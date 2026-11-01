@@ -1,0 +1,56 @@
+{
+  "catalog_version": 1,
+  "title": "R36S PORT HUB - ports (R36S)",
+  "updated": "2026-11-01",
+  "categories": [
+    { "id": "corrida", "name": "Corrida" }
+  ],
+  "ports": [
+    {
+      "id": "asphalt-8-airborne",
+      "name": "Asphalt 8 - Airborne",
+      "short": "Corrida arcade da Gameloft.",
+      "description": "Port para R36S.\n\nArquivo hospedado no Internet Archive.",
+      "category": "corrida",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 1717986918,
+      "size_label": "1.6 GB",
+      "download_url": "https://archive.org/download/asphalt-5_202611/Asphalt%208%20-%20Airborne.zip",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-01"
+    },
+    {
+      "id": "asphalt-xtreme",
+      "name": "Asphalt Xtreme",
+      "short": "Corrida off-road.",
+      "description": "Port para R36S.\n\nArquivo hospedado no Internet Archive.",
+      "category": "corrida",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 1503238554,
+      "size_label": "1.4 GB",
+      "download_url": "https://archive.org/download/asphalt-5_202611/Asphalt%20Xtreme.zip",
+      "author": "Comunidade",
+      "requires_files": false,
+      "added": "2026-11-01"
+    },
+    {
+      "id": "asphalt-5",
+      "name": "Asphalt 5",
+      "short": "Corrida arcade.",
+      "description": "Port para R36S.\n\nArquivo hospedado no Internet Archive.",
+      "category": "corrida",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 113246208,
+      "size_label": "108 MB",
+      "download_url": "https://archive.org/download/asphalt-5_202611/Asphalt5.zip",
+      "author": "Comunidade",
+      "requires_files": false,
+      "added": "2026-11-01"
+    }
+  ]
+}
