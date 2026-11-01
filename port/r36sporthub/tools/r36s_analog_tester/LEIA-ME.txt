@@ -1,0 +1,43 @@
+R36S ANALOG TESTER - por LagdoLira (versao 1.2)
+
+INSTALAR
+  Extraia o zip em /roms/ports/ (ou /roms2/ports/ se usa o 2o cartao).
+  Fica: R36S_Analog_Tester.sh + pasta r36s_analog_tester/
+  Atualize a lista de jogos e abra "R36S_Analog_Tester" no menu Ports.
+
+MENU (D-PAD ou analogico esquerdo para navegar, botao A ou START para confirmar)
+  Testar analogicos : mostra os 2 sticks (com a imagem das tampas), alcance, zona morta, diferenca entre eles;
+                      a tabela de eixos fica centralizada na parte de baixo da tela.
+                      Botao A = (unico botao que faz) o teste de repouso de 5 s (solte os analogicos):
+                      detecta DERIVA (puxando para um lado) e MEXENDO SOZINHO.
+                      (a tela mostra "Pressione A para iniciar" e uma barra de progresso)
+                      Botao B = zerar as medicoes.
+  Testar botoes     : mostra a ilustracao do R36S; ao apertar um botao ele acende no lugar certo e o nome
+                      aparece embaixo ("Pressionando: ..."). Anel laranja = ainda nao testado,
+                      anel verde = testado OK, verde cheio = apertado agora, amarelo = chatter,
+                      vermelho = preso. Os analogicos (L3/R3) mostram a posicao com uma bolinha.
+                      Botao que o aparelho nao reporta fica sem anel.
+  Sair (Exit)       : fecha o programa.
+
+ATALHOS
+  START + SELECT (0,3 s) : volta ao menu (nos testes) / fecha o programa (no menu)
+  L1 + R1 (1 s)          : volta ao menu (alternativa)
+  Ao voltar ao menu, o relatorio e salvo em r36s_analog_tester/relatorio_controles.txt
+
+TRIG1..TRIG5 (R36S): TRIG1 = SELECT, TRIG2 = START, TRIG3 = L3, TRIG4 = R3, TRIG5 = FN.
+  Aparecem com o icone certo e valem para START/SELECT no menu e nos atalhos.
+
+BOTOES NA TELA
+  Os icones das dicas (A, B, START...) seguem o que esta impresso no console.
+  Layout usado (padrao R36S):   X em cima, B embaixo, Y a esquerda, A a direita.
+  Se no seu aparelho A/B ou X/Y estiverem trocados, edite FACE_LAYOUT no inicio de
+  r36s_analog_tester/r36s_analog_tester.py.
+  As imagens da tela de botoes e de analogicos ficam em r36s_analog_tester/ui_imagens.bin
+  (se faltar, o programa usa o desenho simples antigo).
+  A logo do menu fica em r36s_analog_tester/logo_menu.bin (se faltar, o menu usa o titulo em texto).
+  A fonte moderna do menu fica em r36s_analog_tester/fonte_menu.bin (Poppins/Inter, licenca OFL);
+  se o arquivo faltar, o programa usa a fonte antiga normalmente.
+
+SE A TELA NAO APARECER
+  Edite R36S_Analog_Tester.sh e troque BACKEND=auto por pygame, fb ou text.
+  O log fica em r36s_analog_tester/log.txt

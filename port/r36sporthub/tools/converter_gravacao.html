@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>R36S PORT HUB — gravações (.r36rec)</title>
+<style>
+html,body{margin:0;background:#0b0d12;color:#cfd6e4;font:14px/1.45 system-ui,sans-serif}
+main{max-width:900px;margin:0 auto;padding:18px}
+h1{font-size:18px;color:#fff;margin:0 0 6px}p{margin:6px 0;color:#9aa6bf}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}
+button,label.btn{background:#263042;color:#e8eefc;border:1px solid #3a4760;border-radius:6px;padding:7px 12px;cursor:pointer}
+button:disabled{opacity:.45;cursor:default}
+canvas{width:100%;max-width:640px;aspect-ratio:4/3;background:#000;display:block;border:1px solid #263042}
+#st{color:#ffd166}#bar{height:6px;background:#1c2230;border-radius:3px;max-width:640px;overflow:hidden}#bar i{display:block;height:100%;width:0;background:#4cc9f0}
+input[type=file]{display:none}
+</style></head><body><main>
+<h1>R36S PORT HUB — <span data-t="title">gravações .r36rec</span></h1>
+<p data-t="intro">Abra aqui um arquivo .r36rec da pasta r36sporthub/gravacoes (copie pelo FTP). Tudo acontece neste computador: nada é enviado para a internet.</p>
+<div class="row">
+  <label class="btn"><input type="file" id="f" accept=".r36rec"><span data-t="open">Abrir gravação</span></label>
+  <button id="play" disabled data-t="play">Reproduzir</button>
+  <button id="conv" disabled data-t="conv">Converter para vídeo (WebM)</button>
+  <span id="st"></span>
+</div>
+<canvas id="c" width="640" height="480"></canvas>
+<div class="row"><div id="bar" style="flex:1"><i></i></div><span id="tm">00:00</span></div>
+<p data-t="note">A conversão acontece no tempo real da gravação (uma gravação de 5 minutos leva 5 minutos). Deixe esta aba aberta até o download começar.</p>
+</main>
+<script>
+(function(){
+var TXT={
+ en:{title:'.r36rec recordings',intro:'Open a .r36rec file from the r36sporthub/gravacoes folder (copy it over FTP). Everything happens on this computer: nothing is sent to the internet.',open:'Open recording',play:'Play',conv:'Convert to video (WebM)',note:'Conversion runs in real time (a 5-minute recording takes 5 minutes). Keep this tab open until the download starts.',bad:'This is not a R36S PORT HUB recording.',old:'This browser cannot read the file. Use an up-to-date Firefox or Chromium.',ready:'Ready',playing:'Playing...',converting:'Converting...',done:'Done: the video was downloaded.',norec:'This browser cannot record video.'},
+ ru:{title:'записи .r36rec',intro:'Откройте файл .r36rec из папки r36sporthub/gravacoes (скопируйте по FTP). Всё происходит на этом компьютере: ничего не отправляется в интернет.',open:'Открыть запись',play:'Воспроизвести',conv:'Преобразовать в видео (WebM)',note:'Преобразование идёт в реальном времени (5-минутная запись займёт 5 минут). Не закрывайте вкладку до начала загрузки.',bad:'Это не запись R36S PORT HUB.',old:'Этот браузер не может прочитать файл. Используйте свежий Firefox или Chromium.',ready:'Готово',playing:'Воспроизведение...',converting:'Преобразование...',done:'Готово: видео загружено.',norec:'Этот браузер не умеет записывать видео.'},
+ pt:{bad:'Este arquivo não é uma gravação do R36S PORT HUB.',old:'Este navegador não consegue ler o arquivo. Use Firefox ou Chromium atualizados.',ready:'Pronto',playing:'Reproduzindo...',converting:'Convertendo...',done:'Concluído: o vídeo foi baixado.',norec:'Este navegador não consegue gravar vídeo.'}};
+var lang=(navigator.language||'pt').slice(0,2);var T=TXT[lang]||{};var P=TXT.pt;
+function t(k){return T[k]||P[k]||k;}
+if(T.title){document.documentElement.lang=lang;document.querySelectorAll('[data-t]').forEach(function(e){var k=e.getAttribute('data-t');if(T[k])e.textContent=T[k];});}
+var cv=document.getElementById('c'),ctx=cv.getContext('2d',{alpha:false}),st=document.getElementById('st'),tm=document.getElementById('tm'),bar=document.querySelector('#bar i');
+var rec=null,name='gravacao';
+function fmt(ms){var s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function inflate(u8){var s=new Blob([u8]).stream().pipeThrough(new DecompressionStream('deflate'));return new Response(s).arrayBuffer().then(function(b){return new Uint8Array(b);});}
+function parse(buf){
+  var u=new Uint8Array(buf),head=new TextDecoder().decode(u.slice(0,8));
+  if(head!=='R36REC1\n')throw t('bad');
+  var nl=u.indexOf(10,8),meta=JSON.parse(new TextDecoder().decode(u.slice(8,nl)));var p=nl+1,fr=[];
+  while(p+8<=u.length){var tms=((u[p]<<24)|(u[p+1]<<16)|(u[p+2]<<8)|u[p+3])>>>0,len=((u[p+4]<<24)|(u[p+5]<<16)|(u[p+6]<<8)|u[p+7])>>>0;p+=8;if(p+len>u.length)break;fr.push({t:tms,d:u.subarray(p,p+len)});p+=len;}
+  return {meta:meta,frames:fr};
+}
+function draw(d,ts){var tile=ctx.createImageData(ts,ts),px=tile.data,n=d[0]|(d[1]<<8),p=2;for(var i=0;i<n;i++){var tx=d[p],ty=d[p+1];p+=2;for(var k=0,j=0;k<ts*ts;k++,j+=4,p+=3){px[j]=d[p];px[j+1]=d[p+1];px[j+2]=d[p+2];px[j+3]=255;}ctx.putImageData(tile,tx*ts,ty*ts);}}
+function play(onEnd){
+  var fr=rec.frames,ts=rec.meta.ts||32,total=fr.length?fr[fr.length-1].t+500:0,i=0,t0=performance.now(),busy=false,decoded=[];
+  ctx.fillStyle='#000';ctx.fillRect(0,0,cv.width,cv.height);
+  function step(){
+    var now=performance.now()-t0;
+    if(!busy&&i<fr.length&&fr[i].t<=now){busy=true;var f=fr[i++];inflate(f.d).then(function(d){draw(d,ts);busy=false;});}
+    tm.textContent=fmt(Math.min(now,total))+' / '+fmt(total);bar.style.width=(total?Math.min(100,now/total*100):100)+'%';
+    if(i>=fr.length&&!busy&&now>=total){onEnd&&onEnd();return;}
+    requestAnimationFrame(step);
+  }
+  step();
+}
+document.getElementById('f').onchange=function(e){
+  var file=e.target.files[0];if(!file)return;name=file.name.replace(/\.r36rec$/i,'');
+  if(!window.DecompressionStream){st.textContent=t('old');return;}
+  file.arrayBuffer().then(function(b){rec=parse(b);cv.width=rec.meta.w||640;cv.height=rec.meta.h||480;st.textContent=t('ready');
+    document.getElementById('play').disabled=false;document.getElementById('conv').disabled=false;
+    if(rec.frames.length)inflate(rec.frames[0].d).then(function(d){draw(d,rec.meta.ts||32);});
+  }).catch(function(x){st.textContent=typeof x==='string'?x:t('bad');});
+};
+document.getElementById('play').onclick=function(){if(!rec)return;st.textContent=t('playing');play(function(){st.textContent=t('ready');});};
+document.getElementById('conv').onclick=function(){
+  if(!rec)return;
+  if(!window.MediaRecorder||!cv.captureStream){st.textContent=t('norec');return;}
+  var fps=rec.meta.fps||10,stream=cv.captureStream(fps),chunks=[];
+  var type=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].filter(function(x){return MediaRecorder.isTypeSupported(x);})[0];
+  var mr=new MediaRecorder(stream,type?{mimeType:type,videoBitsPerSecond:2500000}:undefined);
+  mr.ondataavailable=function(ev){if(ev.data.size)chunks.push(ev.data);};
+  mr.onstop=function(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob(chunks,{type:'video/webm'}));a.download=name+'.webm';document.body.appendChild(a);a.click();a.remove();st.textContent=t('done');};
+  st.textContent=t('converting');mr.start(1000);
+  play(function(){setTimeout(function(){mr.stop();},300);});
+};
+})();
+</script></body></html>

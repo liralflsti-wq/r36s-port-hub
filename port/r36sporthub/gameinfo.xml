@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gameList>
+  <game>
+    <path>./R36S PORT HUB.sh</path>
+    <name>R36S PORT HUB</name>
+    <desc>Central de ports e ferramentas para o R36S: instale jogos e utilitários, transfira arquivos por FTP, gerencie o Wi-Fi, personalize temas e verifique o console.</desc>
+    <image>./r36sporthub/cover.png</image>
+    <thumbnail>./r36sporthub/cover.png</thumbnail>
+    <marquee>./r36sporthub/logo.png</marquee>
+    <fanart>./r36sporthub/fanart.png</fanart>
+    <releasedate>20261030T000000</releasedate>
+    <developer>Comunidade R36S</developer>
+    <publisher>Comunidade R36S</publisher>
+    <genre>Other</genre>
+  </game>
+</gameList>
