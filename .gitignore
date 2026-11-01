@@ -2,3 +2,12 @@ dist/
 build/
 *.token
 .env
+
+# Catalogos e fontes de dados: NAO versionar (podem conter enderecos de download)
+/catalog.json
+/catalogos/
+/catalogo/
+/bios_url.txt
+/catalog_url.txt
+/es_themes_url.txt
+/update_url.txt

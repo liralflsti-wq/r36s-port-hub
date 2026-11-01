@@ -244,10 +244,22 @@ git_init() {
   git remote add origin "https://x-access-token:$TOKEN@github.com/$SLUG.git"
 }
 
+guard_leak() {
+  local lista="${R36S_BLOQUEIO:-$HOME/.config/r36s-port-hub/bloqueio.txt}"
+  [ -f "$lista" ] || return 0
+  local achados
+  achados="$(git grep --cached -I -n -F -f "$lista" -- . 2>/dev/null | head -20 || true)"
+  [ -z "$achados" ] && return 0
+  c '1;31' "  xx  os arquivos versionados contem termos bloqueados:"
+  printf '%s\n' "$achados"
+  die "ajuste os arquivos ou desative a checagem com R36S_BLOQUEIO=off"
+}
+
 git_push() {  # git_push "mensagem"
   cd "$ROOT"
-  printf 'dist/\nbuild/\n*.token\n.env\n' > .gitignore
+printf 'dist/\nbuild/\n*.token\n.env\n/catalog.json\n/catalogos/\n/catalogo/\n/bios_url.txt\n/catalog_url.txt\n/es_themes_url.txt\n/update_url.txt\n' > .gitignore
   git add -A
+  guard_leak || exit 1
   if git diff --cached --quiet; then
     info "nada novo para commitar"
   else
