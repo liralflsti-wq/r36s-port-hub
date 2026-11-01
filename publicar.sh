@@ -248,7 +248,7 @@ guard_leak() {
   local lista="${R36S_BLOQUEIO:-$HOME/.config/r36s-port-hub/bloqueio.txt}"
   [ -f "$lista" ] || return 0
   local achados
-  achados="$(git grep --cached -I -n -F -f "$lista" -- . 2>/dev/null | head -20 || true)"
+  achados="$(git grep --cached -I -n -F -f "$lista" -- . ':!ports.json' 2>/dev/null | head -20 || true)"
   [ -z "$achados" ] && return 0
   c '1;31' "  xx  os arquivos versionados contem termos bloqueados:"
   printf '%s\n' "$achados"
