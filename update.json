@@ -1,10 +1,10 @@
 {
-  "version": "0.4.3",
-  "version_label": "0.4.3 BETA",
+  "version": "0.4.5",
+  "version_label": "0.4.5 BETA",
   "date": "2026-11-01",
   "url": "https://github.com/liralflsti-wq/r36s-port-hub/releases/latest/download/R36S-PORT-HUB-update.zip",
-  "size": 7869032,
-  "sha256": "2df22790cbae0eba8b6c83541da99ec6395713e867b3d54bb66c872b6668d7c7",
+  "size": 7873791,
+  "sha256": "8fa3d764b313914f1c8ddb4a9a02bddd68dd759bec7fab9d6ce8862ba0e3e226",
   "min_version": "0.4",
-  "notes": "Atualização local, desinstalação em Meus Ports, aviso importante e análise da bateria\n* Atualizações: depois de instalar com sucesso, o hub pergunta se quer excluir ou manter o arquivo de atualização (só aquele arquivo; nunca a pasta update).\n* Meus Ports: a confirmação de desinstalação mostra o arquivo de inicialização (.sh) e a pasta do jogo que serão removidos.\n* Meus Ports: se a pasta do jogo não for localizada, Y abre um navegador de pastas para escolher a pasta manualmente (só pastas dentro da pasta de ports; protegidas e links são recusados).\n* Nova Análise da bateria (Informações do console): nível, estado, tensão, corrente, capacidade e carregador, com o tempo estimado para a carga completa calculado com os dados reais do sistema.\n* (corrigido) Aviso importante: com letra grande o texto ficava cortado. Agora ele rola com o direcional e o botão PARA CONTINUAR fica sempre visível.\n* (corrigido) Desinstalação: o registro do jogo só é removido quando todos os arquivos foram apagados; se os arquivos já não existirem, dá para só limpar o registro."
+  "notes": "Atualização 0.4.5 BETA (a partir da 0.4.4 BETA).\n* O botão do port não instalado agora diz INSTALAR (antes BAIXAR).\n* Atualização via rede ligada ao link oficial do projeto no GitHub (última Release). O hub lê a versão, as mudanças e as correções direto do pacote, sem baixar tudo.\n* Atualização via rede: Y mostra as novidades completas antes de baixar.\n* (corrigido) Corrigido o erro \"Download incompleto: o tamanho do arquivo não confere\" em ports cujo tamanho no catálogo é arredondado: agora vale o tamanho informado pelo servidor."
 }
