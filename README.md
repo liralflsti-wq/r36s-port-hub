@@ -33,6 +33,12 @@ Feito para o **dArkOSRE** (também funciona no dArkOS e no ArkOS), em **LÖVE 11
 
 ---
 
+## ⚖️ Aviso
+
+O R36S PORT HUB é uma ferramenta de catálogo e instalação. Os jogos, ports, BIOS e demais arquivos de terceiros citados pertencem aos seus respectivos autores e **não fazem parte deste repositório**. O projeto não se responsabiliza pela criação, pelo conteúdo, pela disponibilidade ou pela distribuição desses arquivos — respeite as licenças e os direitos autorais de cada um.
+
+---
+
 ## ⬇️ Downloads (link fixo)
 
 Estes links **nunca mudam**: cada atualização substitui o arquivo por trás deles.
