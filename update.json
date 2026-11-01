@@ -1,0 +1,10 @@
+{
+  "version": "0.4.2",
+  "version_label": "0.4.2 BETA",
+  "date": "2026-11-01",
+  "url": "https://github.com/liralflsti-wq/r36s-port-hub/releases/latest/download/R36S-PORT-HUB-update.zip",
+  "size": 7856782,
+  "sha256": "83ab17d87486031db8f864a6a137fc9766ff1beaddf9bc1795866c44ed8b8d98",
+  "min_version": "0.4",
+  "notes": "Central de Conteúdo, BIOS do Sistema e avisos do registro de erros\n* A Loja de Ports agora se chama Central de Conteúdo, com três áreas: Ports de Jogos, BIOS do Sistema e Ports Utilitários e Ferramentas.\n* Nova área BIOS do Sistema: baixa o pacote de BIOS (com confirmação), identifica cada arquivo pelo MD5 (banco do libretro) e instala na pasta certa do dArkOSRE, com backup e conferência.\n* BIOS do Sistema: lista de sistemas com o estado real das BIOS, histórico com restauração de backup e limpeza dos arquivos de instalação para liberar espaço.\n* Quando uma tarefa em segundo plano falha, aparece um aviso apontando para o Registro de erros.\n* (corrigido) A tela de erro fatal não aparecia (o hub só fechava). Agora ela mostra onde o registro foi salvo e fecha com START.\n* (corrigido) No menu principal, com texto grande, o subtítulo não passa mais da borda do destaque."
+}

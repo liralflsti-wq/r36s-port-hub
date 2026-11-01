@@ -1,0 +1,40 @@
+{
+  "catalog_version": 1,
+  "title": "R36S PORT HUB - catálogo",
+  "updated": "2026-11-01",
+  "categories": [
+    { "id": "acao", "name": "Ação" },
+    { "id": "aventura", "name": "Aventura" },
+    { "id": "plataforma", "name": "Plataforma" },
+    { "id": "corrida", "name": "Corrida" },
+    { "id": "puzzle", "name": "Puzzle" }
+  ],
+  "ports": [
+    {
+      "id": "exemplo-com-link-direto",
+      "name": "Nome do Jogo",
+      "short": "Resumo de uma linha para a lista.",
+      "description": "Descrição completa do port.\n\nComo jogar, créditos, observações.",
+      "category": "plataforma",
+      "version": "1.0",
+      "size_bytes": 157910476,
+      "download_url": "https://exemplo.com/Nome%20do%20Jogo.zip",
+      "cover": "https://exemplo.com/capa.png",
+      "md5": "",
+      "author": "",
+      "requires_files": false,
+      "featured": true
+    },
+    {
+      "id": "exemplo-sem-capa",
+      "name": "Outro Jogo",
+      "description": "Exemplo sem capa: o app gera uma capa retrô.",
+      "category": "acao",
+      "version": "1.0",
+      "size_bytes": 64574499,
+      "download_url": "https://exemplo.com/Outro%20Jogo.zip",
+      "requires_files": true,
+      "notes": "Copie os arquivos do jogo original para /roms/ports/outrojogo/gamedata antes de jogar."
+    }
+  ]
+}

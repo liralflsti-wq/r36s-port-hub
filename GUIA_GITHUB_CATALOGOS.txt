@@ -1,0 +1,203 @@
+=====================================================================
+ R36S PORT HUB - GUIA: PUBLICAR NO GITHUB E LIGAR OS CATALOGOS AO HUB
+ Versao 0.3 BETA
+=====================================================================
+
+O hub le listas (catalogos) em arquivos JSON publicados na internet.
+Quando voce atualiza um desses arquivos no GitHub, o hub mostra a
+mudanca sozinho, sem precisar de uma versao nova do aplicativo.
+
+Resumo dos catalogos:
+
+  CATALOGO                     ARQUIVO          LINK NO HUB (pasta r36sporthub/)
+  ---------------------------  ---------------  --------------------------------
+  Ports de jogos + utilitarios catalog.json     catalog_url.txt
+  Temas do EmulationStation    temas.json       es_themes_url.txt
+  Temas do proprio hub         themes.json      themes_url.txt   (ver PARTE 5)
+  Atualizacao do hub           Releases         update_url.txt
+
+Cada arquivo .txt tem UMA linha: o link. Tambem da para gravar os links
+direto no codigo, em src/config.lua (C.CATALOG_URL, C.ES_THEMES_URL,
+C.THEMES_CATALOG_URL, C.UPDATE_URL); o arquivo .txt tem prioridade.
+
+
+---------------------------------------------------------------------
+PARTE 1 - CRIAR O REPOSITORIO NO GITHUB
+---------------------------------------------------------------------
+
+1. Entre em https://github.com e crie uma conta (se ainda nao tiver).
+2. Clique em "+" (canto superior direito) > "New repository".
+3. Nome sugerido: r36s-port-hub
+   Marque "Public" (o console precisa ler os arquivos sem login).
+4. Clique em "Create repository".
+
+Enviar o projeto (pelo navegador):
+5. Na pagina do repositorio, clique em "uploading an existing file".
+6. Arraste o conteudo do R36S-PORT-HUB-BETA-codigo-fonte.zip ja
+   extraido (README.md, src/, port/, docs/, catalogo-temas/ ...).
+7. Escreva uma mensagem (ex.: "Versao 0.3 BETA") e clique em
+   "Commit changes".
+
+Enviar o projeto (pelo terminal, opcional):
+   git init
+   git add .
+   git commit -m "Versao 0.3 BETA"
+   git branch -M main
+   git remote add origin https://github.com/SEU-USUARIO/r36s-port-hub.git
+   git push -u origin main
+
+
+---------------------------------------------------------------------
+PARTE 2 - O LINK "RAW" (O QUE O HUB PRECISA)
+---------------------------------------------------------------------
+
+O hub precisa do arquivo JSON puro, e nao da pagina do GitHub.
+
+1. No GitHub, abra o arquivo (ex.: catalogo-temas/temas.json).
+2. Clique no botao "Raw".
+3. Copie o endereco da barra do navegador. Ele fica assim:
+
+   https://raw.githubusercontent.com/SEU-USUARIO/r36s-port-hub/main/catalogo-temas/temas.json
+
+Esse link nao muda quando voce edita o arquivo. Por isso basta
+configura-lo UMA vez no hub: depois, e so editar o JSON no GitHub.
+
+Observacao: o GitHub pode levar alguns minutos para entregar a versao
+nova de um arquivo "raw" depois de uma edicao.
+
+
+---------------------------------------------------------------------
+PARTE 3 - CATALOGO DE PORTS DE JOGOS E UTILITARIOS (catalog.json)
+---------------------------------------------------------------------
+
+O catalog.json guarda os dados e os links de download de cada port
+(o endereco de cada arquivo fica no campo "download_url" e e definido
+por voce).
+
+1. Coloque o catalog.json no repositorio (ex.: catalogo/catalog.json).
+2. Pegue o link "raw" (PARTE 2).
+3. No cartao do R36S, crie o arquivo:
+      /roms/ports/r36sporthub/catalog_url.txt
+   com uma unica linha: o link raw do catalog.json.
+4. Abra o hub. O catalogo e baixado a cada abertura, e tambem em
+   Configuracoes > Downloads e atualizacoes > Atualizar catalogo.
+   Sem internet, o hub usa a ultima copia baixada.
+
+Jogos x utilitarios: os dois ficam no mesmo catalog.json e sao
+separados pelo campo "section":
+   "section": "games"   -> Ports de Jogos
+   "section": "tools"   -> Utilitarios & Ferramentas
+Na loja eles aparecem em areas diferentes e nunca na mesma lista.
+
+Os campos de cada port (nome, links, capa, tamanho, hash) estao em
+docs/CATALOGO.md.
+
+PARA ATUALIZAR: edite o catalog.json no GitHub (novo jogo, versao
+nova, descricao). Quem abrir o hub (ou usar "Atualizar catalogo") ve
+a mudanca. Se a "version" de um port mudar, quem ja instalou ve o botao
+ATUALIZAR.
+
+
+---------------------------------------------------------------------
+PARTE 4 - LOJA DE TEMAS DO EMULATIONSTATION (temas.json)
+---------------------------------------------------------------------
+
+Sao os temas do sistema do console (dArkOSRE/dArkOS/ArkOS), e nao os
+temas do hub.
+
+1. O arquivo ja vem pronto: catalogo-temas/temas.json.
+2. Publique no repositorio e pegue o link "raw" (PARTE 2).
+3. No cartao do R36S, crie:
+      /roms/ports/r36sporthub/es_themes_url.txt
+   com o link raw do temas.json.
+
+Alem do temas.json, a loja ja le sozinha as fontes do ThemeMaster
+(galeria OGA e colecoes do GitHub). Essas fontes e o temas.json sao
+consultados no maximo a cada 6 horas; sem internet a loja usa a ultima
+copia. Formato do temas.json: docs/LOJA_TEMAS.md.
+
+PARA ATUALIZAR: edite o temas.json no GitHub. Mudancas na galeria OGA
+e nas colecoes aparecem sem voce precisar fazer nada.
+
+
+---------------------------------------------------------------------
+PARTE 5 - TEMAS DO PROPRIO HUB (themes.json)
+---------------------------------------------------------------------
+
+IMPORTANTE: nesta versao (0.3 BETA), o DOWNLOAD de temas do hub pela
+internet AINDA NAO ESTA ATIVO. A opcao Configuracoes > Temas > Baixar
+novos temas so avisa que o catalogo ainda nao esta disponivel. Hoje o
+hub traz o Tema Padrao e o Tema Xbox. O que esta abaixo e a estrutura
+ja definida para quando essa funcao for ligada (veja docs/TEMAS.md).
+
+Como preparar os temas no GitHub:
+
+1. Cada tema e uma pasta com:
+      theme.json   (nome, cores, botoes e estilo - veja docs/TEMAS.md)
+      preview.png  (imagem 320x240, opcional)
+2. Compacte o conteudo da pasta em um .zip (theme.json na raiz do zip).
+3. No GitHub: "Releases" > "Draft a new release" > tag "temas" >
+   anexe os .zip > "Publish release".
+   O link de cada zip fica:
+   https://github.com/SEU-USUARIO/r36s-port-hub/releases/download/temas/nome-do-tema.zip
+4. Crie o indice themes.json no repositorio:
+
+   {
+     "themes": [
+       {
+         "id": "nome-do-tema",
+         "name": "Nome exibido",
+         "description": "Descricao curta",
+         "version": "1.0",
+         "author": "Autor",
+         "preview": "https://raw.githubusercontent.com/SEU-USUARIO/r36s-port-hub/main/temas-hub/nome-do-tema/preview.png",
+         "url": "https://github.com/SEU-USUARIO/r36s-port-hub/releases/download/temas/nome-do-tema.zip",
+         "size": 51234,
+         "sha256": "codigo sha256 do zip"
+       }
+     ]
+   }
+
+   - "size": tamanho do zip em bytes.
+   - "sha256": no Linux, "sha256sum nome-do-tema.zip"; no Windows,
+     "certutil -hashfile nome-do-tema.zip SHA256".
+5. Pegue o link raw do themes.json e grave em:
+      /roms/ports/r36sporthub/themes_url.txt
+
+PARA ATUALIZAR UM TEMA: troque o .zip na release, aumente o "version"
+e atualize "size" e "sha256" no themes.json.
+
+
+---------------------------------------------------------------------
+PARTE 6 - ATUALIZACAO DO PROPRIO HUB (Releases)
+---------------------------------------------------------------------
+
+1. Gere o pacote: tools/build.sh -> build/R36S-PORT-HUB-BETA.zip
+   (ou um pacote incremental: tools/make_update.py incremental ...;
+   os dois trazem update_manifest.json com versao e SHA-256)
+2. No GitHub: "Releases" > "Draft a new release".
+   Tag: v0.4.1 (o numero e a versao; tem que ser maior que a instalada).
+   Anexe o .zip e publique.
+3. No cartao, crie /roms/ports/r36sporthub/update_url.txt com:
+      https://github.com/SEU-USUARIO/r36s-port-hub
+4. No hub: Configuracoes > Downloads e atualizacoes > Atualizacoes >
+   Atualizacao via rede. O hub le a ultima Release, baixa para a pasta
+   update, confere o pacote e so instala com confirmacao.
+   Sem internet: copie o .zip para /roms/ports/r36sporthub/update/ e use
+   Atualizacao local.
+
+Na versao seguinte, troque C.VERSION e C.VERSION_NUM em src/config.lua
+(ex.: "0.4.1 BETA" e "0.4.1") antes de gerar o pacote.
+
+
+---------------------------------------------------------------------
+PARTE 7 - CONFERIR SE ESTA TUDO CERTO
+---------------------------------------------------------------------
+
+- Abra cada link raw no navegador: tem que aparecer o JSON puro.
+- Confira o JSON em https://jsonlint.com antes de publicar (uma virgula
+  a mais faz o hub recusar o catalogo e manter a copia anterior).
+- No hub, Configuracoes > Downloads e atualizacoes > Atualizar catalogo
+  mostra de onde o catalogo foi carregado (online, cache ou local).
+- Se algo falhar, veja os arquivos em /roms/ports/r36sporthub/logs/
+  (Configuracoes > Informacoes do console > Registro de erros).

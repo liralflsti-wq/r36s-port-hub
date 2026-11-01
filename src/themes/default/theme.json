@@ -1,0 +1,25 @@
+{
+  "id": "default",
+  "name": "Tema Padrão",
+  "description": "Tema original do R36S PORT HUB: visual retrô gamer com rosa neon e ciano sobre fundo escuro.",
+  "version": "1.0",
+  "author": "R36S PORT HUB",
+  "preview": "preview.png",
+  "colors": {
+    "bg0": "#0a0c16", "bg1": "#11142a", "bg2": "#191d3a", "bg3": "#232852", "line": "#2c3263",
+    "text": "#eef0ff", "dim": "#9aa0cc", "faint": "#5d638f",
+    "accent": "#ff4f8b", "accent2": "#38d6ff",
+    "yellow": "#ffd447", "green": "#3ddc84", "red": "#ff5c6c", "orange": "#ff9f43",
+    "black": "#000000", "shadow": "#00000073"
+  },
+  "buttons": {
+    "a": "#ff5c6c", "b": "#ffd447", "x": "#38d6ff", "y": "#3ddc84",
+    "l1": "#9aa0cc", "r1": "#9aa0cc", "start": "#9aa0cc", "select": "#9aa0cc", "dpad": "#9aa0cc"
+  },
+  "style": {
+    "background": "retro",
+    "round": 1.0,
+    "glow": "#381f66",
+    "scanlines": true
+  }
+}
