@@ -3,7 +3,7 @@
 --  Verifica a fonte oficial configurada (update_url.txt ou C.UPDATE_URL),
 --  mostra versao instalada e disponivel, baixa o pacote para a pasta update
 --  (progresso real) e abre a analise/instalacao do Gerenciador de atualizacoes.
---  A: verificar / baixar | B: voltar (ou cancelar o download)
+--  A: verificar / baixar | Y: novidades (do manifesto) | B: voltar (ou cancelar o download)
 -- =============================================================================
 local L = require("lib.i18n").L
 local T = require("ui.theme")
@@ -59,7 +59,7 @@ function S:draw()
   elseif st == "none" then
     center(T.f.pix16, L("SEM LINK DE ATUALIZAÇÃO"), y + 90, T.c.yellow)
     center(T.f.body, L("A fonte oficial das atualizações ainda não foi configurada.\n")
-      .. L("Para ativar, coloque o link do repositório do GitHub (com Releases) ou de um arquivo JSON de versão em:"), y + 126, T.c.dim)
+      .. L("Para ativar, coloque o link direto do pacote .zip, do repositório do GitHub (com Releases) ou de um arquivo JSON de versão em:"), y + 126, T.c.dim)
     center(T.f.bodyb, C.APP_DIR .. "/update_url.txt", y + 190, T.c.accent2)
     center(T.f.small, L("Enquanto isso, use a Atualização local com o pacote na pasta update."), y + 222, T.c.faint)
     table.insert(hints, 1, { "a", L("Verificar de novo") })
@@ -70,11 +70,17 @@ function S:draw()
     center(T.f.pix16, L("SISTEMA ATUALIZADO"), y + 110, T.c.green)
     center(T.f.body, L("Você já está usando a versão mais recente (") .. C.VERSION .. L(").\nÚltima versão publicada: ") .. Update.info.version .. ".", y + 150, T.c.dim)
     table.insert(hints, 1, { "a", L("Verificar de novo") })
+    if Manager.has_notes(Update.info) then table.insert(hints, 2, { "y", L("Novidades") }) end
   elseif st == "available" then
     local i = Update.info
     center(T.f.pix16, L("NOVA VERSÃO DISPONÍVEL"), y + 50, T.c.accent)
     center(T.f.h2, C.VERSION .. "  →  " .. i.version, y + 80, T.c.text)
-    center(T.f.small, i.size and (L("Tamanho do download: ") .. U.format_bytes(i.size)) or L("Tamanho do download: informado ao baixar"), y + 112, T.c.dim)
+    local sub = i.size and (L("Tamanho do download: ") .. U.format_bytes(i.size)) or L("Tamanho do download: informado ao baixar")
+    local too_old = i.min_version and Update.compare(C.VERSION_NUM, i.min_version) < 0
+    if too_old then
+      sub = L("Atenção: este pacote exige a versão ") .. i.min_version .. L(" ou mais nova. Use o pacote completo.")
+    end
+    center(T.f.small, sub, y + 112, too_old and T.c.yellow or T.c.dim)
     local notes = (i.notes or ""):gsub("\r", "")
     if notes ~= "" then
       G.text(T.f.pix8, L("NOVIDADES"), x + 24, y + 140, T.c.accent2)
@@ -85,6 +91,7 @@ function S:draw()
     end
     G.text(T.f.small, L("Depois do download o pacote é conferido e você confirma a instalação."), x + 16, y + h - 26, T.c.faint, "center", w - 32)
     table.insert(hints, 1, { "a", L("Baixar") })
+    if Manager.has_notes(i) then table.insert(hints, 2, { "y", L("Novidades") }) end
   elseif st == "error" then
     center(T.f.pix16, L("NÃO FOI POSSÍVEL VERIFICAR"), y + 100, T.c.red)
     center(T.f.body, Update.error or L("Erro desconhecido."), y + 140, T.c.text)
@@ -116,6 +123,11 @@ function S:action(act)
     return
   end
   if act == "b" then App.pop(); return end
+  local i = Update.info
+  if act == "y" and (Update.state == "available" or Update.state == "uptodate") and i and Manager.has_notes(i) then
+    App.push("upd_notes", { to = i.version, to_label = i.label, description = i.description, changes = i.changes, fixes = i.fixes })
+    return
+  end
   if act ~= "a" then return end
   local st = Update.state
   if self.dl_error then self.dl_error = nil; self:download(); return end

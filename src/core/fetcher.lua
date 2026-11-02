@@ -60,6 +60,22 @@ function F.update()
   end
 end
 
+--- Baixa so os primeiros `bytes` de um arquivo (ex.: manifesto de um .zip).
+--- cb(ok, out_path, reason)
+function F.get_part(kind, url, out, bytes, cb)
+  F.start()
+  F.seq = F.seq + 1
+  local id = kind .. ":" .. F.seq
+  F.handlers[id] = cb
+  F.pending = F.pending + 1
+  local queued = {}
+  local m = F.req:pop()
+  while m do queued[#queued + 1] = m; m = F.req:pop() end
+  F.req:push({ id = id, kind = kind, url = url, out = out, part = bytes })
+  for _, q in ipairs(queued) do F.req:push(q) end
+  return id
+end
+
 --- Remove pedidos de capa ainda nao iniciados (ao trocar de tela)
 function F.drop_covers()
   if not F.req then return end

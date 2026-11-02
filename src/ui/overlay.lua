@@ -153,6 +153,15 @@ function O.dialog_action(app, act)
     local cancel = d.cancel
     app.close_dialog()
     if cancel then cancel() end
+  else
+    -- botao com tecla propria (ex.: key = "y"), alem da navegacao normal
+    for _, b in ipairs(d.buttons or {}) do
+      if b.key and b.key == act then
+        app.close_dialog()
+        if b.fn then b.fn() end
+        return
+      end
+    end
   end
 end
 

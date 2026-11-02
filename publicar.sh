@@ -255,6 +255,23 @@ guard_leak() {
   die "ajuste os arquivos ou desative a checagem com R36S_BLOQUEIO=off"
 }
 
+update_version_text() {  # update_version_text "0.4.5 BETA"
+  local label="$1"
+  # README: selo de versao
+  local enc; enc="$(printf '%s' "$label" | sed 's/ /%20/g')"
+  sed -i "s/vers%C3%A3o-[0-9.]*%20BETA/vers%C3%A3o-${enc}/g; s/alt=\"Versão [0-9.]* BETA\"/alt=\"Versão ${label}\"/g" "$ROOT/README.md"
+  # About (descricao curta do repositorio)
+  local base="Central de conteúdo para o console R36S (dArkOSRE): baixe e instale ports de jogos, BIOS de emuladores e ferramentas direto no console, com downloads em segundo plano, PortMaster, temas, Wi-Fi, FTP e cuidados com o microSD. Feito em LÖVE, em PT-BR, EN e RU."
+  local desc="v${label} — ${base}"
+  local payload
+  payload="$(python3 -c 'import json,sys; print(json.dumps({"description": sys.argv[1]}))' "$desc")"
+  if api PATCH "/repos/$SLUG" "$payload" >/dev/null 2>&1; then
+    ok "descrição da versão atualizada para $label"
+  else
+    warn "não consegui atualizar a descrição do repositório"
+  fi
+}
+
 git_push() {  # git_push "mensagem"
   cd "$ROOT"
 printf 'dist/\nbuild/\n*.token\n.env\n/catalog.json\n/catalogos/\n/catalogo/\n/bios_url.txt\n/catalog_url.txt\n/es_themes_url.txt\n/update_url.txt\n' > .gitignore

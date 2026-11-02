@@ -641,3 +641,27 @@ A hora é a do sistema do console (fuso configurado no dArkOS), lida a cada quad
 - **Não testado**: o pacote real de BIOS (o servidor de origem não é acessível daqui), extração de RAR (o simulador não tem 7-Zip/unrar), a leitura do `retroarch.cfg` e as pastas reais do dArkOSRE, e o R36S real.
 
 - Entregue como `R36S-PORT-HUB-update-0.4.2.zip` (lançador + `game.love`; versão mínima 0.4). Corrigido no `tools/make_update.py`: o `update_manifest.json` ia sem permissões Unix e o leitor do hub desalinhava os tamanhos dos outros arquivos do pacote (o leitor em `core/updater/formats.lua` também passou a aceitar esse caso). Testado: análise e instalação pela Atualização local do hub 0.4, SHA-256 conferidos e abertura da 0.4.2.
+
+## Atualização local, desinstalação e análise da bateria (0.4.3 BETA)
+
+- **Atualizações**: depois de instalar com sucesso, o hub pergunta se quer excluir ou manter o arquivo de atualização (só aquele arquivo; nunca a pasta `update`).
+- **Meus Ports**: a confirmação de desinstalação mostra o arquivo de inicialização (`.sh`) e a pasta do jogo que serão removidos.
+- **Meus Ports**: se a pasta do jogo não for localizada, Y abre um navegador de pastas para escolher a pasta manualmente (só pastas dentro da pasta de ports; protegidas e links são recusados).
+- Nova **Análise da bateria** (Informações do console): nível, estado, tensão, corrente, capacidade e carregador, com o tempo estimado para a carga completa calculado com os dados reais do sistema.
+- **Corrigido**: no aviso importante, com letra grande o texto ficava cortado. Agora ele rola com o direcional e o botão PARA CONTINUAR fica sempre visível.
+- **Corrigido**: na desinstalação, o registro do jogo só é removido quando todos os arquivos foram apagados; se os arquivos já não existirem, dá para só limpar o registro.
+- Entregue como `R36S-PORT-HUB-update-0.4.3.zip` (só `r36sporthub/game.love`; versão mínima 0.4).
+
+## Catálogo online oficial de ports (0.4.4 BETA)
+
+- O hub agora busca o catálogo oficial de ports no GitHub do projeto (`ports.json`). Sem internet, usa o último catálogo baixado.
+- URL em `src/config.lua` (`C.CATALOG_URL`) e cópia publicada em `ports.json`, na raiz do repositório.
+- Entregue como `R36S-PORT-HUB-update-0.4.4.zip` (só `r36sporthub/game.love`; versão mínima 0.4).
+
+## Link oficial de atualização e botão INSTALAR (0.4.5 BETA)
+
+- O botão do port não instalado agora diz **INSTALAR** (antes BAIXAR).
+- Atualização via rede ligada ao link oficial do projeto no GitHub (última Release). O hub lê a versão, as mudanças e as correções direto do pacote, sem baixar tudo.
+- Atualização via rede: **Y** mostra as novidades completas antes de baixar.
+- **Corrigido**: erro "Download incompleto: o tamanho do arquivo não confere" em ports cujo tamanho no catálogo é arredondado; agora vale o tamanho informado pelo servidor.
+- Entregue como `R36S-PORT-HUB-update-0.4.5.zip` (lançador auxiliar `fetch.sh` + `r36sporthub/game.love`; versão mínima 0.4).

@@ -8,14 +8,16 @@ local L = require("lib.i18n").L
 local C = {}
 
 C.APP_NAME = L("R36S PORT HUB")
-C.VERSION = L("0.4.2 BETA")       -- texto exibido
-C.VERSION_NUM = "0.4.2"        -- numero usado para comparar com a atualizacao
+C.VERSION = L("0.4.5 BETA")       -- texto exibido
+C.VERSION_NUM = "0.4.5"        -- numero usado para comparar com a atualizacao
 
 -- Atualizacao do sistema (Configuracoes > Atualizacao do sistema).
--- Link do repositorio no GitHub (ex.: https://github.com/USUARIO/REPO, usa a
--- ultima Release) ou de um JSON { "version", "url", "sha256", "notes" }.
+-- Link direto do pacote .zip (o hub le o update_manifest.json de dentro dele:
+-- versao, mudancas e correcoes), link do repositorio no GitHub (ex.:
+-- https://github.com/USUARIO/REPO, usa a ultima Release) ou de um JSON
+-- { "version", "url", "sha256", "notes" }.
 -- Tambem pode ser definido em <pasta do app>/update_url.txt (sobrescreve este).
-C.UPDATE_URL = "https://raw.githubusercontent.com/liralflsti-wq/r36s-port-hub/main/update.json"
+C.UPDATE_URL = "https://github.com/liralflsti-wq/r36s-port-hub/releases/latest/download/R36S-PORT-HUB-update.zip"
 
 -- Catalogo de temas (Configuracoes > Temas > Baixar novos temas). Vazio ate o
 -- repositorio de temas ser publicado. Tambem pode ser definido em
@@ -25,12 +27,13 @@ C.THEMES_CATALOG_URL = ""
 -- Loja de Temas do EmulationStation (Utilitarios & Ferramentas > Ferramentas de
 -- sistema). Link "raw" do temas.json no GitHub. Vazio = usa a copia que vem no
 -- app (catalog/es_themes.json). Tambem pode ir em <pasta do app>/es_themes_url.txt
-C.ES_THEMES_URL = "https://raw.githubusercontent.com/liralflsti-wq/r36s-port-hub/main/temas.json"
+C.ES_THEMES_URL = ""
 C.TAGLINE = L("Ports de jogos e utilitários para o console R36S, criados por fãs e para fãs.")
 
--- Endereco do catalogo online (JSON). Deixe vazio enquanto nao houver um
--- catalogo oficial: o app usa entao o catalogo local (veja ordem abaixo).
-C.CATALOG_URL = ""
+-- Endereco do catalogo online (JSON) com os ports de jogos e utilitarios.
+-- Catalogo oficial no GitHub do projeto (link "raw"). O ultimo baixado fica em
+-- cache para uso sem internet. Pode ser trocado por <pasta do app>/catalog_url.txt.
+C.CATALOG_URL = "https://raw.githubusercontent.com/liralflsti-wq/r36s-port-hub/main/ports.json"
 
 -- Central de Conteudo > BIOS do Sistema: pacote de BIOS (link direto do arquivo).
 -- O link NAO vem no codigo: configure em <pasta do app>/bios_url.txt (uma linha).

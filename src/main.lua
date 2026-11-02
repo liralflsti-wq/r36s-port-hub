@@ -49,7 +49,7 @@ local App = {
 }
 _G.App = App
 
-local SCREEN_NAMES = { "disclaimer", "menu", "store", "categories", "details", "about", "settings", "files", "sections", "search", "downloads", "news", "console", "ftp", "ftp_activity", "ftp_help", "textinput", "sdanalyzer", "integrity", "netdiag", "update", "themes", "sdcheck", "esthemes", "splash", "language", "settings_cat", "tester", "consoleid", "wifi", "wifi_connect", "r36control", "sdmaint", "sdmaint_run", "compat", "datetime", "tzpicker", "datetime_edit", "pmmanager", "streamrec", "recordings", "updmgr", "upd_local", "upd_pkg", "upd_history", "upd_backups", "upd_notes", "bios", "bios_list", "bios_pkg", "bios_hist" }
+local SCREEN_NAMES = { "disclaimer", "menu", "store", "categories", "details", "about", "settings", "files", "sections", "search", "downloads", "news", "console", "ftp", "ftp_activity", "ftp_help", "textinput", "sdanalyzer", "integrity", "netdiag", "update", "themes", "sdcheck", "esthemes", "splash", "language", "settings_cat", "tester", "consoleid", "wifi", "wifi_connect", "r36control", "sdmaint", "sdmaint_run", "compat", "datetime", "tzpicker", "datetime_edit", "pmmanager", "streamrec", "recordings", "updmgr", "upd_local", "upd_pkg", "upd_history", "upd_backups", "upd_notes", "bios", "bios_list", "bios_pkg", "bios_hist", "folderpick", "battery" }
 
 ---------------------------------------------------------------------------
 -- Navegacao
@@ -250,36 +250,96 @@ function App.update_runtimes()
   if not ok then App.show_dialog({ title = L("Runtimes"), body = err, kind = "error" }) end
 end
 
---- Meus Ports > X: confirma e exclui o jogo completo (script + pasta + itens do port)
+--- Meus Ports > X: mostra exatamente o que sera apagado e pede confirmacao
 function App.ask_uninstall(p)
   if Installer.busy() or Runtimes.busy() or Uninstall.busy() or PM.busy() then
     App.toast(L("Aguarde a operação atual terminar."), "warn"); return
   end
-  local plan, why = Uninstall.plan(p)
+  local plan, why, info = Uninstall.plan(p)
   if not plan then
-    App.show_dialog({ title = L("Desinstalação não realizada"), kind = "error", body = why })
+    if info and info.nothing then
+      -- .sh e pasta nao existem mais: so limpa o registro, se o usuario quiser
+      App.show_dialog({ title = L("Desinstalar port"), kind = "warn",
+        body = why .. "\n\n" .. L("Deseja tirar este jogo da lista de Meus Ports? Nenhum arquivo será apagado."),
+        buttons = {
+          { label = L("LIMPAR REGISTRO"), fn = function()
+            Uninstall.clear_record(p)
+            App.on_catalog_changed()
+            App.toast(L("Registro removido da lista. Nenhum arquivo foi apagado."), "ok")
+          end },
+          { label = L("CANCELAR") },
+        }, sel = 2 })
+    else
+      App.show_dialog({ title = L("Desinstalação não realizada"), kind = "error", body = why })
+    end
     return
   end
+  App.confirm_uninstall(plan)
+end
+
+--- janela de confirmacao (tambem usada depois de escolher a pasta a mao)
+function App.confirm_uninstall(plan)
+  local p = plan.port
   local lines = {}
-  for i, n in ipairs(plan.targets) do
-    if i > 5 then lines[#lines + 1] = string.format(L("… e mais %d itens"), #plan.targets - 5); break end
+  local shown = 0
+  for _, n in ipairs(plan.targets) do
+    shown = shown + 1
+    if shown > 6 then lines[#lines + 1] = string.format(L("… e mais %d itens"), #plan.targets - 6); break end
     local sz = plan.sizes[n] and ("  (" .. U.format_bytes(plan.sizes[n]) .. ")") or ""
-    lines[#lines + 1] = "• " .. n .. (plan.is_dir(n) and L("/  [pasta]") or "") .. sz
+    local kind
+    if n:lower():match("%.sh$") and not plan.is_dir(n) then kind = L("Arquivo de inicialização: ")
+    elseif plan.is_dir(n) then kind = L("Pasta do jogo: ")
+    else kind = L("Arquivo do jogo: ") end
+    lines[#lines + 1] = "• " .. kind .. "\"" .. n .. (plan.is_dir(n) and "/" or "") .. "\"" .. sz
   end
-  App.show_dialog({
-    title = L("Desinstalar jogo?"),
-    kind = "error",
-    body = L("Deseja realmente desinstalar ") .. p.name .. "?\n"
-      .. L("Estes itens serão apagados de ") .. C.PORTS_DIR .. ":\n"
-      .. table.concat(lines, "\n")
-      .. (plan.note and ("\n" .. plan.note) or "")
-      .. ((#plan.evidence > 0) and ("\n" .. L("Identificado por: ") .. table.concat(plan.evidence, ", ")) or "")
-      .. L("\n\nSaves dentro da pasta do jogo também serão apagados. Esta ação não pode ser desfeita."),
-    buttons = {
-      { label = L("CANCELAR") },
-      { label = L("DESINSTALAR"), danger = true, fn = function() Uninstall.start(plan) end },
-    },
-    sel = 1,
+  local body = L("Você está prestes a remover:") .. "\n" .. table.concat(lines, "\n")
+  if plan.manual_dir then
+    body = body .. "\n" .. L("Pasta escolhida: ") .. plan.base .. "/" .. plan.manual_dir
+  elseif plan.missing_dir then
+    body = body .. "\n" .. (plan.expected_dir
+      and (L("A pasta do jogo (\"") .. plan.expected_dir .. L("/\") não foi localizada: só o arquivo .sh será removido."))
+      or L("A pasta do jogo não foi localizada: só o arquivo .sh será removido.")) .. "\n" .. L("Y: localizar a pasta manualmente.")
+  end
+  if #plan.evidence > 0 then body = body .. "\n" .. L("Identificado por: ") .. table.concat(plan.evidence, ", ") end
+  body = body .. "\n\n" .. L("Essa operação removerá os arquivos selecionados do cartão SD (saves dentro da pasta do jogo também). Não pode ser desfeita.")
+    .. "\n\n" .. L("Deseja continuar?")
+  local buttons = {
+    { label = L("CONFIRMAR"), danger = true, fn = function() Uninstall.start(plan) end },
+    { label = L("CANCELAR") },
+  }
+  if plan.missing_dir then
+    table.insert(buttons, 2, { label = L("Y: LOCALIZAR PASTA"), key = "y", fn = function() App.pick_port_folder(plan) end })
+  end
+  App.show_dialog({ title = L("DESINSTALAR PORT"), kind = "error", body = body, buttons = buttons, sel = 1,
+    cancel = function() App.toast(L("Desinstalação cancelada. Nada foi apagado."), "info") end })
+end
+
+--- escolher a pasta do jogo no navegador de pastas
+function App.pick_port_folder(plan)
+  App.push("folderpick", {
+    title = L("Localizar pasta do jogo"),
+    start = plan.base, root = plan.base:match("^(.*)/[^/]+$") or plan.base,
+    info = plan.scripts[1],
+    on_cancel = function() App.toast(L("Desinstalação cancelada. Nada foi apagado."), "info") end,
+    on_pick = function(abs)
+      local name, why = Uninstall.check_folder(plan, abs)
+      if not name then
+        App.show_dialog({ title = L("Pasta não aceita"), kind = "error", body = why .. "\n\n" .. L("Nada foi apagado.") })
+        return false
+      end
+      App.show_dialog({ title = L("Usar esta pasta?"), kind = "warn",
+        body = L("Pasta escolhida:") .. "\n" .. plan.base .. "/" .. name .. "\n\n"
+          .. L("Ela será apagada junto com o arquivo ") .. "\"" .. plan.scripts[1] .. "\".",
+        buttons = {
+          { label = L("SIM, USAR"), fn = function()
+            Uninstall.add_folder(plan, name)
+            App.pop()
+            App.confirm_uninstall(plan)
+          end },
+          { label = L("ESCOLHER OUTRA") },
+        }, sel = 1 })
+      return true
+    end,
   })
 end
 

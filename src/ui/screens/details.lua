@@ -96,7 +96,7 @@ function S:layout()
     item(L("Espaço ocupado"), L("não instalado (calculado após a instalação)"))
   end
   if (p.origin or "") ~= "" then
-    item(L("Origem"), p.origin)
+    item(L("Origem"), p.origin .. (((p.archive_id or "") ~= "") and (" (" .. p.archive_id .. ")") or ""))
   end
   if (p.file_type or "") ~= "" then item(L("Formato do arquivo"), p.file_type) end
   if p.notes ~= "" then
@@ -119,7 +119,7 @@ function S:primary()
   if not p.download_url:match("^https?://") then return L("EM BREVE"), false end
   if st == "update" then return L("ATUALIZAR"), true end
   if st == "installed" then return L("REINSTALAR"), true end
-  return L("BAIXAR"), true
+  return L("INSTALAR"), true
 end
 
 function S:draw()

@@ -1,7 +1,7 @@
 -- =============================================================================
 --  R36S PORT HUB - thread de downloads pequenos (catalogo e capas)
 --  Recebe pedidos pelo canal "hub_fetch_req" e responde em "hub_fetch_res".
---  Pedido: { id=, url=, out=, kind="catalog"|"cover" }
+--  Pedido: { id=, url=, out=, kind="catalog"|"cover", part=BYTES (opcional) }
 -- =============================================================================
 require("love.timer")
 
@@ -36,10 +36,18 @@ while true do
     local pidf = req.out .. ".pid"
     os.remove(tmp); os.remove(rcf)
     local maxt = req.kind == "catalog" and 25 or 30
-    os.execute("sh " .. shq(fetch_sh) .. " get " .. shq(req.url) .. " " .. shq(tmp) .. " "
-      .. shq(pidf) .. " " .. shq(rcf) .. " " .. maxt .. " >/dev/null 2>&1")
-    local rcs = read_head(rcf, 16)
-    local rc = tonumber(rcs:match("%d+") or "1")
+    local rc
+    if req.part then
+      -- so o comeco do arquivo (manifesto de um pacote .zip)
+      local ok = os.execute("sh " .. shq(fetch_sh) .. " part " .. shq(req.url) .. " " .. shq(tmp) .. " "
+        .. math.floor(tonumber(req.part) or 262144) .. " >/dev/null 2>&1")
+      rc = (ok == 0 or ok == true) and 0 or 1
+    else
+      os.execute("sh " .. shq(fetch_sh) .. " get " .. shq(req.url) .. " " .. shq(tmp) .. " "
+        .. shq(pidf) .. " " .. shq(rcf) .. " " .. maxt .. " >/dev/null 2>&1")
+      local rcs = read_head(rcf, 16)
+      rc = tonumber(rcs:match("%d+") or "1")
+    end
     os.remove(rcf); os.remove(pidf)
     local size = fsize(tmp)
     local okres = (rc == 0 and size > 0)

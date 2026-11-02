@@ -626,14 +626,22 @@ local console = {
         if require("core.errlog").count() == 0 then App.toast(L("Nenhum erro registrado até agora."), "info"); return end
         App.push("files", { path = d })
       end }
+    local battery = { kind = "action", label = L("Análise da bateria"), icon = "set_battery",
+      desc = L("Nível, estado, tensão, corrente e capacidade que o sistema informa, e o tempo estimado para a carga completa. Somente leitura."),
+      value = function()
+        local b = Battery.get()
+        return b.ok and (b.pct .. "%" .. (b.charging and ("  •  " .. I18N.tr(L("carregando"))) or "")) or I18N.tr(L("indisponível"))
+      end,
+      on_a = function() App.push("battery") end }
     if not r then
-      return { analyzer, sdmaint, sdcheck, datetime, errlog, { kind = "info", label = L("Lendo informações..."), desc = L("Somente leitura: nada é alterado no console."),
+      return { analyzer, battery, sdmaint, sdcheck, datetime, errlog, { kind = "info", label = L("Lendo informações..."), desc = L("Somente leitura: nada é alterado no console."),
         value = function() return "" end } }
     end
     local NA = SysInfo.NA
     local s = r.storage and r.storage[1] or { ok = false }
     local rows = {
       analyzer,
+      battery,
       sdmaint,
       sdcheck,
       datetime,

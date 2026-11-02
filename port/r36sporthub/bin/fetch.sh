@@ -8,6 +8,9 @@
 #       Tenta retomar (-C -) em quedas de conexao, ate 3 tentativas.
 #   fetch.sh head URL
 #       Imprime o tamanho (Content-Length) final do arquivo, se o servidor informar.
+#   fetch.sh part URL SAIDA BYTES
+#       Baixa so o comeco do arquivo (os primeiros BYTES), para ler o manifesto
+#       de um pacote .zip sem baixar tudo. Codigo de saida 0 se gravou algo.
 #
 # Codigos em ARQ_RC: 0 = ok; 143/137 = cancelado; outros = erro do curl/wget.
 
@@ -34,6 +37,23 @@ if [ "$MODE" = "head" ]; then
       | grep -i 'content-length:' | tail -n 1 | awk '{print $2}'
   fi
   exit 0
+fi
+
+if [ "$MODE" = "part" ]; then
+  OUTFILE="$3"
+  BYTES="${4:-262144}"
+  LAST=$((BYTES - 1))
+  rm -f "$OUTFILE"
+  if have curl; then
+    curl -L -s --connect-timeout 20 --max-time 40 -r "0-$LAST" -A "$UA" "$URL" 2>/dev/null | head -c "$BYTES" > "$OUTFILE"
+    if [ ! -s "$OUTFILE" ]; then
+      curl -L -s -k --connect-timeout 20 --max-time 40 -r "0-$LAST" -A "$UA" "$URL" 2>/dev/null | head -c "$BYTES" > "$OUTFILE"
+    fi
+  elif have wget; then
+    wget -q -O - --no-check-certificate -T 30 -U "$UA" "$URL" 2>/dev/null | head -c "$BYTES" > "$OUTFILE"
+  fi
+  [ -s "$OUTFILE" ] && exit 0
+  exit 1
 fi
 
 if [ "$MODE" != "get" ]; then

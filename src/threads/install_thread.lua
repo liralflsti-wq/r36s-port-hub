@@ -218,13 +218,19 @@ local function run()
     log("arquivo local:", PART, got, "bytes")
   else
 
-  -- tamanho esperado: catalogo ou cabecalho do servidor
-  expected = tonumber(job.expected_size)
-  if not expected or expected <= 0 then
-    local h = capture("sh " .. shq(job.fetch_sh) .. " head " .. shq(job.url) .. " 2>/dev/null")
-    expected = tonumber(h:match("(%d+)"))
-    if expected and expected <= 0 then expected = nil end
+  -- tamanho esperado: o que o SERVIDOR informa vale mais que o do catalogo.
+  -- Catalogos costumam trazer o tamanho arredondado (ex.: 1.6 GB em bytes) e
+  -- isso fazia um download completo ser recusado como "incompleto".
+  local catalog_size = tonumber(job.expected_size)
+  if catalog_size and catalog_size <= 0 then catalog_size = nil end
+  local h = capture("sh " .. shq(job.fetch_sh) .. " head " .. shq(job.url) .. " 2>/dev/null")
+  local server_size = tonumber(h:match("(%d+)"))
+  if server_size and server_size <= 0 then server_size = nil end
+  if server_size and catalog_size and server_size ~= catalog_size then
+    log("tamanho do catalogo (" .. catalog_size .. ") difere do servidor (" .. server_size .. "): usando o do servidor")
   end
+  expected = server_size or catalog_size
+  job.server_size = server_size
 
   -- 1) espaco para o ZIP ----------------------------------------------------
   local avail = free_bytes(job.ports_dir)
@@ -297,8 +303,14 @@ local function run()
     return fail("not_zip", what)
   end
   log("formato do pacote:", fmt)
-  if expected and got ~= expected then
-    return fail("size_mismatch", string.format("%d|%d", got, expected))
+  if job.server_size and got ~= job.server_size then
+    -- o servidor informou o tamanho e o arquivo veio diferente: download incompleto
+    return fail("size_mismatch", string.format("%d|%d", got, job.server_size))
+  elseif not job.local_file and not job.server_size and expected and got ~= expected then
+    -- sem tamanho do servidor: o download terminou sem erro (curl/wget), mas o
+    -- tamanho difere do catalogo, que pode estar arredondado. O hash (se houver)
+    -- e a extracao (que falha com arquivo cortado), logo abaixo, conferem.
+    log("aviso: tamanho baixado " .. got .. " difere do catalogo " .. expected .. " (servidor nao informou o tamanho)")
   end
   if job.sha256 and job.sha256 ~= "" then
     local sum = capture("sha256sum " .. shq(PART) .. " 2>/dev/null"):match("^(%x+)")

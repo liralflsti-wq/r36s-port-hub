@@ -51,6 +51,32 @@ function M.scan()
   return t
 end
 
+--- O pacote instalado ainda esta na pasta update? (so arquivo comum, direto na
+--- pasta, sem link). Devolve o caminho real ou nil.
+function M.package_left(path)
+  if type(path) ~= "string" or path == "" then return nil end
+  local dir, name = path:match("^(.*)/([^/]+)$")
+  if not dir or not name or name == "LEIA-ME.txt" or name:find("^%.") then return nil end
+  local rd = U.trim(U.capture("readlink -f -- " .. U.shq(M.DIR) .. " 2>/dev/null") or "")
+  local rp = U.trim(U.capture("readlink -f -- " .. U.shq(dir) .. " 2>/dev/null") or "")
+  if rd == "" or rp ~= rd then return nil end
+  if U.exec_ok("test -L " .. U.shq(path)) or not U.exec_ok("test -f " .. U.shq(path)) then return nil end
+  return path
+end
+
+--- Apaga SO o arquivo do pacote instalado (nunca a pasta). Devolve ok, motivo
+function M.remove_package(path)
+  local p = M.package_left(path)
+  if not p then return false, "missing" end
+  local ok, err = os.remove(p)
+  if not ok then
+    U.log("Atualizações: não foi possível apagar o pacote", p, tostring(err))
+    return false, tostring(err)
+  end
+  U.log("Atualizações: pacote apagado depois da instalação:", p)
+  return true
+end
+
 function M.format_label(fmt) return Formats.LABEL[fmt] or L("desconhecido") end
 
 return M

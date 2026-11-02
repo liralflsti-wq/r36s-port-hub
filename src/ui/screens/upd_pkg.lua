@@ -121,6 +121,7 @@ function S:draw()
     G.text(T.f.body, L("Reinicie o app para usar a nova versão. Se ela não abrir, a anterior volta sozinha."), x + 30, y + 206, T.c.text, "center", w - 60)
     hints = { { "a", L("Reiniciar o app agora") }, { "b", L("Depois") } }
     if Manager.has_notes(res) then table.insert(hints, 2, { "y", L("Novidades") }) end
+    if self.left then table.insert(hints, #hints, { "x", L("Excluir arquivo") }) end
   elseif st == "error" then
     G.text(T.f.pix16, L("NÃO FOI POSSÍVEL ATUALIZAR"), x, y + 90, T.c.red, "center", w)
     G.text(T.f.body, self.err or L("Erro desconhecido."), x + 30, y + 126, T.c.text, "center", w - 60)
@@ -133,6 +134,9 @@ function S:draw()
       end
     end
     G.text(T.f.small, L("Configurações, ports e gravações não foram alterados."), x, y + h - 40, T.c.dim, "center", w)
+    if self.p.origin == "local" then
+      G.text(T.f.small, L("O arquivo de atualização foi mantido na pasta update para uma nova tentativa."), x, y + h - 24, T.c.dim, "center", w)
+    end
   end
   G.hints(hints)
 end
@@ -142,7 +146,11 @@ function S:install()
   local p = self.p
   local ok, why = Manager.start("install", { archive = p.path, origin = p.origin, package = p.name, version = r.version },
     function(j)
-      if j.state == "done" then self.state = "done"
+      if j.state == "done" then
+        self.state = "done"
+        self.left = Folder.package_left(self.p.path)   -- conferido uma vez (nao a cada quadro)
+        -- instalacao conferida: oferece apagar o pacote (so ele; falhas nunca chegam aqui)
+        self:ask_delete()
       else
         self.err = Manager.message(j.error_code, j.detail)
         if j.report then self.report = j.report end
@@ -150,6 +158,34 @@ function S:install()
       end
     end)
   if ok then self.state = "installing" else App.toast(why, "error") end
+end
+
+--- pergunta se apaga o arquivo do pacote instalado; se ele ja nao existe, nada muda
+function S:ask_delete()
+  if self.pkg_handled or not self.left then return end
+  App.show_dialog({
+    title = L("Arquivo de atualização"), kind = "info",
+    body = L("A atualização foi instalada e conferida. O arquivo de atualização ainda está na pasta update:") .. "\n"
+      .. self.p.name .. "  (" .. U.format_bytes(U.file_size(self.p.path) or 0) .. ")\n\n"
+      .. L("Excluir só este arquivo? Os outros arquivos da pasta, os backups e os registros não são tocados."),
+    buttons = {
+      { label = L("EXCLUIR"), fn = function() self:delete_package() end },
+      { label = L("MANTER"), fn = function()
+        self.pkg_handled = true
+        App.toast(L("Arquivo de atualização mantido na pasta update."), "info")
+      end },
+    },
+    sel = 2,
+  })
+end
+
+function S:delete_package()
+  self.pkg_handled = true
+  local ok, why = Folder.remove_package(self.p.path)
+  self.left = Folder.package_left(self.p.path)
+  if ok then App.toast(L("Arquivo de atualização excluído."), "ok")
+  elseif why == "missing" then App.toast(L("O arquivo de atualização já não existe. Nada foi alterado."), "info")
+  else App.toast(L("Não foi possível excluir o arquivo de atualização: ") .. tostring(why), "error") end
 end
 
 function S:confirm()
@@ -188,6 +224,11 @@ function S:action(act)
     return
   end
   if st == "done" then
+    if act == "x" and self.left then
+      self.pkg_handled = false
+      self:ask_delete()
+      return
+    end
     if act == "a" then require("ui.screens.updmgr").restart_app()
     elseif act == "b" then App.pop() end
     return
