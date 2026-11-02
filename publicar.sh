@@ -339,6 +339,7 @@ print(json.dumps({"name": sys.argv[1].split("/")[1], "private": False,
   cp "$src"  "$DIST/$SRC_NAME"
   write_update_json "$DIST/$UP_NAME" "$man"
 
+  update_version_text "$label"
   git_push "R36S PORT HUB $label"
   local rid; rid="$(ensure_release "v$ver" "R36S PORT HUB $label" "$body")"
   [ -n "$rid" ] || die "nao consegui criar a release"
@@ -368,6 +369,7 @@ cmd_update() {
   # anexos do pacote completo/fonte da versao anterior continuam validos:
   # a nova release recebe o update; se existir a mesma versao, os anexos sao refeitos
   git_init
+  update_version_text "$label"
   git_push "Atualizacao $label"
 
   rid="$(release_info "v$ver")"
@@ -397,6 +399,7 @@ cmd_final() {
 
   ver="$(grep -oP 'C\.VERSION_NUM\s*=\s*"\K[^"]+' "$ROOT/src/config.lua" | head -1)"
   label="$(grep -oP 'C\.VERSION\s*=\s*L\("\K[^"]+' "$ROOT/src/config.lua" | head -1)"
+  update_version_text "$label"
   tag="v$ver"
   rid="$(release_info "$tag")"
   if [ -z "$rid" ]; then
