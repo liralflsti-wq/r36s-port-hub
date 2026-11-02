@@ -1965,7 +1965,7 @@ return {
   ["AUSENTE"] = "ОТСУТСТВУЕТ",
   ["NÃO CONFIRMADO"] = "НЕ ПОДТВЕРЖДЕНО",
   ["DESCONHECIDO"] = "НЕИЗВЕСТНО",
-  ["Runtime"] = "Среда",
+  ["Runtime"] = "Рантайм",
   ["Biblioteca"] = "Библиотека",
   ["O sistema ou os runtimes do console mudaram desde a última análise; os resultados foram refeitos."] = "Система или среды консоли изменились с последнего анализа; результаты пересчитаны.",
   ["DETECTADO NO CONSOLE"] = "ОБНАРУЖЕНО НА КОНСОЛИ",
@@ -1974,7 +1974,7 @@ return {
   ["Console"] = "Консоль",
   ["  (pacotes: "] = "  (пакеты: ",
   ["  •  confiança: "] = "  •  достоверность: ",
-  ["Runtimes instalados"] = "Установленные среды",
+  ["Runtimes instalados"] = "Установленные рантаймы",
   ["nenhum"] = "нет",
   ["Ferramenta integrada ao hub: não depende de requisitos externos."] = "Встроенный инструмент хаба: внешних требований нет.",
   ["REQUISITOS INFORMADOS PELO PORT E COMPARAÇÃO"] = "ТРЕБОВАНИЯ ПОРТА И СРАВНЕНИЕ",
@@ -3088,4 +3088,5 @@ return {
   ["Atenção: este pacote exige a versão "] = "Внимание: этот пакет требует версию ",
   [" ou mais nova. Use o pacote completo."] = " или новее. Используйте полный пакет.",
   ["Para ativar, coloque o link direto do pacote .zip, do repositório do GitHub (com Releases) ou de um arquivo JSON de versão em:"] = "Чтобы включить, укажите прямую ссылку на пакет .zip, на репозиторий GitHub (с Releases) или на JSON-файл версии в:",
+  ["Nenhum destaque no catálogo."] = "В каталоге нет рекомендуемых портов.",
 }

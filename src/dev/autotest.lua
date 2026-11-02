@@ -58,6 +58,25 @@ function A.update(dt)
     local p = { id = "local:" .. arg, name = arg, is_local = true, local_items = lp and lp.items or { arg }, install_check = {} }
     local plan, why = require("core.uninstall").plan(p)
     print("[autotest] plano " .. arg .. ": " .. (plan and (table.concat(plan.targets, " | ") .. " / " .. table.concat(plan.evidence, ", ") .. " / " .. tostring(plan.note)) or ("RECUSADO: " .. tostring(why))))
+  elseif cmd == "rmfile" then
+    os.remove(arg)
+  elseif cmd == "exists" then
+    local f = io.open(arg, "rb")
+    print("[autotest] existe " .. arg .. " = " .. tostring(f ~= nil)); io.stdout:flush()
+    if f then f:close() end
+  elseif cmd == "uninstall" then
+    -- Meus Ports > X de um port do cartao (pelo nome do script)
+    local Scan = require("core.scan")
+    require("core.manifest").rescan(true)
+    local lp = Scan.by_script[arg]
+    local p = { id = "local:" .. arg, name = arg, is_local = true, local_items = lp and lp.items or { arg }, install_check = {}, version = "" }
+    A.app.ask_uninstall(p)
+  elseif cmd == "pickname" then
+    local cur = A.app.current()
+    for i, it in ipairs(cur.list or {}) do if it.name == arg then cur.sel = i end end
+  elseif cmd == "dialogtext" then
+    print("[autotest] dialogo: " .. tostring(A.app.dialog and A.app.dialog.title) .. " | " .. tostring(A.app.dialog and A.app.dialog.body):gsub("\n", " / "))
+    io.stdout:flush()
   elseif cmd == "errdialog" then
     A.app.show_dialog({ title = "Falha de teste", kind = "error", body = "Download falhou (teste). PASS segredo123 senha=abc" })
   elseif cmd == "threadcrash" then
@@ -91,6 +110,10 @@ function A.update(dt)
   elseif cmd == "dialoglist" then
     A.app.show_dialog({ title = "Teste", kind = "info", list = true, body = "Escolha o que fazer com o item selecionado.",
       buttons = { { label = "Recortar", sub = "Mover para outra pasta depois" }, { label = "Excluir", sub = "Apagar do cartão SD", danger = true }, { label = "Extrair aqui", sub = "Descompactar nesta pasta" }, { label = "Cancelar" } } })
+  elseif cmd == "theme" then
+    require("core.themes").apply(arg, false)
+  elseif cmd == "refreshcat" then
+    A.app.refresh_catalog(true)
   elseif cmd == "eco" then
     A.app.eco = arg == "1"
   elseif cmd == "anim" then

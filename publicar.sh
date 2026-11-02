@@ -223,10 +223,10 @@ import sys, json
 m = json.loads(sys.argv[1])
 out = [m.get("description", "").strip(), ""]
 ch, fx = m.get("changes", []), m.get("fixes", [])
-if ch: out += ["### Mudancas"] + ["- " + x for x in ch] + [""]
-if fx: out += ["### Correcoes"] + ["- " + x for x in fx] + [""]
+if ch: out += ["### Mudanças"] + ["- " + x for x in ch] + [""]
+if fx: out += ["### Correções"] + ["- " + x for x in fx] + [""]
 out += [f"Pacote incremental: **{m.get('version_label', m.get('version',''))}**"
-        f" (minimo {m.get('min_version','-')})."]
+        f" (mínimo {m.get('min_version','-')})."]
 print("\n".join(out).strip())
 PY
 }
@@ -370,7 +370,7 @@ cmd_update() {
   # a nova release recebe o update; se existir a mesma versao, os anexos sao refeitos
   git_init
   update_version_text "$label"
-  git_push "Atualizacao $label"
+  git_push "Atualização $label"
 
   rid="$(release_info "v$ver")"
   if [ -n "$rid" ]; then

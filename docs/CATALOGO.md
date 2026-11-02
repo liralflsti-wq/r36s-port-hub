@@ -53,7 +53,7 @@ A URL precisa entregar o JSON direto (sem página HTML). Exemplo:
 | `description` | não | Texto da página do port (rolável). |
 | `short` | não | Resumo da lista; se faltar, usa a 1ª linha da descrição. |
 | `category` | não | Categoria do port. Use um dos ids oficiais abaixo; nomes como `"Ação"` ou apelidos em inglês (`racing`, `shooter`…) também são reconhecidos. Um nome diferente vira uma categoria extra na área do port. |
-| `section` | não | Área da loja: `"games"` (Ports de Jogos) ou `"tools"` (Utilitários & Ferramentas). Se faltar, é deduzida pela categoria; sem categoria conhecida, vai para Ports de Jogos. |
+| `section` | não | Área da loja: `"games"` (Ports de Jogos) ou `"tools"` (Utilitários & Ferramentas). Se faltar, é deduzida pela categoria; sem categoria conhecida, vai para Ports de Jogos. Também aceita `"type": "game"` / `"type": "utility"`. |
 | `version` | não | Versão do port. Se mudar, quem já instalou vê **ATUALIZAR**. |
 | `size_bytes` | recomendado | Tamanho exato do ZIP em bytes. Usado para o progresso, checagem de espaço e para confirmar que o download veio completo. Também aceita `size` como texto (`"150 MB"`), só para exibição. |
 | `size_label` | não | Texto do tamanho, se quiser personalizar. |
@@ -63,7 +63,8 @@ A URL precisa entregar o JSON direto (sem página HTML). Exemplo:
 | `author` | não | Quem fez o port. |
 | `requires_files` | não | `true` mostra o aviso "Requer arquivos do jogo original". |
 | `notes` | não | Observações extras exibidas após a descrição. |
-| `featured` | não | `true` coloca o port no "Em destaque" do menu. |
+| `featured` | não | `true` coloca o port (jogo ou utilitário) na vitrine **EM DESTAQUE** do menu. Só aparecem os marcados; sem nenhum marcado, a caixa avisa que não há destaques. |
+| `featured_order` | não | Número que define a ordem na vitrine (1, 2, 3...). Sem ele, vale a ordem do catálogo. |
 | `pm_name` | não | Nome do pacote no PortMaster (ex.: `"sprout.zip"`). Liga o port do catálogo a um jogo instalado pelo PortMaster mesmo que os nomes sejam diferentes. |
 | `test_type` | não | Só para a categoria `testes_de_controles`: `"analogicos"`, `"botoes"` ou `"completo"` (padrão). Os ids antigos `testes_de_analogicos` e `testes_de_botoes` continuam aceitos e viram esses tipos. |
 | `added` | não | Data em que o port entrou no catálogo (`AAAA-MM-DD`). Aparece em Novidades como **NOVO**. |

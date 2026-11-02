@@ -88,6 +88,8 @@ local function normalize_port(raw, idx, cat_names)
   p.notes = str(raw.notes or raw.observacoes)
   p.requires_files = raw.requires_files == true or raw.requer_arquivos == true
   p.featured = raw.featured == true or raw.destaque == true
+  -- ordem opcional na vitrine EM DESTAQUE (sem ela, vale a ordem do catalogo)
+  p.featured_order = tonumber(raw.featured_order or raw.destaque_ordem)
   p.allow_no_script = raw.allow_no_script == true
   -- requisitos para o Verificador de compatibilidade (opcionais; nada e deduzido)
   p.compat = type(raw.compat) == "table" and raw.compat or nil

@@ -7,7 +7,7 @@
 --  Nenhuma tela precisa saber qual idioma esta ativo.
 -- =============================================================================
 local utf8 = require("utf8")
-local I = { lang = "pt-BR", dicts = {}, rev = {}, rev_up = {}, built = false }
+local I = { lang = "pt-BR", dicts = {}, rev = {}, rev_up = {}, keys = {}, built = false }
 
 I.LANGS = {
   { id = "pt-BR", name = "Português (Brasil)", short = "PORTUGUÊS (BRASIL)", label = "Português", flag = "br" },
@@ -61,6 +61,7 @@ local function build()
   for _, l in ipairs(I.LANGS) do
     if l.id ~= "pt-BR" then
       for k, v in pairs(load_dict(l.id)) do
+        I.keys[k] = true
         I.rev[v] = I.rev[v] or k
         I.rev_up[I.upper(v)] = I.rev_up[I.upper(v)] or k
       end
@@ -83,6 +84,9 @@ function I.tr(s)
   if not I.built then build() end
   local d = I.dicts[I.lang] or {}
   if d[s] then return d[s] end                 -- chave em portugues
+  -- em portugues, um texto que ja e chave fica como esta (ex.: "Download" nao
+  -- pode virar "Baixar" so porque as duas tem a mesma traducao em ingles)
+  if I.lang == "pt-BR" and I.keys[s] then return s end
   local k = I.rev[s]                           -- ja traduzido (outro idioma)
   if k then return I.lang == "pt-BR" and k or (d[k] or k) end
   k = I.rev_up[s]                              -- versao em MAIUSCULAS

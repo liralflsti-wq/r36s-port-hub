@@ -37,6 +37,7 @@ Projeto **independente** do KMP: nenhum arquivo do KMP foi alterado ou é necess
   - No primeiro acesso, vêm depois **SELECT LANGUAGE** (Português, English, Русский) e o **Aviso importante** no idioma escolhido. **A** confirma.
   - Nos acessos seguintes, a splash leva ao **Aviso importante** (sempre aparece ao abrir) e depois ao menu.
 - **Menu principal**: Central de Conteúdo (antiga Loja de Ports), Categorias, Meus Ports, Configurações, Sobre o Projeto, Sair (com opção de reiniciar o EmulationStation)
+  - **EM DESTAQUE** (caixa à direita): vitrine com os jogos e utilitários marcados com `"featured": true` no catálogo, na ordem do catálogo (ou de `featured_order`). Cada item mostra capa, nome, etiqueta JOGO/UTILITÁRIO, categoria e tamanho, e o contador (ex.: 2/4). A troca é automática a cada 5 s, com deslizamento suave, um brilho discreto na capa e indicadores que mostram o tempo até o próximo. **Esquerda/direita** (ou L1/R1) trocam manualmente e pausam a rotação por alguns segundos. Com as animações desligadas ou no modo econômico, não há rotação automática e a troca manual é instantânea. Funciona offline com o catálogo e as capas em cache.
 - **Central de Conteúdo**: três áreas independentes, **Ports de Jogos**, **BIOS do Sistema** e **Ports Utilitários e Ferramentas**. As áreas de ports têm suas abas (Todos, categorias da área, Instalados); jogos, ferramentas e BIOS nunca aparecem na mesma lista. Detalhes de BIOS em **BIOS do Sistema** abaixo.
 - **Categorias**: 13 categorias de jogos e 4 de utilitários (Manutenção, Diagnóstico do sistema, Testes de controles, Ferramentas de sistema), com ícones. "Testes de controles" reúne os três tipos de teste (analógicos, botões e completo), cada um identificado na lista. Cada bloco abre a área certa já filtrada, e uma categoria vazia avisa que não há ports disponíveis nela.
 - **Meus Ports**: abas Ports de Jogos e Utilitários & Ferramentas, só com o que está instalado
@@ -48,7 +49,7 @@ Projeto **independente** do KMP: nenhum arquivo do KMP foi alterado ou é necess
 - **Informações do Console** (Configurações → Informações do console → Todos os detalhes): cartão SD, memória RAM, sistema, arquitetura, kernel, modelo do aparelho e PortMaster/runtimes. Somente leitura; Y atualiza os dados
 - **Configurações**: central com 9 categorias em cartões (Aparência e personalização, Áudio, Rede e conectividade, Bateria e energia, Controles, Downloads e atualizações, Backup e restauração, Notificações e Informações do console). Detalhes em **Configurações** abaixo.
 - **Loja**: abas de categoria, lista com capa, tamanho e selo INSTALADO/ATUALIZAR, pré-visualização
-- **Página do port**: capa, nome, categoria, versão, tamanho, status, descrição rolável e botão **BAIXAR / REINSTALAR / ATUALIZAR**
+- **Página do port**: capa, nome, categoria, versão, tamanho, status, descrição rolável e botão **INSTALAR / REINSTALAR / ATUALIZAR**
 - **Instalação**: etapas Download → Verificação → Extração → Instalação, com barra, MB baixados, velocidade e tempo restante
 
 ## Configurações

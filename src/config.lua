@@ -8,8 +8,8 @@ local L = require("lib.i18n").L
 local C = {}
 
 C.APP_NAME = L("R36S PORT HUB")
-C.VERSION = L("0.4.5 BETA")       -- texto exibido
-C.VERSION_NUM = "0.4.5"        -- numero usado para comparar com a atualizacao
+C.VERSION = L("0.4.6 BETA")       -- texto exibido
+C.VERSION_NUM = "0.4.6"        -- numero usado para comparar com a atualizacao
 
 -- Atualizacao do sistema (Configuracoes > Atualizacao do sistema).
 -- Link direto do pacote .zip (o hub le o update_manifest.json de dentro dele:

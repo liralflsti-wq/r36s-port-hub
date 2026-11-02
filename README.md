@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.4.5%20BETA-ff4f8b?style=for-the-badge" alt="Versão 0.4.5 BETA">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.4.6%20BETA-ff4f8b?style=for-the-badge" alt="Versão 0.4.6 BETA">
   <img src="https://img.shields.io/badge/console-R36S-38d6ff?style=for-the-badge" alt="R36S">
   <img src="https://img.shields.io/badge/sistema-dArkOSRE%20%7C%20dArkOS%20%7C%20ArkOS-ffd447?style=for-the-badge" alt="dArkOSRE, dArkOS, ArkOS">
   <img src="https://img.shields.io/badge/L%C3%96VE-11.5-e74a99?style=for-the-badge" alt="LÖVE 11.5">

@@ -665,3 +665,51 @@ A hora é a do sistema do console (fuso configurado no dArkOS), lida a cada quad
 - Atualização via rede: **Y** mostra as novidades completas antes de baixar.
 - **Corrigido**: erro "Download incompleto: o tamanho do arquivo não confere" em ports cujo tamanho no catálogo é arredondado; agora vale o tamanho informado pelo servidor.
 - Entregue como `R36S-PORT-HUB-update-0.4.5.zip` (lançador auxiliar `fetch.sh` + `r36sporthub/game.love`; versão mínima 0.4).
+
+## Varredura de erros e traduções (0.4.6 BETA)
+
+- Varredura: sintaxe de todos os 151 arquivos Lua, JSON, scripts .sh e
+  gameinfo.xml; todas as chaves usadas em L() conferidas em en/ru;
+  marcadores (%s, %d) e quebras de linha das traduções; abertura de todas as
+  telas e categorias de Configurações em pt-BR, en e ru no simulador,
+  procurando erros, texto em português sobrando e variáveis globais.
+- Corrigido `lib/i18n.lua`: em pt-BR, um texto que já é chave em português
+  podia ser trocado por outra chave com a mesma tradução em inglês
+  ("Download" aparecia como "Baixar"; "Data" como "Dados"). Agora a chave em
+  português sempre fica como está.
+- Corrigido en: "Dados" (taxa da transmissão) era traduzido como "Data", que
+  ao desenhar virava "Date". Agora "Data rate".
+- ru: "Runtime" padronizado como "Рантайм" (antes "Среда", que também é
+  "quarta-feira"); "Runtimes instalados" → "Установленные рантаймы".
+- en: adicionadas as chaves "RUNTIMES" e "Runtime " (só existiam em ru).
+
+
+## Vitrine EM DESTAQUE animada (0.4.6 BETA)
+
+- Mesma caixa da tela inicial (posição, tamanho, borda, fundo e título
+  iguais; conferido pixel a pixel que o resto da tela não mudou).
+- Seleção só pelo catálogo: entram apenas itens com `"featured": true`,
+  jogos e utilitários na mesma sequência, na ordem do catálogo ou pelo novo
+  campo opcional `featured_order`. Acabou o preenchimento automático com os
+  primeiros ports quando não havia destaques: agora aparece "Nenhum destaque
+  no catálogo.". Depois de atualizar o catálogo, a lista é refeita (itens
+  novos entram, removidos saem) e continua no mesmo item se ele seguir em
+  destaque. Offline usa o catálogo e as capas em cache.
+- Cada item: capa, nome, etiqueta JOGO/UTILITÁRIO (as mesmas cores da página
+  do port), categoria e tamanho (o tamanho desce uma linha quando não cabe) e
+  contador 2/4 no canto.
+- Animação: saída deslizando e esmaecendo, entrada pelo lado oposto, brilho
+  discreto que atravessa a capa ao chegar, moldura pulsando na cor do tipo e
+  indicadores animados (o atual alarga e enche conforme o tempo até a próxima
+  troca). Uma troca por vez; troca a cada 5 s.
+- Esquerda/direita (ou L1/R1) no menu trocam o destaque e pausam a rotação
+  por 8 s. A capa do próximo item é pedida antes (cache de capas).
+- Animações desligadas ou modo econômico: sem rotação automática (como diz a
+  opção Animações da interface) e troca manual instantânea, sem brilho.
+- Arquivos: `ui/screens/menu.lua`, `core/catalog.lua` (`featured_order`),
+  `i18n/en.lua`, `i18n/ru.lua`, `docs/CATALOGO.md`, `docs/MANUAL.md`.
+- Testado no simulador: um e vários jogos, utilitários, alternância jogo ↔
+  ferramenta, indicadores, capas, item sem capa, nenhum destaque, catálogo
+  offline (cache), atualização do catálogo com destaque removido e novo
+  utilitário, temas Padrão e Xbox, pt-BR/en/ru, texto Grande e Muito grande,
+  modo econômico e animações desligadas.

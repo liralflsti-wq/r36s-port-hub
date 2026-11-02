@@ -1,10 +1,10 @@
 {
-  "version": "0.4.5",
-  "version_label": "0.4.5 BETA",
-  "date": "2026-11-01",
+  "version": "0.4.6",
+  "version_label": "0.4.6 BETA",
+  "date": "2026-11-02",
   "url": "https://github.com/liralflsti-wq/r36s-port-hub/releases/latest/download/R36S-PORT-HUB-update.zip",
-  "size": 7873791,
-  "sha256": "8fa3d764b313914f1c8ddb4a9a02bddd68dd759bec7fab9d6ce8862ba0e3e226",
+  "size": 7873196,
+  "sha256": "633eef916cdc47d657412f1428abd3a7add66e4ba5ff80a540df401569020943",
   "min_version": "0.4",
-  "notes": "Atualização 0.4.5 BETA (a partir da 0.4.4 BETA).\n* O botão do port não instalado agora diz INSTALAR (antes BAIXAR).\n* Atualização via rede ligada ao link oficial do projeto no GitHub (última Release). O hub lê a versão, as mudanças e as correções direto do pacote, sem baixar tudo.\n* Atualização via rede: Y mostra as novidades completas antes de baixar.\n* (corrigido) Corrigido o erro \"Download incompleto: o tamanho do arquivo não confere\" em ports cujo tamanho no catálogo é arredondado: agora vale o tamanho informado pelo servidor."
+  "notes": "Vitrine EM DESTAQUE animada com jogos e utilitários, e correções de tradução.\n* Tela inicial: a caixa EM DESTAQUE virou uma vitrine animada, com troca suave, brilho na capa e indicadores que mostram o tempo até o próximo destaque.\n* EM DESTAQUE agora mostra jogos e utilitários marcados no catálogo, com etiqueta JOGO/UTILITÁRIO, categoria, tamanho e contador.\n* Esquerda/direita (ou L1/R1) no menu trocam o destaque manualmente.\n* Catálogo: novo campo opcional featured_order para definir a ordem dos destaques.\n* (corrigido) EM DESTAQUE não mostra mais ports que não foram marcados como destaque no catálogo.\n* (corrigido) Traduções: em português, \"Download\" aparecia como \"Baixar\" e \"Data\" como \"Dados\"; em inglês, a taxa da transmissão aparecia como \"Date\"; em russo, \"Runtime\" foi padronizado."
 }

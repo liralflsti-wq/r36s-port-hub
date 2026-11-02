@@ -1,5 +1,6 @@
 -- Menu principal da loja
 local L = require("lib.i18n").L
+local I18N = require("lib.i18n")
 local T = require("ui.theme")
 local G = require("ui.gfx")
 local U = require("lib.util")
@@ -22,31 +23,91 @@ local ITEMS = {
   { id = "exit", label = L("Sair"), sub = L("Fechar o R36S PORT HUB"), icon = "exit" },
 }
 
+-- Vitrine EM DESTAQUE: so itens marcados no catalogo ("featured": true),
+-- jogos e utilitarios na mesma sequencia, na ordem do catalogo (ou pela
+-- "featured_order" opcional). Uma transicao por vez.
+local DWELL = 5.0        -- segundos de exibicao de cada destaque
+local TRANS = 0.55       -- duracao da troca
+local HOLD = 8.0         -- pausa extra depois de uma troca manual
+local SHINE = 0.7        -- brilho que passa na capa ao chegar
+
 function S:enter()
   self.sel = self.sel or 1
-  self.feat_i = 1
+  self.feat_i = self.feat_i or 1
   self.feat_t = 0
+  self.feat_hold = 0
+  self.trans = nil
+  self.shine = nil
+  self.dots = self.dots or {}
   self:on_catalog()
 end
 
 function S:on_catalog()
+  local cur = self.featured and self.featured[self.feat_i]
   local f = {}
-  for _, p in ipairs(Catalog.ports) do if p.featured then f[#f + 1] = p end end
-  if #f == 0 then
-    for i = 1, math.min(6, #Catalog.ports) do f[#f + 1] = Catalog.ports[i] end
+  for i, p in ipairs(Catalog.ports) do
+    if p.featured then f[#f + 1] = { p = p, i = i } end
   end
-  self.featured = f
-  if self.feat_i > #f then self.feat_i = 1 end
+  table.sort(f, function(a, b)
+    local oa, ob = a.p.featured_order or math.huge, b.p.featured_order or math.huge
+    if oa ~= ob then return oa < ob end
+    return a.i < b.i
+  end)
+  local list = {}
+  for k, e in ipairs(f) do list[k] = e.p end
+  self.featured = list
+  -- continua no mesmo item depois de atualizar o catalogo, se ele ainda estiver em destaque
+  self.feat_i = 1
+  if cur then
+    for k, p in ipairs(list) do if p.id == cur.id then self.feat_i = k break end end
+  end
+  self.trans = nil
 end
 
 function S:resume() self:on_catalog() end
 
-function S:update(dt)
-  self.feat_t = self.feat_t + dt
-  if self.feat_t > 4.5 and #self.featured > 1 and App.animations() then
-    self.feat_t = 0
-    self.feat_i = self.feat_i % #self.featured + 1
+local function ease(t) return 1 - (1 - t) ^ 3 end
+
+--- troca de destaque (dir = 1 proximo, -1 anterior); manual pausa a rotacao
+function S:feat_go(dir, manual)
+  local n = #self.featured
+  if n < 2 then return end
+  local from = self.feat_i
+  self.feat_i = (self.feat_i - 1 + dir) % n + 1
+  self.feat_t = 0
+  if manual then self.feat_hold = HOLD end
+  if App.animations() then
+    self.trans = { from = from, dir = dir, t = 0 }   -- substitui qualquer troca em andamento
+  else
+    self.trans = nil
   end
+  self.shine = nil
+end
+
+function S:update(dt)
+  local anim = App.animations()
+  if self.trans then
+    self.trans.t = self.trans.t + dt
+    if self.trans.t >= TRANS then
+      self.trans = nil
+      if anim then self.shine = 0 end
+    end
+  elseif self.shine then
+    self.shine = self.shine + dt
+    if self.shine >= SHINE then self.shine = nil end
+  end
+  -- indicadores: largura anima ate o alvo
+  local n = #self.featured
+  for i = 1, n do
+    local target = (i == self.feat_i) and 20 or 8
+    local w = self.dots[i] or target
+    self.dots[i] = anim and (w + (target - w) * math.min(1, dt * 10)) or target
+  end
+  if n < 2 or not anim then return end
+  if self.feat_hold > 0 then self.feat_hold = self.feat_hold - dt; return end
+  if self.trans then return end
+  self.feat_t = self.feat_t + dt
+  if self.feat_t > DWELL then self:feat_go(1, false) end
 end
 
 local function icon(kind, x, y, c)
@@ -122,23 +183,7 @@ function S:draw()
   local px, py, pw, ph = 340, 24, 280, 330
   G.panel(px, py, pw, ph, { bg = T.c.bg1 })
   G.text(T.f.pix8, L("EM DESTAQUE"), px + 16, py + 14, T.c.yellow)
-  local p = self.featured[self.feat_i]
-  if p then
-    local cw, ch = 150, 200
-    local cx, cy = px + (pw - cw) / 2, py + 34
-    G.cover(Covers.get(p), p, cx, cy, cw, ch, Covers.is_loading(p), App.t)
-    G.text_fit(T.f.h3, p.name, px + 16, cy + ch + 10, pw - 32, T.c.text)
-    G.text_fit(T.f.small, p.category .. "  •  " .. p.size_label, px + 16, cy + ch + 32, pw - 32, T.c.dim)
-    -- indicadores
-    local n = #self.featured
-    local dx = px + pw / 2 - (n * 12) / 2
-    for i = 1, n do
-      G.rect(dx + (i - 1) * 12, py + ph - 18, 8, 4, i == self.feat_i and T.c.accent or T.c.line, 2)
-    end
-  else
-    G.text(T.f.body, L("Nenhum port no catálogo ainda."), px + 16, py + 140, T.c.dim, "center", pw - 32)
-  end
-
+  self:draw_featured(px, py, pw, ph)
   -- status
   local sy = py + ph + 12
   G.panel(px, sy, pw, 76, { bg = T.c.bg1 })
@@ -159,6 +204,104 @@ function S:draw()
   else
     G.hints(hints)
     self:draw_wifi()
+  end
+end
+
+-- ---------------------------------------------------------------------------
+-- Vitrine EM DESTAQUE (dentro da caixa existente)
+local function is_tool(p) return p.section == "tools" end
+local function type_color(p) return is_tool(p) and T.c.green or T.c.accent end
+local function with_alpha(c, a) return { c[1], c[2], c[3], (c[4] or 1) * a } end
+
+--- capa + nome + informacoes de um item, deslocado em x e com opacidade a
+local function draw_item(p, px, py, pw, ox, a, glow)
+  local cw, ch = 150, 200
+  local cx, cy = px + (pw - cw) / 2 + ox, py + 34
+  G.cover(Covers.get(p), p, cx, cy, cw, ch, Covers.is_loading(p), App.t)
+  if a < 1 then
+    -- fade: cobre a capa com o fundo da caixa (leve, sem shader)
+    G.rect(cx - 1, cy - 1, cw + 5, ch + 6, T.c.bg1, 6, 1 - a)
+  elseif glow then
+    G.frame(cx - 3, cy - 3, cw + 6, ch + 6, type_color(p), 7, 2, App.pulse(0.55, 0.25, 2.2))
+  end
+  -- nome e informacoes
+  local tx, ty = px + 16 + ox * 0.6, cy + ch + 10
+  G.text_fit(T.f.h3, p.name, tx, ty, pw - 32, with_alpha(T.c.text, a))
+  local tag = is_tool(p) and L("UTILITÁRIO") or L("JOGO")
+  local font = T.f.pix8
+  local tw = font:getWidth(I18N.tr(tag)) + 12
+  local th = font:getHeight() + 8
+  G.rect(tx, ty + 24, tw, th, type_color(p), 4, a)
+  G.text(font, tag, tx + 6, ty + 28, with_alpha(T.c.bg0, a))
+  -- categoria e tamanho na linha da etiqueta; se nao couberem juntos, o tamanho desce uma linha
+  local room = pw - 32 - tw - 8
+  local my = ty + 24 + (th - T.f.small:getHeight()) / 2
+  local info = I18N.tr(p.category) .. "  •  " .. p.size_label
+  if T.f.small:getWidth(info) <= room then
+    G.text(T.f.small, info, tx + tw + 8, my, with_alpha(T.c.dim, a))
+  else
+    G.text_fit(T.f.small, p.category, tx + tw + 8, my, room, with_alpha(T.c.dim, a))
+    G.text_fit(T.f.small, p.size_label, tx, ty + 46, pw - 32, with_alpha(T.c.dim, a))
+  end
+  return cx, cy, cw, ch
+end
+
+function S:draw_featured(px, py, pw, ph)
+  local list = self.featured or {}
+  local n = #list
+  if n == 0 then
+    local msg = #Catalog.ports == 0 and L("Nenhum port no catálogo ainda.") or L("Nenhum destaque no catálogo.")
+    G.text(T.f.body, msg, px + 16, py + 140, T.c.dim, "center", pw - 32)
+    return
+  end
+  if n > 1 then
+    G.text(T.f.pix8, self.feat_i .. "/" .. n, px + pw - 16 - T.f.pix8:getWidth(self.feat_i .. "/" .. n), py + 14, T.c.faint)
+  end
+  local p = list[self.feat_i]
+  local tr = self.trans
+  if tr and list[tr.from] then
+    local k = math.min(1, tr.t / TRANS)
+    local dx = 36 * tr.dir
+    if k < 0.45 then
+      local e = ease(k / 0.45)
+      draw_item(list[tr.from], px, py, pw, -dx * e, 1 - e)
+    else
+      local e = ease((k - 0.45) / 0.55)
+      draw_item(p, px, py, pw, dx * (1 - e), e)
+    end
+  else
+    local cx, cy, cw, ch = draw_item(p, px, py, pw, 0, 1, App.animations())
+    -- brilho discreto que atravessa a capa quando ela chega
+    if self.shine then
+      local k = self.shine / SHINE
+      local bx = cx - 60 + (cw + 120) * k
+      G.clip(cx, cy, cw, ch)
+      lg.setColor(1, 1, 1, 0.16 * math.sin(k * math.pi))
+      lg.polygon("fill", bx, cy, bx + 34, cy, bx - 26, cy + ch, bx - 60, cy + ch)
+      G.unclip()
+    end
+  end
+  -- deixa a capa do proximo destaque pronta (usa o cache de capas)
+  if n > 1 then Covers.get(list[self.feat_i % n + 1]) end
+
+  -- indicadores: o atual fica mais largo e mostra o tempo ate a proxima troca
+  local widths, total = {}, 0
+  for i = 1, n do widths[i] = (self.dots and self.dots[i]) or (i == self.feat_i and 20 or 8); total = total + widths[i] end
+  total = total + (n - 1) * 4
+  local dx = px + pw / 2 - total / 2
+  local dy = py + ph - 18
+  for i = 1, n do
+    local w = widths[i]
+    local on = i == self.feat_i
+    G.rect(dx, dy, w, 4, on and with_alpha(type_color(list[i]), 0.35) or T.c.line, 2)
+    if on then
+      local frac = 1
+      if App.animations() and n > 1 and not self.trans and self.feat_hold <= 0 then
+        frac = math.min(1, self.feat_t / DWELL)
+      end
+      G.rect(dx, dy, math.max(4, w * frac), 4, type_color(list[i]), 2)
+    end
+    dx = dx + w + 4
   end
 end
 
@@ -291,6 +434,8 @@ end
 function S:action(act)
   if act == "up" then self.sel = (self.sel - 2) % #ITEMS + 1
   elseif act == "down" then self.sel = self.sel % #ITEMS + 1
+  elseif act == "left" or act == "l1" then self:feat_go(-1, true)
+  elseif act == "right" or act == "r1" then self:feat_go(1, true)
   elseif act == "b" then exit_dialog()
   elseif act == "a" then
     local id = ITEMS[self.sel].id

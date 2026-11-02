@@ -2582,7 +2582,7 @@ return {
   ["TRANSMISSÃO"] = "STREAM",
   ["Computadores"] = "Computers",
   [" assistindo"] = " watching",
-  ["Dados"] = "Data",
+  ["Dados"] = "Data rate",
   ["Abra no navegador do computador:"] = "Open in the computer's browser:",
   ["O código no fim muda a cada transmissão."] = "The code at the end changes every stream.",
   ["Use INICIAR TRANSMISSÃO para ver o endereço aqui."] = "Use START STREAM to see the address here.",
@@ -3086,4 +3086,7 @@ return {
   ["Atenção: este pacote exige a versão "] = "Warning: this package requires version ",
   [" ou mais nova. Use o pacote completo."] = " or newer. Use the full package.",
   ["Para ativar, coloque o link direto do pacote .zip, do repositório do GitHub (com Releases) ou de um arquivo JSON de versão em:"] = "To enable it, put the direct link to the .zip package, the GitHub repository (with Releases) or a version JSON file in:",
+  ["RUNTIMES"] = "RUNTIMES",
+  ["Runtime "] = "Runtime ",
+  ["Nenhum destaque no catálogo."] = "No featured items in the catalog.",
 }
