@@ -6,6 +6,10 @@
     {
       "id": "corrida",
       "name": "Corrida"
+    },
+    {
+      "id": "aventura",
+      "name": "Aventura"
     }
   ],
   "ports": [
@@ -41,6 +45,23 @@
       "author": "Comunidade",
       "requires_files": false,
       "featured": true,
+      "added": "2026-11-02"
+    },
+    {
+      "id": "animal-crossing",
+      "name": "Animal Crossing",
+      "short": "Vida tranquila numa vila de animais.",
+      "description": "Port para R36S.\n\nMude-se para uma vila habitada por animais, decore sua casa, pesque, colete insetos e faça amizade com os vizinhos.\n\nArquivo hospedado no Internet Archive.",
+      "category": "aventura",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 20744685,
+      "size_label": "19.8 MB",
+      "download_url": "https://archive.org/download/animal-crossing_202611/Animal%20Crossing.zip",
+      "cover": "https://archive.org/download/animal-crossing_202611/Animal-Crossing-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
       "added": "2026-11-02"
     }
   ]
