@@ -61,4 +61,29 @@
       "version": "1.0",
       "size_bytes": 20744685,
       "size_label": "19.8 MB",
-      "download_url":
+      "download_url": "https://archive.org/download/animal-crossing_202611/Animal%20Crossing.zip",
+      "cover": "https://archive.org/download/animal-crossing_202611/animal-crossing-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-02"
+    },
+    {
+      "id": "balatro",
+      "name": "Balatro",
+      "short": "Roguelike de cartas com mãos de pôquer.",
+      "description": "Port para R36S.\n\nMonte mãos de pôquer, combine curingas com efeitos especiais e vença as apostas cada vez maiores neste roguelike de construção de baralho.\n\nArquivo hospedado no Internet Archive.",
+      "category": "estrategia",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 113664576,
+      "size_label": "108.4 MB",
+      "download_url": "https://archive.org/download/balatro-cover/Balatro.zip",
+      "cover": "https://archive.org/download/balatro-cover/balatro-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-02"
+    }
+  ]
+}
