@@ -36,9 +36,9 @@ C.TAGLINE = L("Ports de jogos e utilitÃ¡rios para o console R36S, criados por fÃ
 C.CATALOG_URL = "https://raw.githubusercontent.com/liralflsti-wq/r36s-port-hub/main/ports.json"
 
 -- Central de Conteudo > BIOS do Sistema: pacote de BIOS (link direto do arquivo).
--- O link NAO vem no codigo: configure em <pasta do app>/bios_url.txt (uma linha).
--- Vazio = a tela avisa que a fonte ainda nao foi configurada.
-C.BIOS_URL = ""
+-- Link oficial do projeto. Pode ser trocado em <pasta do app>/bios_url.txt
+-- (uma linha; sobrescreve este). Vazio = a tela avisa que a fonte nao foi configurada.
+C.BIOS_URL = "https://archive.org/download/bios-r-36s/Bios%20r36s.rar"
 
 -- Ordem de busca do catalogo:
 --  1) C.CATALOG_URL (online)  -> salvo em cache para uso offline

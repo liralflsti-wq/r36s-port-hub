@@ -728,4 +728,7 @@ A hora é a do sistema do console (fuso configurado no dArkOS), lida a cada quad
   Textos novos traduzidos em en/ru.
 - Testado no simulador: tela de BIOS sem link e com link no `bios_url.txt`;
   varredura de todas as telas em pt-BR/en/ru sem erros.
+- Link oficial do pacote de BIOS definido no código:
+  `C.BIOS_URL = https://archive.org/download/bios-r-36s/Bios%20r36s.rar`
+  (o `bios_url.txt` no cartão continua podendo trocar o link).
 
