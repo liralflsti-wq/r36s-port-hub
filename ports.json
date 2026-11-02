@@ -14,6 +14,14 @@
     {
       "id": "estrategia",
       "name": "Estratégia"
+    },
+    {
+      "id": "terror",
+      "name": "Terror"
+    },
+    {
+      "id": "plataforma",
+      "name": "Plataforma"
     }
   ],
   "ports": [
@@ -80,6 +88,40 @@
       "size_label": "108.4 MB",
       "download_url": "https://archive.org/download/balatro-cover/Balatro.zip",
       "cover": "https://archive.org/download/balatro-cover/balatro-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-02"
+    },
+    {
+      "id": "dead-space",
+      "name": "Dead Space",
+      "short": "Terror e sobrevivência numa nave mineradora.",
+      "description": "Port para R36S.\n\nComo o engenheiro Isaac Clarke, enfrente os necromorfos a bordo da nave USG Ishimura, desmembrando inimigos com ferramentas de mineração.\n\nArquivo hospedado no Internet Archive.",
+      "category": "terror",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 153613948,
+      "size_label": "146.5 MB",
+      "download_url": "https://archive.org/download/dead-space-cover/Dead%20Space.zip",
+      "cover": "https://archive.org/download/dead-space-cover/dead-space-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-02"
+    },
+    {
+      "id": "banjo-kazooie",
+      "name": "Banjo-Kazooie",
+      "short": "Plataforma 3D clássico com o urso e a ave.",
+      "description": "Port para R36S.\n\nGuie Banjo e Kazooie pelos mundos da bruxa Gruntilda, coletando notas musicais e peças de quebra-cabeça para resgatar Tooty.\n\nArquivo hospedado no Internet Archive.",
+      "category": "plataforma",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 46661632,
+      "size_label": "44.5 MB",
+      "download_url": "https://archive.org/download/banjo-kazooie-cover/Banjo%20Kazooie%20%28Lighthouse%29.zip",
+      "cover": "https://archive.org/download/banjo-kazooie-cover/banjo-kazooie-cover.png",
       "author": "Comunidade",
       "requires_files": false,
       "featured": false,
