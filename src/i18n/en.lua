@@ -3089,4 +3089,10 @@ return {
   ["RUNTIMES"] = "RUNTIMES",
   ["Runtime "] = "Runtime ",
   ["Nenhum destaque no catálogo."] = "No featured items in the catalog.",
+  ["fonte não configurada"] = "source not configured",
+  ["Fonte não configurada"] = "Source not configured",
+  ["Link em: "] = "Link in: ",
+  ["O link do pacote de BIOS ainda não foi configurado. Coloque o link (uma linha) no arquivo:"] = "The BIOS package link has not been configured yet. Put the link (one line) in the file:",
+  ["Nada foi baixado ou alterado."] = "Nothing was downloaded or changed.",
+  ["O link do pacote de BIOS não foi configurado (bios_url.txt). Nada foi feito."] = "The BIOS package link is not configured (bios_url.txt). Nothing was done.",
 }

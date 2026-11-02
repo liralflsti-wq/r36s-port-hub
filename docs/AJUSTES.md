@@ -713,3 +713,19 @@ A hora é a do sistema do console (fuso configurado no dArkOS), lida a cada quad
   offline (cache), atualização do catálogo com destaque removido e novo
   utilitário, temas Padrão e Xbox, pt-BR/en/ru, texto Grande e Muito grande,
   modo econômico e animações desligadas.
+
+## Correção: BIOS do Sistema fechava o hub sem link configurado (0.4.6 BETA)
+
+- Erro relatado no R36S: ao abrir **BIOS do Sistema**, o hub fechava com
+  `ui/gfx.lua:70: bad argument #1 to 'getWidth' (string expected, got nil)`.
+- Causa: na versão publicada o link do pacote de BIOS fica vazio no código
+  (`C.BIOS_URL = ""`, configurado no cartão em `bios_url.txt`). A tela tentava
+  tirar o nome e o servidor de um link vazio.
+- Correção (`ui/screens/bios.lua`, `core/bios.lua`): sem link, o painel mostra
+  "Fonte não configurada" e onde colocar o link; "Baixar pacote de BIOS"
+  mostra um aviso com o caminho do `bios_url.txt` e não inicia nada
+  (`Bios.url_ok()`; a thread também recusa consultar ou baixar sem link).
+  Textos novos traduzidos em en/ru.
+- Testado no simulador: tela de BIOS sem link e com link no `bios_url.txt`;
+  varredura de todas as telas em pt-BR/en/ru sem erros.
+

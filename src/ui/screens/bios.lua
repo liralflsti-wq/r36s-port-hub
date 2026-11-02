@@ -4,6 +4,7 @@
 --  Nada e baixado, instalado ou apagado sem confirmacao.
 -- =============================================================================
 local L = require("lib.i18n").L
+local C = require("config")
 local I18N = require("lib.i18n")
 local T = require("ui.theme")
 local G = require("ui.gfx")
@@ -64,6 +65,7 @@ local function sub_of(self, id)
       (n.pending or 0) + (n.update or 0) + (n.incompatible or 0) + (n.error or 0)), T.c.accent2
   elseif id == "download" then
     if self.pkg then return string.format(I18N.tr(L("baixado: %s")), U.format_bytes(self.pkg.size or 0)), T.c.green end
+    if not Bios.url_ok() then return L("fonte não configurada"), T.c.yellow end
     return L("não baixado"), T.c.faint
   elseif id == "analyze" then
     if Bios.analysis_ready() then
@@ -122,11 +124,18 @@ function S:draw()
   G.text(T.f.pix8, L("FONTE"), px + 14, y, T.c.yellow)
   y = y + 14
   local url, from = Bios.url()
-  local info = Bios.info()
-  local name = info and info.name or url:match("([^/]+)$"):gsub("%%20", " ")
-  G.text_fit(T.f.small, name .. (info and info.size and ("  •  " .. U.format_bytes(info.size)) or ""), px + 14, y, pw - 28, T.c.text)
-  y = y + G.step(T.f.small, 16)
-  G.text_fit(T.f.small, from and (L("Link de ") .. from) or url:match("^https?://([^/]+)"), px + 14, y, pw - 28, T.c.faint)
+  if Bios.url_ok() then
+    local info = Bios.info()
+    local name = info and info.name or (url:gsub("[?#].*$", ""):match("([^/]+)$") or url):gsub("%%20", " ")
+    G.text_fit(T.f.small, name .. (info and info.size and ("  •  " .. U.format_bytes(info.size)) or ""), px + 14, y, pw - 28, T.c.text)
+    y = y + G.step(T.f.small, 16)
+    G.text_fit(T.f.small, from and (L("Link de ") .. from) or (url:match("^https?://([^/]+)") or url), px + 14, y, pw - 28, T.c.faint)
+  else
+    -- sem link: o pacote de BIOS e configurado no cartao (bios_url.txt)
+    G.text_fit(T.f.small, L("Fonte não configurada"), px + 14, y, pw - 28, T.c.yellow)
+    y = y + G.step(T.f.small, 16)
+    G.text_fit(T.f.small, L("Link em: ") .. "r36sporthub/bios_url.txt", px + 14, y, pw - 28, T.c.faint)
+  end
   y = y + G.step(T.f.small, 16)
   G.text_fit(T.f.small, L("Espaço livre: ") .. (self.free and U.format_bytes(self.free) or "?"), px + 14, y, pw - 28, T.c.dim)
   y = y + G.step(T.f.small, 22)
@@ -167,6 +176,13 @@ function S:ask_download()
   local D = require("core.downloads")
   if D.active() or require("core.installer").busy() then
     App.toast(L("Aguarde o download em andamento terminar (Central de Downloads)."), "warn"); return
+  end
+  if not Bios.url_ok() then
+    App.show_dialog({ title = L("Fonte não configurada"), kind = "warn",
+      body = I18N.tr(L("O link do pacote de BIOS ainda não foi configurado. Coloque o link (uma linha) no arquivo:")) .. "\n"
+        .. C.APP_DIR .. "/bios_url.txt\n" .. I18N.tr(L("Nada foi baixado ou alterado.")),
+      buttons = { { label = L("OK") } } })
+    return
   end
   -- 1) consulta a fonte (nome e tamanho reais)
   self:run("info", nil, function(j)

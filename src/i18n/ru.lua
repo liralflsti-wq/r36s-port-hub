@@ -3089,4 +3089,10 @@ return {
   [" ou mais nova. Use o pacote completo."] = " или новее. Используйте полный пакет.",
   ["Para ativar, coloque o link direto do pacote .zip, do repositório do GitHub (com Releases) ou de um arquivo JSON de versão em:"] = "Чтобы включить, укажите прямую ссылку на пакет .zip, на репозиторий GitHub (с Releases) или на JSON-файл версии в:",
   ["Nenhum destaque no catálogo."] = "В каталоге нет рекомендуемых портов.",
+  ["fonte não configurada"] = "источник не настроен",
+  ["Fonte não configurada"] = "Источник не настроен",
+  ["Link em: "] = "Ссылка в: ",
+  ["O link do pacote de BIOS ainda não foi configurado. Coloque o link (uma linha) no arquivo:"] = "Ссылка на пакет BIOS ещё не настроена. Укажите ссылку (одной строкой) в файле:",
+  ["Nada foi baixado ou alterado."] = "Ничего не было скачано или изменено.",
+  ["O link do pacote de BIOS não foi configurado (bios_url.txt). Nada foi feito."] = "Ссылка на пакет BIOS не настроена (bios_url.txt). Ничего не сделано.",
 }

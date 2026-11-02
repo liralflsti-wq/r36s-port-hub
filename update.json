@@ -3,8 +3,8 @@
   "version_label": "0.4.6 BETA",
   "date": "2026-11-02",
   "url": "https://github.com/liralflsti-wq/r36s-port-hub/releases/latest/download/R36S-PORT-HUB-update.zip",
-  "size": 7873196,
-  "sha256": "633eef916cdc47d657412f1428abd3a7add66e4ba5ff80a540df401569020943",
+  "size": 7873892,
+  "sha256": "9b96ebaedebb370b8ff36d37d748386475a671f81315caccc5af454d3d94b008",
   "min_version": "0.4",
-  "notes": "Vitrine EM DESTAQUE animada com jogos e utilitários, e correções de tradução.\n* Tela inicial: a caixa EM DESTAQUE virou uma vitrine animada, com troca suave, brilho na capa e indicadores que mostram o tempo até o próximo destaque.\n* EM DESTAQUE agora mostra jogos e utilitários marcados no catálogo, com etiqueta JOGO/UTILITÁRIO, categoria, tamanho e contador.\n* Esquerda/direita (ou L1/R1) no menu trocam o destaque manualmente.\n* Catálogo: novo campo opcional featured_order para definir a ordem dos destaques.\n* (corrigido) EM DESTAQUE não mostra mais ports que não foram marcados como destaque no catálogo.\n* (corrigido) Traduções: em português, \"Download\" aparecia como \"Baixar\" e \"Data\" como \"Dados\"; em inglês, a taxa da transmissão aparecia como \"Date\"; em russo, \"Runtime\" foi padronizado."
+  "notes": "Vitrine EM DESTAQUE animada com jogos e utilitários, correções de tradução e correção da tela BIOS do Sistema.\n* Tela inicial: a caixa EM DESTAQUE virou uma vitrine animada, com troca suave, brilho na capa e indicadores que mostram o tempo até o próximo destaque.\n* EM DESTAQUE agora mostra jogos e utilitários marcados no catálogo, com etiqueta JOGO/UTILITÁRIO, categoria, tamanho e contador.\n* Esquerda/direita (ou L1/R1) no menu trocam o destaque manualmente.\n* Catálogo: novo campo opcional featured_order para definir a ordem dos destaques.\n* (corrigido) EM DESTAQUE não mostra mais ports que não foram marcados como destaque no catálogo.\n* (corrigido) Traduções: em português, \"Download\" aparecia como \"Baixar\" e \"Data\" como \"Dados\"; em inglês, a taxa da transmissão aparecia como \"Date\"; em russo, \"Runtime\" foi padronizado.\n* (corrigido) BIOS do Sistema: o hub fechava ao abrir a tela quando o link do pacote de BIOS não estava configurado. Agora a tela avisa \"Fonte não configurada\" e mostra onde colocar o link (bios_url.txt)."
 }

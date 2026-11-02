@@ -36,7 +36,12 @@ function B.url()
   local s = U.read_file(C.APP_DIR .. "/bios_url.txt")
   s = s and U.trim(s) or ""
   if s:match("^https?://%S+$") then return s, "bios_url.txt" end
-  return C.BIOS_URL, nil
+  return C.BIOS_URL or "", nil
+end
+
+--- existe um link valido para o pacote de BIOS?
+function B.url_ok()
+  return (B.url()):match("^https?://%S+$") ~= nil
 end
 
 -- ---------------------------------------------------------------------------
@@ -263,6 +268,9 @@ function B.start(op, args, on_done)
   local d = B.detect_dir()
   if (op == "scan" or op == "analyze" or op == "install" or op == "restore") and not d.dir then
     return false, L("A pasta de BIOS do console não foi encontrada. Nada foi feito.")
+  end
+  if (op == "info" or op == "download") and not B.url_ok() then
+    return false, L("O link do pacote de BIOS não foi configurado (bios_url.txt). Nada foi feito.")
   end
   U.exec_ok("mkdir -p " .. U.shq(B.DIR))
   local job = { op = op, out_channel = OUT, in_channel = IN, app_bios = B.DIR, pkg_dir = B.PKG_DIR, backups_dir = B.BACKUPS,
