@@ -1,9 +1,12 @@
 {
   "catalog_version": 1,
   "title": "R36S PORT HUB - ports (R36S)",
-  "updated": "2026-11-01",
+  "updated": "2026-11-02",
   "categories": [
-    { "id": "corrida", "name": "Corrida" }
+    {
+      "id": "corrida",
+      "name": "Corrida"
+    }
   ],
   "ports": [
     {
@@ -22,6 +25,23 @@
       "requires_files": false,
       "featured": true,
       "added": "2026-11-01"
+    },
+    {
+      "id": "need-for-speed-underground",
+      "name": "Need For Speed Underground",
+      "short": "Corrida de rua arcade.",
+      "description": "Port para R36S.\n\nArquivo hospedado no Internet Archive.",
+      "category": "corrida",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 270742323,
+      "size_label": "258.2 MB",
+      "download_url": "https://archive.org/download/need-for-speed-underground_202611/Need%20For%20Speed%20Underground.rar",
+      "cover": "https://archive.org/download/need-for-speed-underground_202611/need-for-speed-underground-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-02"
     }
   ]
 }
