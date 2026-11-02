@@ -23,7 +23,7 @@
 # =============================================================================
 set -euo pipefail
 
-SLUG="${R36S_SLUG:-USUARIO/r36s-port-hub}"     # usuario/repositorio
+SLUG="${R36S_SLUG:-liralflsti-wq/r36s-port-hub}"   # usuario/repositorio (troque com R36S_SLUG=...)
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DIST="$ROOT/dist"
 TOKEN_FILE="${R36S_TOKEN_FILE:-$HOME/.config/r36s-port-hub/token}"
