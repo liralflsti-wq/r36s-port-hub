@@ -29,7 +29,7 @@ Ele roda direto no console, com os botões físicos, em uma interface retrô fei
 
 O catálogo de jogos e ferramentas fica online, então novos ports aparecem no hub sem precisar de uma versão nova do aplicativo.
 
-Feito para o **dArkOSRE** (também funciona no dArkOS e no ArkOS), em **LÖVE 11.5**, com tradução para português, inglês e russo. Desenvolvido por **LagdoLira**.
+Feito para o **dArkOSRE** (também funciona no dArkOS e no ArkOS), em **LÖVE 11.5**, com tradução para português, inglês e russo. Desenvolvido por **LagdoLira** ([YouTube](https://www.youtube.com/@LagdoLira)).
 
 ---
 
@@ -189,5 +189,7 @@ Gerar o pacote: `tools/build.sh` → `build/R36S-PORT-HUB-BETA.zip`.
 - **LÖVE**: licença zlib. **7-Zip**: licença em `port/r36sporthub/licenses/`.
 - **PortMaster**, **ThemeMaster**, **dArkOS/dArkOSRE** e a **Emulationstation-OGA-Theme-Gallery** pertencem aos seus autores; o hub apenas usa as fontes públicas deles.
 - Os jogos e ports listados pertencem aos seus respectivos autores.
+
+📺 Canal no YouTube: **[LagdoLira](https://www.youtube.com/@LagdoLira)**
 
 <p align="center">💜 Feito pela comunidade, para a comunidade!</p>
