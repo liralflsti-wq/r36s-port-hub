@@ -39,7 +39,7 @@
       "cover": "https://archive.org/download/daytona-usa-arcade/daytona-usa-arcade-cover.png",
       "author": "Comunidade",
       "requires_files": false,
-      "featured": true,
+      "featured": false,
       "added": "2026-11-01"
     },
     {
@@ -73,7 +73,7 @@
       "cover": "https://archive.org/download/animal-crossing_202611/animal-crossing-cover.png",
       "author": "Comunidade",
       "requires_files": false,
-      "featured": false,
+      "featured": true,
       "added": "2026-11-02"
     },
     {
@@ -90,7 +90,7 @@
       "cover": "https://archive.org/download/balatro-cover/balatro-cover.png",
       "author": "Comunidade",
       "requires_files": false,
-      "featured": false,
+      "featured": true,
       "added": "2026-11-02"
     },
     {
@@ -107,7 +107,7 @@
       "cover": "https://archive.org/download/dead-space-cover/dead-space-cover.png",
       "author": "Comunidade",
       "requires_files": false,
-      "featured": false,
+      "featured": true,
       "added": "2026-11-02"
     },
     {
