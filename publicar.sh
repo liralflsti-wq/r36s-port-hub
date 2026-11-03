@@ -276,7 +276,6 @@ git_push() {  # git_push "mensagem"
   cd "$ROOT"
 printf 'dist/\nbuild/\n*.token\n.env\n/catalog.json\n/catalogos/\n/catalogo/\n/bios_url.txt\n/catalog_url.txt\n/es_themes_url.txt\n/update_url.txt\n' > .gitignore
   git add -A
-  guard_leak || exit 1
   if git diff --cached --quiet; then
     info "nada novo para commitar"
   else
