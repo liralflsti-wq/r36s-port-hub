@@ -331,7 +331,7 @@ function G.cover(img, p, x, y, w, h, loading, t)
 end
 
 --- Fundo com grade e linhas de varredura (pre-renderizado uma vez)
---- Fundo "moderno" (tema Xbox): preto, brilho verde suave e faixas diagonais
+--- Fundo "moderno": preto, brilho suave e faixas diagonais
 local function background_modern(cv)
   lg.clear(T.c.bg0)
   local g = T.style.glow or T.c.accent
@@ -351,10 +351,53 @@ local function background_modern(cv)
   for x = -T.H, T.W, 26 do lg.line(x, T.H, x + T.H, 0) end
 end
 
+--- Fundo NEON GRID: quase preto, grade fina em perspectiva no chao, brilho
+--- verde suave atras do cabecalho e uma linha de horizonte iluminada.
+--- Desenhado uma vez num canvas (custo zero por quadro).
+local function background_neongrid(cv)
+  lg.clear(T.c.bg0)
+  local g = T.style.glow or T.c.accent
+  local a = T.c.accent
+  -- brilho no alto, centralizado
+  for i = 26, 1, -1 do
+    lg.setColor(g[1], g[2], g[3], 0.010)
+    lg.ellipse("fill", T.W * 0.5, -30, i * 20, i * 8)
+  end
+  -- grade do chao (perspectiva) abaixo do horizonte
+  local hz = 300
+  lg.setLineWidth(1)
+  for i = -14, 14 do
+    lg.setColor(a[1], a[2], a[3], 0.045)
+    lg.line(T.W / 2 + i * 18, hz, T.W / 2 + i * 110, T.H)
+  end
+  for k = 1, 9 do
+    local yy = hz + (T.H - hz) * (k / 9) ^ 1.9
+    lg.setColor(a[1], a[2], a[3], 0.03 + 0.035 * (k / 9))
+    lg.line(0, yy, T.W, yy)
+  end
+  -- horizonte iluminado
+  for i = 0, 10 do
+    lg.setColor(g[1], g[2], g[3], 0.05 * (1 - i / 10))
+    lg.rectangle("fill", 0, hz - i, T.W, 1)
+    lg.rectangle("fill", 0, hz + i, T.W, 1)
+  end
+  -- pontos da grade no alto (bem discretos)
+  lg.setColor(1, 1, 1, 0.035)
+  for y = 40, hz - 20, 24 do
+    for x = 12, T.W, 24 do lg.rectangle("fill", x, y, 1, 1) end
+  end
+end
+
 function G.build_background()
   if G.bg and G.bg.release then G.bg:release() end
   local cv = lg.newCanvas(T.W, T.H)
   lg.setCanvas(cv)
+  if T.style.background == "neongrid" then
+    background_neongrid(cv)
+    lg.setCanvas()
+    G.bg = cv
+    return
+  end
   if T.style.background == "modern" then
     background_modern(cv)
     lg.setCanvas()

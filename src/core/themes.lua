@@ -14,6 +14,10 @@ local json = require("lib.json")
 local T = require("ui.theme")
 
 local M = { list = {}, current = "default", DEFAULT = "default" }
+-- ids antigos -> ids atuais (quem usava o tema antigo continua com ele, ja renomeado)
+M.ALIASES = { xbox = "neongrid" }
+local function resolve(id) return M.ALIASES[id] or id end
+M.resolve = resolve
 local PREF = "theme.txt"
 local BUILTIN_DIR = "themes"
 M.USER_DIR = "user_themes"
@@ -44,7 +48,9 @@ local function load_def(dir, builtin)
     if c then th.buttons[k] = c end
   end
   local st = type(d.style) == "table" and d.style or {}
-  th.style.background = (st.background == "modern") and "modern" or "retro"
+  th.style.background = (st.background == "modern" or st.background == "neongrid") and st.background or "retro"
+  -- layout da tela inicial: "dashboard" (NEON GRID) ou o classico
+  th.style.layout = (st.layout == "dashboard") and "dashboard" or nil
   th.style.round = U.clamp(tonumber(st.round) or 1, 0, 1.5)
   th.style.glow = T.parse_hex(st.glow) or th.colors.accent
   th.style.scanlines = st.scanlines ~= false
@@ -82,6 +88,7 @@ end
 
 --- aplica um tema (sem reiniciar). Devolve true ou false, motivo
 function M.apply(id, save)
+  id = resolve(id)
   local th = M.by_id and M.by_id[id]
   if not th then return false, L("tema não encontrado") end
   T.apply_palette(th.colors, th.buttons, th.style)
@@ -98,6 +105,12 @@ function M.init()
   local ok, saved = pcall(love.filesystem.read, PREF)
   saved = ok and saved and U.trim(saved) or M.DEFAULT
   if saved == "" then saved = M.DEFAULT end
+  -- migracao: tema salvo com o id antigo (ex.: xbox -> neongrid) e regravado com o novo
+  if M.ALIASES[saved] then
+    U.log("tema: id antigo", saved, "migrado para", resolve(saved))
+    saved = resolve(saved)
+    pcall(love.filesystem.write, PREF, saved)
+  end
   if saved ~= M.DEFAULT then
     local applied = M.apply(saved, false)
     if applied then return nil end

@@ -121,6 +121,21 @@ function M.problem(title, body)
   end)
 end
 
+--- relatorio para suporte (Configuracoes > Diagnostico e suporte). Devolve o caminho ou nil
+function M.report(body)
+  local ok, res = pcall(function()
+    local path = M.dir() .. "/relatorio_suporte_" .. os.date("%Y%m%d_%H%M%S") .. ".txt"
+    local text = header() .. "\n" .. string.rep("=", 60) .. "\n" .. scrub(body) .. "\n\n"
+      .. "ULTIMAS LINHAS DO REGISTRO DO APP:\n" .. scrub(table.concat(M.ring, "\n")) .. "\n"
+    if write(path, text) then
+      -- guarda so os 5 relatorios mais recentes
+      os.execute("cd " .. shq(M.dir()) .. " 2>/dev/null && ls -1t relatorio_suporte_*.txt 2>/dev/null | tail -n +6 | while read -r f; do rm -f -- \"$f\"; done")
+      return path
+    end
+  end)
+  return ok and res or nil
+end
+
 --- quantos arquivos de erro existem (para mostrar nas Configuracoes)
 function M.count()
   local h = io.popen("ls -1 " .. shq(M.dir()) .. " 2>/dev/null | grep -cE '^(erro_|problemas_).*\\.txt$'")

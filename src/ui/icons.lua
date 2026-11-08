@@ -215,6 +215,13 @@ D.set_sdmaint = function(x, y) -- cartao SD com marca de verificacao
   lg.line(x + 8, y + 15, x + 11, y + 18, x + 16, y + 12)
   lg.setLineWidth(1)
 end
+D.set_storage = function(x, y) -- cartao SD com barra de uso
+  lg.setLineWidth(2)
+  lg.polygon("line", x + 5, y + 2, x + 15, y + 2, x + 19, y + 6, x + 19, y + 22, x + 5, y + 22)
+  lg.line(x + 9, y + 3, x + 9, y + 7); lg.line(x + 12, y + 3, x + 12, y + 7); lg.line(x + 15, y + 4, x + 15, y + 8)
+  lg.setLineWidth(1)
+  px(x + 8, y + 17, 8, 2); px(x + 8, y + 13, 5, 2)
+end
 D.set_clock = function(x, y) -- relogio
   lg.setLineWidth(2)
   lg.circle("line", x + 12, y + 12, 10)
@@ -230,6 +237,99 @@ D.set_console = function(x, y) -- chip
     local o = 7 + i * 4
     px(x + o, y + 1, 2, 3); px(x + o, y + 20, 2, 3); px(x + 1, y + o, 3, 2); px(x + 20, y + o, 3, 2)
   end
+end
+
+-- CENTRAL DE CONFIGURACOES (0.4.7) ------------------------------------------
+D.set_prefs = function(x, y) -- tres controles deslizantes
+  for i = 0, 2 do
+    local yy = y + 4 + i * 8
+    px(x + 2, yy, 20, 2)
+    lg.circle("fill", x + 6 + ((i * 7) % 14), yy + 1, 3)
+  end
+end
+D.set_lang = function(x, y) -- globo
+  lg.setLineWidth(2)
+  lg.circle("line", x + 12, y + 12, 10)
+  lg.ellipse("line", x + 12, y + 12, 4, 10)
+  lg.line(x + 2, y + 12, x + 22, y + 12)
+  lg.setLineWidth(1)
+end
+D.set_catalog = function(x, y) -- livro aberto
+  lg.polygon("fill", x + 1, y + 5, x + 11, y + 7, x + 11, y + 21, x + 1, y + 19)
+  lg.polygon("fill", x + 13, y + 7, x + 23, y + 5, x + 23, y + 19, x + 13, y + 21)
+  lg.setColor(0, 0, 0, 0.35)
+  for i = 0, 2 do px(x + 3, y + 10 + i * 3, 6, 1); px(x + 15, y + 10 + i * 3, 6, 1) end
+  lg.setColor(I.c)
+end
+D.set_myports = function(x, y) -- cartucho
+  px(x + 4, y + 2, 16, 20)
+  lg.setColor(0, 0, 0, 0.4); px(x + 7, y + 5, 10, 7); lg.setColor(I.c)
+  for i = 0, 3 do px(x + 6 + i * 4, y + 18, 2, 4) end
+end
+D.set_ftp = function(x, y) -- pasta com setas
+  px(x + 1, y + 7, 22, 15); px(x + 1, y + 4, 9, 4)
+  lg.setColor(0, 0, 0, 0.45)
+  lg.polygon("fill", x + 8, y + 10, x + 12, y + 14, x + 4, y + 14)
+  px(x + 7, y + 14, 2, 5)
+  lg.polygon("fill", x + 16, y + 19, x + 12, y + 15, x + 20, y + 15)
+  px(x + 15, y + 10, 2, 5)
+  lg.setColor(I.c)
+end
+D.set_favorites = function(x, y) -- estrela
+  local pts = {}
+  for i = 0, 9 do
+    local a = -math.pi / 2 + i * math.pi / 5
+    local r = (i % 2 == 0) and 11 or 5
+    pts[#pts + 1] = x + 12 + math.cos(a) * r
+    pts[#pts + 1] = y + 13 + math.sin(a) * r
+  end
+  -- estrela e concava: divide em triangulos
+  local ok, tris = pcall(love.math.triangulate, pts)
+  if ok and tris then
+    for _, t in ipairs(tris) do lg.polygon("fill", t) end
+  else
+    lg.circle("fill", x + 12, y + 12, 9)
+  end
+end
+D.set_updates = function(x, y) -- seta circular
+  lg.setLineWidth(3)
+  lg.arc("line", "open", x + 12, y + 12, 9, -0.4, 4.4)
+  lg.setLineWidth(1)
+  lg.polygon("fill", x + 20, y + 1, x + 23, y + 10, x + 14, y + 8)
+end
+D.set_tools = function(x, y) -- chave inglesa
+  lg.setLineWidth(4)
+  lg.line(x + 6, y + 18, x + 15, y + 9)
+  lg.setLineWidth(1)
+  lg.circle("fill", x + 17, y + 7, 6)
+  lg.setColor(0, 0, 0, 0.6); px(x + 16, y + 1, 4, 6); lg.setColor(I.c)
+  lg.circle("fill", x + 5, y + 19, 3)
+end
+D.set_diag = function(x, y) -- pulso (linha de diagnostico)
+  lg.setLineWidth(2)
+  lg.line(x + 1, y + 13, x + 7, y + 13, x + 10, y + 5, x + 14, y + 20, x + 17, y + 13, x + 23, y + 13)
+  lg.setLineWidth(1)
+end
+D.set_store = function(x, y) -- sacola com alca
+  lg.setLineWidth(2)
+  lg.rectangle("line", x + 3, y + 8, 18, 13, 2, 2)
+  lg.line(x + 8, y + 8, x + 8, y + 4, x + 16, y + 4, x + 16, y + 8)
+  lg.setLineWidth(1)
+  px(x + 10, y + 13, 4, 4)
+end
+D.set_grid = function(x, y) -- quatro blocos (categorias)
+  for i = 0, 1 do for j = 0, 1 do lg.rectangle("fill", x + 3 + i * 10, y + 3 + j * 10, 8, 8, 1.5, 1.5) end end
+end
+D.set_exit = function(x, y) -- porta com seta saindo
+  lg.setLineWidth(2)
+  lg.line(x + 13, y + 6, x + 13, y + 3, x + 3, y + 3, x + 3, y + 21, x + 13, y + 21, x + 13, y + 18)
+  lg.line(x + 9, y + 12, x + 22, y + 12)
+  lg.line(x + 18, y + 8, x + 22, y + 12, x + 18, y + 16)
+  lg.setLineWidth(1)
+end
+D.set_about = function(x, y) -- "i" num circulo
+  lg.setLineWidth(2); lg.circle("line", x + 12, y + 12, 10); lg.setLineWidth(1)
+  px(x + 11, y + 10, 3, 8); px(x + 11, y + 6, 3, 3)
 end
 
 -- Icones em imagem (assets/icons/<id>.png, 64x64, branco com fundo transparente).

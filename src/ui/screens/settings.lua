@@ -1,4 +1,5 @@
--- Configuracoes: central com as categorias em cartoes (3 x 3).
+-- Configuracoes: central com as categorias em cartoes (3 colunas, 3 linhas
+-- visiveis; as demais linhas aparecem rolando com o direcional).
 -- Cada cartao abre a tela da categoria (ui/screens/settings_cat.lua).
 -- Aqui so aparecem estados ja conhecidos em memoria (nada pesado ao abrir).
 local L = require("lib.i18n").L
@@ -16,17 +17,30 @@ local X0, Y0, CW, CH, GAP = 12, 48, 200, 124, 8
 
 function S:enter(p)
   self.sel = self.sel or 1
+  self.top = self.top or 0          -- primeira linha visivel
   if p and p.cat then
     for i, c in ipairs(Defs.LIST) do if c.id == p.cat then self.sel = i end end
   end
+  self:follow()
 end
+
+--- mantem a linha do cartao escolhido dentro das 3 visiveis
+function S:follow()
+  local row = math.floor((self.sel - 1) / COLS)
+  if row < self.top then self.top = row end
+  if row > self.top + ROWS - 1 then self.top = row - ROWS + 1 end
+end
+
+local function total_rows() return math.ceil(#Defs.LIST / COLS) end
 
 local function color(name) return T.c[name] or T.c.accent end
 
 function S:draw()
   G.header(L("Configurações"))
-  for i, cat in ipairs(Defs.LIST) do
-    local col, row = (i - 1) % COLS, math.floor((i - 1) / COLS)
+  local first, last = self.top * COLS + 1, math.min(#Defs.LIST, (self.top + ROWS) * COLS)
+  for i = first, last do
+    local cat = Defs.LIST[i]
+    local col, row = (i - 1) % COLS, math.floor((i - 1) / COLS) - self.top
     local x, y = X0 + col * (CW + GAP), Y0 + row * (CH + GAP)
     local on = i == self.sel
     local c = color(cat.color)
@@ -66,21 +80,37 @@ function S:draw()
     lg.line(ax, ay, ax + 5, ay + 5, ax, ay + 10)
     lg.setLineWidth(1)
   end
+  -- indicador de rolagem (mais categorias acima/abaixo)
+  local tr = total_rows()
+  if tr > ROWS then
+    G.color(T.c.accent2)
+    local cx = T.W - 9
+    if self.top > 0 then lg.polygon("fill", cx, Y0 + 2, cx - 5, Y0 + 10, cx + 5, Y0 + 10) end
+    local yb = Y0 + ROWS * (CH + GAP) - GAP
+    if self.top + ROWS < tr then lg.polygon("fill", cx, yb - 2, cx - 5, yb - 10, cx + 5, yb - 10) end
+  end
   G.hints({ { "dpad", L("Navegar") }, { "a", L("Abrir") }, { "b", L("Voltar") } })
+  local cnt = string.format("%d/%d", self.sel, #Defs.LIST)
+  G.text(T.f.small, cnt, T.W - 14 - T.f.small:getWidth(cnt), T.H - 25, T.c.faint)
 end
 
 function S:action(act)
   local n = #Defs.LIST
+  local tr = total_rows()
   local col, row = (self.sel - 1) % COLS, math.floor((self.sel - 1) / COLS)
   if act == "left" then col = (col - 1) % COLS
   elseif act == "right" then col = (col + 1) % COLS
-  elseif act == "up" then row = (row - 1) % ROWS
-  elseif act == "down" then row = (row + 1) % ROWS
+  elseif act == "up" then row = (row - 1) % tr
+  elseif act == "down" then row = (row + 1) % tr
+  elseif act == "l1" then row = math.max(0, row - ROWS)
+  elseif act == "r1" then row = math.min(tr - 1, row + ROWS)
   elseif act == "b" then App.pop(); return
   elseif act == "a" then App.push("settings_cat", { id = Defs.LIST[self.sel].id }); return
   else return end
   local i = row * COLS + col + 1
-  if i <= n then self.sel = i end
+  if i > n then i = n end   -- ultima linha incompleta: vai para o ultimo cartao
+  self.sel = i
+  self:follow()
 end
 
 return S

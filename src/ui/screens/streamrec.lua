@@ -241,6 +241,16 @@ local function start_rec()
   go()
 end
 
+--- aviso ao escolher 30 FPS na gravacao
+local function rec_fps_hint()
+  if Recorder.fps() < 30 then return end
+  if App.eco then
+    App.toast(L("No modo econômico a tela do hub tem no máximo 20 quadros por segundo."), "info")
+  else
+    App.toast(L("30 FPS usa mais o processador. Se o vídeo ficar travado, use 15 FPS."), "info")
+  end
+end
+
 function S:action(act)
   local it = ITEMS[self.sel]
   local id = it.id
@@ -253,6 +263,7 @@ function S:action(act)
     else
       if Recorder.running() then App.toast(L("Vale para a próxima gravação."), "info") end
       Recorder.set_fps(cycle(Recorder.FPS_CHOICES, Recorder.fps(), dir))
+      rec_fps_hint()
     end
   elseif act == "a" then
     if disabled(id) then
@@ -289,6 +300,7 @@ function S:action(act)
     elseif id == "r_fps" then
       if Recorder.running() then App.toast(L("Vale para a próxima gravação."), "info") end
       Recorder.set_fps(cycle(Recorder.FPS_CHOICES, Recorder.fps(), 1))
+      rec_fps_hint()
     end
   end
 end

@@ -231,6 +231,9 @@ end
 --- limpa o registro de um jogo que nao existe mais no cartao
 function X.clear_record(p)
   local had = Manifest.data[p.id] ~= nil
+  if had and Manifest.data[p.id].gamelist then
+    pcall(require("core.esgamelist").remove_port, Manifest.data[p.id].gamelist)
+  end
   if had then Manifest.data[p.id] = nil; Manifest.save() end
   Manifest.invalidate()
   Manifest.rescan(true)
@@ -266,6 +269,12 @@ function X.update()
       j.finished, j.ok, j.failed = true, (#(m.failed or {}) == 0), m.failed or {}
       -- remove o registro do hub so se tudo foi apagado; atualiza a lista de instalados
       local p = j.plan.port
+      -- desfaz a capa que o hub colocou no gamelist.xml (so o que ele criou)
+      local rec = Manifest.data[p.id]
+      if j.ok and rec and rec.gamelist then
+        local ok, err = pcall(require("core.esgamelist").remove_port, rec.gamelist)
+        if not ok then U.log("gamelist.xml: erro ao remover a capa:", tostring(err)) end
+      end
       if j.ok and Manifest.data[p.id] then
         Manifest.data[p.id] = nil
         Manifest.save()

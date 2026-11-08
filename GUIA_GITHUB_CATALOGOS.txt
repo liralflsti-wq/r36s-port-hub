@@ -127,7 +127,7 @@ PARTE 5 - TEMAS DO PROPRIO HUB (themes.json)
 IMPORTANTE: nesta versao (0.3 BETA), o DOWNLOAD de temas do hub pela
 internet AINDA NAO ESTA ATIVO. A opcao Configuracoes > Temas > Baixar
 novos temas so avisa que o catalogo ainda nao esta disponivel. Hoje o
-hub traz o Tema Padrao e o Tema Xbox. O que esta abaixo e a estrutura
+hub traz o Tema Padrao e o NEON GRID. O que esta abaixo e a estrutura
 ja definida para quando essa funcao for ligada (veja docs/TEMAS.md).
 
 Como preparar os temas no GitHub:

@@ -5,8 +5,8 @@
 --    - INSTALAR COMO PORT: instala em /roms/ports com as verificacoes da loja
 --  EXTRAIR AQUI pergunta, depois da extracao, se o arquivo compactado deve ser
 --  excluido. INSTALAR COMO PORT exclui o compactado ao terminar.
---  X (ou A em arquivos): opcoes do item: recortar, excluir, extrair.
---  Y: cola o item recortado na pasta aberta (mover; nunca sobrescreve).
+--  X (ou A em arquivos): opcoes do item: copiar, recortar, excluir, extrair.
+--  Y: cola o item copiado/recortado na pasta aberta (nunca sobrescreve).
 --  Usa o mesmo instalador da loja (pasta temporaria, confirmacao antes de
 --  substituir, sem apagar nada em caso de erro).
 -- =============================================================================
@@ -14,6 +14,7 @@ local L = require("lib.i18n").L
 local T = require("ui.theme")
 local G = require("ui.gfx")
 local U = require("lib.util")
+local I18N = require("lib.i18n")
 local C = require("config")
 local lg = love.graphics
 
@@ -188,7 +189,7 @@ function S:draw()
   if self.busy then
     G.text(T.f.small, self.busy, 12, LIST_Y + VISIBLE * ROW_H + 10, T.c.yellow, "center", T.W - 24)
   elseif CLIP then
-    G.text_fit(T.f.small, L("Recortado: ") .. CLIP.name .. L("  •  Y: colar nesta pasta"), 18, LIST_Y + VISIBLE * ROW_H + 10, T.W - 36, T.c.accent2)
+    G.text_fit(T.f.small, (CLIP.copy and L("Copiado: ") or L("Recortado: ")) .. CLIP.name .. L("  •  Y: colar nesta pasta"), 18, LIST_Y + VISIBLE * ROW_H + 10, T.W - 36, T.c.accent2)
   end
   local h = { { "a", L("Abrir / opções") }, { "x", L("Opções") } }
   if CLIP and self.path then h[#h + 1] = { "y", L("Colar") } end
@@ -261,6 +262,13 @@ function S:cut(it)
   App.toast(L("Recortado. Abra a pasta de destino e aperte Y para colar."), "info")
 end
 
+--- copiar: o original fica onde esta (itens do proprio hub tambem podem ser copiados)
+function S:copy(it)
+  if it.root or it.up then return end
+  CLIP = { path = it.path, name = it.name, dir = it.dir, copy = true, size = it.size }
+  App.toast(L("Copiado. Abra a pasta de destino e aperte Y para colar."), "info")
+end
+
 function S:ask_delete(it)
   if protected(it.path, self.roots) then
     App.toast(L("Este item é protegido e não pode ser excluído."), "warn"); return
@@ -291,11 +299,40 @@ function S:paste(target)
     CLIP = nil
     App.toast(L("O item recortado não existe mais."), "warn"); return
   end
-  if parent(src) == target then
-    App.toast(L("O item já está nesta pasta."), "info"); return
+  -- nunca colar dentro da pasta do proprio hub
+  if target == C.APP_DIR or target:sub(1, #C.APP_DIR + 1) == C.APP_DIR .. "/" then
+    App.toast(L("Não dá para colar dentro da pasta do R36S PORT HUB."), "warn"); return
   end
   if CLIP.dir and (target == src or target:sub(1, #src + 1) == src .. "/") then
-    App.toast(L("Não dá para mover uma pasta para dentro dela mesma."), "warn"); return
+    App.toast(CLIP.copy and L("Não dá para copiar uma pasta para dentro dela mesma.")
+      or L("Não dá para mover uma pasta para dentro dela mesma."), "warn"); return
+  end
+  if CLIP.copy then
+    -- copia na mesma pasta: ganha o sufixo " (copia)", " (copia 2)"...
+    local name = CLIP.name
+    if parent(src) == target then
+      local base, ext = name:match("^(.-)(%.[^%.]+)$")
+      if CLIP.dir or not base or base == "" then base, ext = name, "" end
+      local k = 1
+      repeat
+        name = base .. (k == 1 and L(" (cópia)") or string.format(I18N.tr(L(" (cópia %d)")), k)) .. ext
+        k = k + 1
+      until not (U.is_dir(target .. "/" .. name) or U.file_size(target .. "/" .. name)) or k > 99
+    end
+    local dest = target .. "/" .. name
+    if U.is_dir(dest) or U.file_size(dest) then
+      App.toast(L("Já existe um item com esse nome nesta pasta."), "warn"); return
+    end
+    -- espaco livre no destino (arquivo: tamanho conhecido; pasta: o cp avisa se faltar)
+    local free = U.free_space and U.free_space(target)
+    if not CLIP.dir and CLIP.size and free and CLIP.size > free then
+      App.toast(L("Espaço insuficiente no destino para esta cópia."), "warn"); return
+    end
+    self:run_op({ op = "copy", src = src, dest = dest }, name)
+    return
+  end
+  if parent(src) == target then
+    App.toast(L("O item já está nesta pasta."), "info"); return
   end
   if protected(src, self.roots) then
     App.toast(L("Este item é protegido e não pode ser movido."), "warn"); return
@@ -318,6 +355,7 @@ function S:run_op(job, name)
   th:start(ch_name, job)
   self.op = { ch = ch, th = th, job = job, name = name }
   self.busy = job.op == "move" and (L("Movendo ") .. name .. "...")
+    or (job.op == "copy" and (L("Copiando ") .. name .. "..."))
     or (job.op == "install_dir" and (L("Instalando ") .. name .. "...") or (L("Excluindo ") .. name .. "..."))
 end
 
@@ -335,6 +373,14 @@ function S:update(dt)
       pcall(function() require("core.manifest").rescan(true); App.on_catalog_changed() end)
     else
       App.show_dialog({ title = L("Não foi possível instalar"), kind = "error", body = o.name .. "\n\n" .. tostring(r.error) })
+    end
+  elseif r.op == "copy" then
+    if r.ok then
+      App.toast(o.name .. L(" copiado para esta pasta."), "ok")
+    elseif r.error == "exists" then
+      App.toast(L("Já existe um item com esse nome nesta pasta."), "warn")
+    else
+      App.show_dialog({ title = L("Não foi possível copiar"), kind = "error", body = o.name .. "\n\n" .. tostring(r.error) })
     end
   elseif r.op == "move" then
     if r.ok then
@@ -361,12 +407,12 @@ function S:options(it)
   -- colar: nesta pasta ou dentro da pasta selecionada
   if CLIP then
     btns[#btns + 1] = { label = L("Colar nesta pasta"), sub = CLIP.name .. L("  →  ") .. self.path, fn = function() self:paste() end }
-    if it and it.dir and not it.up and it.path ~= CLIP.path then
+    if it and it.dir and not it.up and not it.root and it.path ~= CLIP.path then
       btns[#btns + 1] = { label = L("Colar dentro de ") .. it.name, sub = CLIP.name .. L("  →  ") .. it.path, fn = function() self:paste(it.path) end }
     end
   end
   if not it or it.up or it.root then
-    if #btns == 0 then App.toast(L("Nada recortado para colar."), "info"); return end
+    if #btns == 0 then App.toast(L("Nada copiado ou recortado para colar."), "info"); return end
     btns[#btns + 1] = { label = L("Cancelar") }
     App.show_dialog({ title = L("Pasta"), kind = "info", list = true, body = self.path, buttons = btns })
     return
@@ -379,6 +425,7 @@ function S:options(it)
     btns[#btns + 1] = { label = L("Extrair aqui"), sub = L("Descompacta nesta pasta; depois pergunta se exclui o arquivo compactado"), fn = function() self:extract(it) end }
     btns[#btns + 1] = { label = L("Instalar como port"), sub = L("Instala em ") .. C.PORTS_DIR .. L(" com as verificações da loja"), fn = function() self:install_port(it) end }
   end
+  btns[#btns + 1] = { label = L("Copiar"), sub = L("O original fica onde está. Depois abra a pasta de destino: Y ou Opções > Colar"), fn = function() self:copy(it) end }
   btns[#btns + 1] = { label = L("Recortar"), sub = L("Depois abra a pasta de destino: Y ou Opções > Colar"), fn = function() self:cut(it) end }
   btns[#btns + 1] = { label = L("Excluir"), sub = it.dir and L("Apaga a pasta e todo o conteúdo") or L("Apaga o arquivo"), danger = true, fn = function() self:ask_delete(it) end }
   btns[#btns + 1] = { label = L("Cancelar") }

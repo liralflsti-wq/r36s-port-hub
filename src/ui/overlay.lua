@@ -168,9 +168,13 @@ end
 ---------------------------------------------------------------------------
 -- Aviso rapido
 ---------------------------------------------------------------------------
+-- posicao escolhida em Configuracoes > Preferencias > Posicao das notificacoes
+O.TOAST_POS = { "bottom", "top", "top_right", "bottom_right" }
 function O.draw_toast(app, t)
   local f = T.f.body
-  local maxw = 520
+  local pos = require("core.prefs").get("notif_pos") or "bottom"
+  local corner = pos == "top_right" or pos == "bottom_right"
+  local maxw = corner and 330 or 520
   local lines = G.wrap(f, t.text, maxw - 36)
   local lh = f:getHeight()
   local w = 0
@@ -178,6 +182,9 @@ function O.draw_toast(app, t)
   w = w + 40
   local h = #lines * lh + 18
   local x, y = (T.W - w) / 2, T.H - 44 - h
+  if pos == "top" then y = 44
+  elseif pos == "top_right" then x, y = T.W - 12 - w, 44
+  elseif pos == "bottom_right" then x = T.W - 12 - w end
   local a = math.min(1, t.t * 3)
   local kc = KIND_COLOR[t.kind] or T.c.accent2
   G.rect(x + 2, y + 3, w, h, T.c.shadow, 8, a)
@@ -396,8 +403,14 @@ function O.on_install_finished(app, j)
   end
   if j.background then
     -- em segundo plano: aviso rapido (os detalhes ficam na Central de Downloads)
+    -- Configuracoes > Downloads > Avisos de downloads em segundo plano
+    if require("core.prefs").get("notif_downloads") == "0" then
+      Installer.clear()
+      return
+    end
     if j.result == "done" then
-      app.toast(p.name .. L(" instalado. Reinicie a lista de Ports para ver o jogo."), "ok")
+      app.toast(p.name .. (require("config").OS_MODE and L(" instalado. Ele já está em Meus Ports.")
+        or L(" instalado. Reinicie a lista de Ports para ver o jogo.")), "ok")
     elseif j.result == "error" then
       app.toast(L("Falha ao instalar ") .. p.name .. L(". Veja a Central de Downloads."), "error")
     else
@@ -428,7 +441,8 @@ function O.on_install_finished(app, j)
   end
   if j.result == "done" then
     local body = p.name .. L(" foi instalado em ") .. C.PORTS_DIR .. "." .. del_txt .. "\n\n"
-      .. L("Reinicie o EmulationStation para o jogo aparecer na lista de Ports.")
+      .. (j.es_cover and L("Reinicie o EmulationStation para o jogo aparecer na lista de Ports com a capa.")
+        or L("Reinicie o EmulationStation para o jogo aparecer na lista de Ports."))
     if p.requires_files then
       body = body .. L("\n\nAtenção: este port precisa dos arquivos do jogo original. Consulte as instruções do port.")
     end

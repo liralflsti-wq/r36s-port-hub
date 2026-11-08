@@ -1,6 +1,6 @@
 -- =============================================================================
 --  Gerenciador de arquivos: mover (colar) e excluir sem travar a tela.
---  job = { op = "move", src, dest } | { op = "delete", path }
+--  job = { op = "move", src, dest } | { op = "copy", src, dest } | { op = "delete", path }
 --        | { op = "install_dir", src, dest, items }  (copia uma pasta de port ja extraida)
 --  Resultado: { ok, error }
 -- =============================================================================
@@ -32,6 +32,21 @@ if job.op == "move" then
       r.ok = true
     else
       r.ok, r.error = false, out ~= "" and out or "mv"
+    end
+    os.execute("sync")
+  end
+elseif job.op == "copy" then
+  -- copia (arquivo ou pasta inteira); nunca sobrescreve. Se falhar no meio
+  -- (ex.: cartao cheio), apaga so a copia incompleta; a origem nao e tocada.
+  if exists(job.dest) then
+    r.ok, r.error = false, "exists"
+  else
+    local ok, out = run("cp -a -n -- " .. shq(job.src) .. " " .. shq(job.dest))
+    if ok and exists(job.dest) then
+      r.ok = true
+    else
+      run("rm -rf -- " .. shq(job.dest))
+      r.ok, r.error = false, out ~= "" and out or "cp"
     end
     os.execute("sync")
   end

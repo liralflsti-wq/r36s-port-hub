@@ -158,6 +158,7 @@ end
 local function finish(info, err)
   if not info then
     M.state, M.error = "error", err
+    pcall(function() require("core.netlog").add(L("Atualizações do hub"), M.source_url(), err) end)
   elseif not tostring(info.url or ""):match("^https?://") then
     M.state, M.error = "error", L("O link do pacote de atualização é inválido.")
   else

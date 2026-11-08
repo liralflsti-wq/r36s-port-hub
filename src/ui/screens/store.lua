@@ -70,7 +70,12 @@ function S:refresh()
   if not self.mine and not self.favs then
     for _, t in ipairs(Tools.for_filter(self.section, self.filter)) do self.items[#self.items + 1] = t end
   end
-  for _, p in ipairs(Catalog.filter(self.filter, App.status, self.section)) do self.items[#self.items + 1] = p end
+  -- Configuracoes > Catalogo > Ordenacao (favoritos: Favoritos e jogos > Ordenar)
+  local ports = Catalog.filter(self.filter, App.status, self.section)
+  if self.filter ~= "cat:testes_de_controles" then   -- esta categoria ja vem agrupada pelo tipo de teste
+    ports = require("ui.settings_extra").sort_ports(ports, self.favs and "fav_sort" or "list_sort")
+  end
+  for _, p in ipairs(ports) do self.items[#self.items + 1] = p end
   self.sel = 1
   if cur then
     for i, p in ipairs(self.items) do if p.id == cur.id then self.sel = i end end

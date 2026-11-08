@@ -18,6 +18,7 @@ function S:on_language() self:build() end
 
 function S:enter(p)
   self.from_language = p and p.from_language
+  self.view_only = p and p.view_only     -- aberto de Configuracoes > Sobre (so leitura)
   self:build()
 end
 
@@ -103,7 +104,7 @@ function S:draw()
   G.rect(bx - 3, by - 3, bw + 6, bh + 6, T.c.accent, 10, 0.25 + 0.25 * pulse)
   G.rect(bx, by, bw, bh, T.c.accent, 8)
   -- icone do A + texto, centralizados juntos
-  local label = L("PARA CONTINUAR")
+  local label = self.view_only and L("VOLTAR") or L("PARA CONTINUAR")
   local tw = T.f.pix16:getWidth(label)
   local gx = bx + (bw - (16 + 12 + tw)) / 2
   G.button_icon("a", gx, by + 13, T.c.text)
@@ -114,6 +115,8 @@ function S:action(act)
   if act == "down" or act == "up" then
     local step = (T.f.body:getHeight() * T.f.body:getLineHeight()) * 2
     self.scroll = math.max(0, math.min(self:max_scroll(), (self.scroll or 0) + (act == "down" and step or -step)))
+  elseif self.view_only and (act == "a" or act == "b") then
+    App.pop()
   elseif act == "a" then
     App.disclaimer_accepted()
   elseif act == "b" and self.from_language then

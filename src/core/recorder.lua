@@ -23,7 +23,7 @@ local R = {
 }
 
 local CTL, OUT, FRAMES = "hub_rec_ctl", "hub_rec_out", "hub_rec_frames"
-R.FPS_CHOICES = { 10, 15 }
+R.FPS_CHOICES = { 10, 15, 30 }
 local MIN_FREE = 64 * 1024 * 1024      -- nao comeca com menos que isto livre
 local STOP_FREE = 24 * 1024 * 1024     -- finaliza sozinha (sem apagar) abaixo disto
 
@@ -170,8 +170,9 @@ function R.update()
         notify(L("Gravação salva: ") .. R.file, "ok")
       else
         R.last_error = m.error and (L("Falha ao gravar: ") .. m.error) or (m.log and (L("O ffmpeg informou: ") .. m.log))
-          or L("O arquivo da gravação ficou vazio.")
-        U.log("Gravação: falha", tostring(m.error), tostring(m.log))
+          or ((m.frames or 0) == 0 and L("Nenhum quadro da tela chegou à gravação.")) or L("O arquivo da gravação ficou vazio.")
+        U.log("Gravação: falha", tostring(m.error), tostring(m.log), "quadros recebidos", tostring(m.frames),
+          "enviados ao ffmpeg", tostring(m.written), "tamanho", tostring(m.size))
         notify(L("A gravação não foi concluída. Veja os detalhes na tela de transmissão e gravação."), "error")
       end
       if R.on_done then R.on_done(m) end

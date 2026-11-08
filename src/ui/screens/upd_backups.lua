@@ -73,7 +73,8 @@ local function restore(self, b)
         if j.state == "done" then
           App.show_dialog({ title = L("Backup restaurado"), kind = "ok",
             body = L("A versão ") .. tostring(b.from_label or b.from) .. L(" foi restaurada. Reinicie o app para usá-la."),
-            buttons = { { label = L("REINICIAR O APP"), fn = function() require("ui.screens.updmgr").restart_app() end }, { label = L("DEPOIS") } } })
+            buttons = { { label = L("REINICIAR O APP"), fn = function() require("ui.screens.updmgr").restart_app() end } },
+            cancel = function() require("ui.screens.updmgr").restart_app() end })
         else
           App.show_dialog({ title = L("Não foi possível restaurar"), kind = "error", body = Manager.message(j.error_code, j.detail) })
         end

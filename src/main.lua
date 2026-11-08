@@ -49,7 +49,7 @@ local App = {
 }
 _G.App = App
 
-local SCREEN_NAMES = { "disclaimer", "menu", "store", "categories", "details", "about", "settings", "files", "sections", "search", "downloads", "news", "console", "ftp", "ftp_activity", "ftp_help", "textinput", "sdanalyzer", "integrity", "netdiag", "update", "themes", "sdcheck", "esthemes", "splash", "language", "settings_cat", "tester", "consoleid", "wifi", "wifi_connect", "r36control", "sdmaint", "sdmaint_run", "compat", "datetime", "tzpicker", "datetime_edit", "pmmanager", "streamrec", "recordings", "updmgr", "upd_local", "upd_pkg", "upd_history", "upd_backups", "upd_notes", "bios", "bios_list", "bios_pkg", "bios_hist", "folderpick", "battery" }
+local SCREEN_NAMES = { "disclaimer", "menu", "store", "categories", "details", "about", "settings", "files", "sections", "search", "downloads", "news", "console", "ftp", "ftp_activity", "ftp_help", "textinput", "sdanalyzer", "integrity", "netdiag", "update", "themes", "sdcheck", "esthemes", "splash", "language", "settings_cat", "tester", "consoleid", "wifi", "wifi_connect", "r36control", "sdmaint", "sdmaint_run", "compat", "datetime", "tzpicker", "datetime_edit", "pmmanager", "streamrec", "recordings", "updmgr", "upd_local", "upd_pkg", "upd_history", "upd_backups", "upd_notes", "bios", "bios_list", "bios_pkg", "bios_hist", "folderpick", "battery", "infolist", "library", "library_games", "textview" }
 
 ---------------------------------------------------------------------------
 -- Navegacao
@@ -172,6 +172,7 @@ function App.refresh_catalog(user_initiated, on_done)
   Fetcher.get("catalog", url, out, function(ok, path, reason)
     local okp, err = Catalog.on_remote(ok, path or out, reason)
     if okp then
+      Prefs.set("cat_last", tostring(os.time()))
       Manifest.invalidate()
       Covers.retry_failed()
       local after = catalog_snapshot()
@@ -197,6 +198,10 @@ function App.refresh_catalog(user_initiated, on_done)
       elseif user_initiated then App.toast(string.format(L("Catálogo atualizado: %d ports"), #Catalog.ports), "ok") end
     else
       U.log("catalogo online falhou:", reason or "", err or "")
+      -- falha sem o usuario pedir (ex.: Wi-Fi ainda conectando na abertura):
+      -- tenta de novo sozinho quando a rede estiver conectada
+      if not user_initiated and not on_done then App.cat_retry = App.cat_retry or { tries = 0, t = 0 } end
+      pcall(function() require("core.netlog").add(L("Catálogo de ports"), url, err or reason) end)
       if on_done then
         on_done(false, err .. L("\nContinuando com: ") .. Catalog.source_label() .. ".")
       elseif user_initiated or Catalog.source == "none" or Catalog.source == "example" then
@@ -205,6 +210,24 @@ function App.refresh_catalog(user_initiated, on_done)
     end
     App.on_catalog_changed()
   end, true)
+end
+
+--- nova tentativa do catalogo online depois de uma falha na abertura:
+--- a cada 20 s, so com a rede conectada, ate 3 vezes (silenciosa)
+function App.catalog_retry_update(dt)
+  local r = App.cat_retry
+  if not r then return end
+  if Catalog.source == "online" or Prefs.get("cat_auto") == "0" then App.cat_retry = nil; return end
+  if Catalog.remote_state == "loading" then return end
+  r.t = r.t + dt
+  if r.t < 20 then return end
+  r.t = 0
+  local st = require("core.net").current()
+  if not (st and st.connected) then return end
+  if r.tries >= 3 then App.cat_retry = nil; return end
+  r.tries = r.tries + 1
+  U.log("catalogo: nova tentativa online (" .. r.tries .. "/3)")
+  App.refresh_catalog(false)
 end
 
 function App.on_catalog_changed()
@@ -344,6 +367,11 @@ function App.pick_port_folder(plan)
 end
 
 function App.request_es_restart()
+  if C.OS_MODE then
+    -- R36 Hub OS: a lista de jogos e o proprio hub (nada para reiniciar)
+    App.toast(L("No R36 Hub OS os ports instalados já aparecem em Meus Ports."), "info")
+    return
+  end
   -- o launcher verifica este arquivo depois que o app fecha
   os.execute("mkdir -p " .. U.shq(C.APP_DIR .. "/conf") .. " 2>/dev/null")
   U.write_file(C.APP_DIR .. "/conf/.restart_es", "1")
@@ -577,7 +605,9 @@ function love.load(args)
       U.log("R36S PORT HUB", C.VERSION, "| ports:", C.PORTS_DIR, "| app:", C.APP_DIR)
       U.log("dados:", love.filesystem.getSaveDirectory())
       Catalog.load_local()
-      App.refresh_catalog(false)
+      -- Configuracoes > Catalogo > Atualizar ao abrir o hub (ligado por padrao)
+      if Prefs.get("cat_auto") ~= "0" then App.refresh_catalog(false)
+      else U.log("catalogo: atualizacao automatica desligada; usando", Catalog.source_label()) end
     end },
     { L("Verificando espaço livre..."), function() App.update_free_space() end },
   }
@@ -585,6 +615,8 @@ function love.load(args)
     App.after_boot()
     -- avisos da abertura: so depois do aviso importante (nao cobrem o botao dele)
     App.boot_toasts = {}
+    -- aviso de versao nova no alto da tela inicial (consulta leve em segundo plano)
+    pcall(function() require("core.updnotice").start() end)
     -- atualizacao: confirma a versao nova (o app abriu) ou conclui uma recuperacao
     local okn, notice = pcall(UpdMgr.on_boot)
     if okn and notice then App.boot_toasts[#App.boot_toasts + 1] = notice
@@ -650,12 +682,91 @@ function App.launch_tool(id, from)
   go()
 end
 
+--- script .sh do port instalado (na raiz da pasta de ports), ou nil
+function App.port_script(p)
+  if not p or p.builtin or App.status(p) == "none" then return nil end
+  for _, n in ipairs(Manifest.found(p) or {}) do
+    n = tostring(n)
+    if not n:find("/") and not n:find("%.%.") and n:lower():match("%.sh$") and U.exists(C.PORTS_DIR .. "/" .. n) then
+      return n
+    end
+  end
+  return nil
+end
+
+--- ha algo que impede o hub de fechar para abrir um jogo? (mostra o aviso)
+local function blocked_for_game()
+  local ESth = package.loaded["core.esthemes"]
+  if Installer.busy() or Downloads.waiting_count() > 0 or Runtimes.job or Update.busy() or PM.busy()
+      or (ESth and ESth.job and not ESth.job.finished) then
+    App.show_dialog({ title = L("Aguarde"), kind = "warn",
+      body = L("Termine ou cancele os downloads e instalações em andamento antes de iniciar um jogo. O R36S PORT HUB fecha enquanto o jogo estiver aberto.") })
+    return true
+  end
+  return false
+end
+
+--- Biblioteca: abre um jogo de emulador com o comando do es_systems.cfg
+function App.launch_game(sys, game)
+  if blocked_for_game() then return end
+  local function go()
+    local ok, err = require("core.library").launch(sys, game)
+    if not ok then App.toast(err, "error"); return end
+    App.quit(true)
+  end
+  if Ftp.running() then
+    App.show_dialog({ title = L("Servidor FTP ativo"), kind = "warn",
+      body = L("O servidor FTP será parado para abrir o jogo."),
+      buttons = { { label = L("PARAR E JOGAR"), fn = function() Ftp.stop_wait(); go() end }, { label = "VOLTAR" } }, sel = 2 })
+    return
+  end
+  go()
+end
+
+--- Iniciar um port pelo hub: o hub fecha, o launcher roda o script do port
+--- (com o ambiente original do sistema) e, ao sair do jogo, abre o hub de novo.
+function App.launch_port(p)
+  local script = App.port_script(p)
+  if not script then
+    App.toast(L("Não encontrei o script deste port na pasta de ports. Reinstale-o ou abra pela lista de Ports."), "warn")
+    return
+  end
+  if blocked_for_game() then return end
+  local function go()
+    os.execute("mkdir -p " .. U.shq(C.APP_DIR .. "/conf") .. " 2>/dev/null")
+    if not U.write_file(C.APP_DIR .. "/conf/.run_port", script .. "|" .. tostring(p.id) .. "\n") then
+      App.toast(L("Não foi possível iniciar o jogo (pasta do app somente leitura?)."), "error")
+      return
+    end
+    U.log("iniciar port:", p.id, script)
+    App.quit(true)
+  end
+  local body = string.format(L("O R36S PORT HUB vai fechar e %s vai abrir.\nAo sair do jogo, o hub abre de novo.\n\nScript: %s"), p.name, script)
+  if Ftp.running() then body = body .. L("\n\nO servidor FTP será parado.") end
+  App.show_dialog({ title = L("Iniciar o jogo?"), kind = "info", body = body,
+    buttons = { { label = L("INICIAR"), fn = function() if Ftp.running() then Ftp.stop_wait() end; go() end },
+      { label = L("CANCELAR") } } })
+end
+
 --- volta para a tela de onde a ferramenta foi aberta (depois que o launcher reabre o app)
 local function return_from_tool()
   local req = os.getenv("PORTHUB_RETURN")
   if not req or req == "" or App.returned then return false end
   App.returned = true
-  local id, from = req:match("^([%w_]+)|?([%w_]*)")
+  local id, from = req:match("^([%w_]+)|?([%w_%-]*)")
+  -- volta de um jogo iniciado pelo hub: abre a pagina do port
+  -- volta de um jogo da biblioteca: abre a biblioteca no mesmo sistema
+  if id == "game" then
+    App.reset_to("menu")
+    App.push("library", { system = from })
+    return true
+  end
+  if id == "port" then
+    App.reset_to("menu")
+    local p = Catalog.by_id[from]
+    if p then App.push("details", { port = p }) end
+    return true
+  end
   if id ~= "analog_tester" then return false end
   App.reset_to("menu")
   if from == "store" then
@@ -687,6 +798,8 @@ end
 function App.disclaimer_accepted()
   Prefs.set("disclaimer_ok", "1")
   App.reset_to("menu")
+  -- Configuracoes > Preferencias > Tela ao abrir
+  pcall(function() require("ui.settings_extra").open_start_screen() end)
   App.flush_boot_toasts()
 end
 
@@ -714,6 +827,8 @@ function App.apply_restored(done)
     local Themes = require("core.themes")
     local okr, tid = pcall(love.filesystem.read, "theme.txt")
     tid = okr and tid and U.trim(tid) or nil
+    -- backup/exportacao antiga com o id antigo do tema (ex.: xbox): aplica e grava o id novo
+    if tid and Themes.ALIASES[tid] then tid = Themes.resolve(tid); pcall(love.filesystem.write, "theme.txt", tid) end
     if tid and tid ~= "" and tid ~= Themes.current then Themes.apply(tid, false) end
     Music.init()
     Music.set_enabled(Music.enabled)
@@ -725,6 +840,12 @@ function App.apply_restored(done)
     pcall(require("core.brightness").restore)
   end
   if done.favorites then require("core.favorites").load() end
+  if done.catalog then
+    Manifest.load()
+    Catalog.load_local()
+    Manifest.invalidate()
+    App.on_catalog_changed()
+  end
   if done.ftp then Ftp.cfg = nil; Ftp.load(); Ftp.save() end
   if done.history then
     -- troca so os registros finalizados; a restauracao e bloqueada com downloads ativos
@@ -832,6 +953,9 @@ function love.update(dt)
     end
   end
   Ftp.update()
+  require("core.shjob").update()
+  require("core.updnotice").update(dt)
+  App.catalog_retry_update(dt)
   Stream.update()
   Recorder.update()
   Update.update()

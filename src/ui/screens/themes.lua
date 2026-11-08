@@ -135,7 +135,7 @@ function S:action(act)
         title = L("Baixar novos temas"), kind = "info",
         body = Themes.catalog_url()
           and L("O download de temas pelo catálogo ainda não está disponível nesta versão. Ele será liberado em uma próxima atualização.")
-          or L("O catálogo remoto de temas ainda não foi configurado.\n\nPor enquanto estão disponíveis o Tema Padrão e o Tema Xbox."),
+          or L("O catálogo remoto de temas ainda não foi configurado.\n\nPor enquanto estão disponíveis o Tema Padrão e o NEON GRID."),
       })
     end
   end

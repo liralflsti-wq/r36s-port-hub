@@ -13,8 +13,17 @@ local lg = love.graphics
 
 local S = {}
 
+local Dash   -- ui/neon_dash.lua (carregado so quando o tema usa o layout dashboard)
+local function dash()
+  if T.style.layout ~= "dashboard" then return nil end
+  Dash = Dash or require("ui.neon_dash")
+  return Dash
+end
+
+
 local ITEMS = {
   { id = "store", label = L("Central de Conteúdo"), sub = L("Jogos, BIOS, utilitários e ferramentas"), icon = "store" },
+  { id = "library", label = L("Biblioteca de jogos"), sub = L("Jogos dos emuladores do console"), icon = "library" },
   { id = "categories", label = L("Categorias"), sub = L("Navegue por gênero"), icon = "cats" },
   { id = "installed", label = L("Meus Ports"), sub = L("Ports instalados no console"), icon = "mine" },
   { id = "downloads", label = L("Downloads em segundo plano"), sub = L("Progresso e histórico (atalho: START)"), icon = "download" },
@@ -22,12 +31,16 @@ local ITEMS = {
   { id = "about", label = L("Sobre o Projeto"), sub = L("Informações e créditos"), icon = "about" },
   { id = "exit", label = L("Sair"), sub = L("Fechar o R36S PORT HUB"), icon = "exit" },
 }
+if C.OS_MODE then
+  ITEMS[#ITEMS] = { id = "exit", label = L("Energia"), sub = L("Desligar, reiniciar ou reabrir a interface"), icon = "exit" }
+end
 
 -- Vitrine EM DESTAQUE: so itens marcados no catalogo ("featured": true),
 -- jogos e utilitarios na mesma sequencia, na ordem do catalogo (ou pela
 -- "featured_order" opcional). Uma transicao por vez.
 local DWELL = 5.0        -- segundos de exibicao de cada destaque
 local TRANS = 0.55       -- duracao da troca
+local TICK_X, TICK_SPEED = 150, 42   -- faixa de versao nova (x inicial, pixels/s)
 local HOLD = 8.0         -- pausa extra depois de uma troca manual
 local SHINE = 0.7        -- brilho que passa na capa ao chegar
 
@@ -62,9 +75,10 @@ function S:on_catalog()
     for k, p in ipairs(list) do if p.id == cur.id then self.feat_i = k break end end
   end
   self.trans = nil
+  self.dash_dirty = true
 end
 
-function S:resume() self:on_catalog() end
+function S:resume() self:on_catalog(); self.dash_dirty = true end
 
 local function ease(t) return 1 - (1 - t) ^ 3 end
 
@@ -85,7 +99,10 @@ function S:feat_go(dir, manual)
 end
 
 function S:update(dt)
+  local d = dash()
+  if d then d.update(S, self, dt) end
   local anim = App.animations()
+  if anim and require("core.updnotice").pending() then self.tick = (self.tick or 0) + TICK_SPEED * dt end
   if self.trans then
     self.trans.t = self.trans.t + dt
     if self.trans.t >= TRANS then
@@ -116,6 +133,11 @@ local function icon(kind, x, y, c)
   if kind == "store" then
     lg.rectangle("line", x + 2, y + 6, 16, 12, 2, 2)
     lg.line(x + 6, y + 6, x + 6, y + 3, x + 14, y + 3, x + 14, y + 6)
+  elseif kind == "library" then
+    -- controle de videogame
+    lg.rectangle("line", x + 1, y + 6, 18, 10, 4, 4)
+    lg.line(x + 5, y + 11, x + 9, y + 11); lg.line(x + 7, y + 9, x + 7, y + 13)
+    lg.circle("fill", x + 13, y + 10, 1.2); lg.circle("fill", x + 15, y + 12, 1.2)
   elseif kind == "cats" then
     for i = 0, 1 do for j = 0, 1 do lg.rectangle("fill", x + 2 + i * 9, y + 2 + j * 9, 7, 7, 1, 1) end end
   elseif kind == "mine" then
@@ -152,23 +174,26 @@ local function icon(kind, x, y, c)
 end
 
 function S:draw()
+  local d = dash()
+  if d then return d.draw(S, self) end
   -- coluna esquerda: logo + menu
   G.logo(24, 6, "menu")
-  G.text(T.f.pix8, C.VERSION, 28, 86, T.c.faint)
+  G.text(T.f.pix8, C.OS_MODE and (C.OS_NAME .. " " .. C.OS_VERSION .. "  •  " .. C.VERSION) or C.VERSION, 28, 86, T.c.faint)
 
-  local y0 = 100
+  -- 8 itens entre a versao (y 86) e o rodape: passo de 44 px
+  local y0, step = 98, 44
   for i, it in ipairs(ITEMS) do
-    local y = y0 + (i - 1) * 49
+    local y = y0 + (i - 1) * step
     local on = i == self.sel
     if on then
-      G.rect(20, y, 300, 44, T.c.bg2, 8)
-      G.frame(20, y, 300, 44, T.c.accent, 8, 2)
-      G.rect(20, y + 8, 4, 28, T.c.accent, 2)
+      G.rect(20, y, 300, step - 3, T.c.bg2, 8)
+      G.frame(20, y, 300, step - 3, T.c.accent, 8, 2)
+      G.rect(20, y + 7, 4, step - 17, T.c.accent, 2)
     end
-    icon(it.icon, 36, y + 12, on and T.c.accent or T.c.dim)
+    icon(it.icon, 36, y + 10, on and T.c.accent or T.c.dim)
     -- largura do destaque (x 20..320): texto maior diminui ou e encurtado
-    G.text_fit(T.f.h3, it.label, 68, y + 5, 246, on and T.c.text or T.c.dim)
-    G.text_fit(T.f.small, it.sub, 68, y + 25, 246, on and T.c.dim or T.c.faint)
+    G.text_fit(T.f.h3, it.label, 68, y + 3, 246, on and T.c.text or T.c.dim)
+    G.text_fit(T.f.small, it.sub, 68, y + 22, 246, on and T.c.dim or T.c.faint)
   end
 
   -- relogio (hora do sistema), acima do destaque
@@ -178,6 +203,9 @@ function S:draw()
   local datestr = wd .. ", " .. Clock.date(nil, true)
   G.text(T.f.small, datestr, 620 - T.f.bodyb:getWidth(clock) - 8 - T.f.small:getWidth(datestr), 6, T.c.dim)
   G.text(T.f.bodyb, clock, 620 - T.f.bodyb:getWidth(clock), 4, T.c.text)
+
+  -- aviso de versao nova (texto deslizante entre a logo e a data)
+  self:draw_update_notice(620 - T.f.bodyb:getWidth(clock) - 8 - T.f.small:getWidth(datestr) - 10)
 
   -- coluna direita: destaque + status
   local px, py, pw, ph = 340, 24, 280, 330
@@ -197,7 +225,8 @@ function S:draw()
   free = string.format(L("%d no console  •  "), require("core.scan").count) .. free
   G.text(T.f.small, free, px + 16, sy + 50, T.c.dim)
 
-  local hints = { { "dpad", L("Navegar") }, { "a", L("Selecionar") }, { "b", L("Sair") } }
+  local hints = { { "dpad", L("Navegar") }, { "a", L("Selecionar") }, { "b", C.OS_MODE and L("Energia") or L("Sair") } }
+  if require("core.updnotice").pending() then hints[#hints + 1] = { "select", L("Atualizar") } end
   -- texto maior: se dicas + rede + bateria nao couberem no rodape, ele usa o tamanho padrao
   if G.hints_width(hints, T.f.small) + 24 > self:wifi_left() then
     T.with_base_fonts(function() G.hints(hints); self:draw_wifi() end)
@@ -290,6 +319,12 @@ function S:draw_featured(px, py, pw, ph)
   total = total + (n - 1) * 4
   local dx = px + pw / 2 - total / 2
   local dy = py + ph - 18
+  -- L1 / R1 nas pontas: troca manual do destaque
+  if n > 1 then
+    G.button_icon("l1", px + 16, dy - 7)
+    local rw = T.f.pix8:getWidth("R1") + 10
+    G.button_icon("r1", px + pw - 16 - rw, dy - 7)
+  end
   for i = 1, n do
     local w = widths[i]
     local on = i == self.feat_i
@@ -303,6 +338,37 @@ function S:draw_featured(px, py, pw, ph)
     end
     dx = dx + w + 4
   end
+end
+
+--- faixa "versao nova disponivel": desliza da direita para a esquerda,
+--- some e recomeca. Com as animacoes desligadas o texto fica parado.
+function S:draw_update_notice(right, left, top)
+  local UN = require("core.updnotice")
+  if not UN.pending() then self.tick = nil; return end
+  local x, y, h = left or TICK_X, top or 3, 19
+  local w = right - x
+  if w < 80 then return end
+  G.rect(x, y, w, h, T.c.bg1, 6)
+  G.frame(x, y, w, h, T.c.yellow, 6, 1)
+  -- etiqueta com seta para cima
+  G.rect(x + 3, y + 3, 14, h - 6, T.c.yellow, 3)
+  G.color(T.c.bg0)
+  lg.polygon("fill", x + 10, y + 5, x + 6, y + 10, x + 14, y + 10)
+  lg.rectangle("fill", x + 8.5, y + 10, 3, 4)
+  local ix, iw = x + 21, w - 25
+  local text = UN.text()
+  local f = T.f.small
+  local ty = y + math.floor((h - f:getHeight()) / 2)
+  if not App.animations() then
+    G.text_fit(f, text, ix, ty, iw, T.c.yellow)
+    return
+  end
+  local tw = f:getWidth(text)
+  local off = self.tick or 0
+  G.clip(ix, y + 1, iw, h - 2)
+  G.text(f, text, ix + iw - off, ty, T.c.yellow)
+  G.unclip()
+  if off > iw + tw then self.tick = 0 end
 end
 
 --- icone de Wi-Fi (arcos); off = riscado
@@ -339,20 +405,18 @@ end
 
 --- onde comeca (x) o bloco rede + bateria do rodape, com a fonte atual
 function S:wifi_left()
-  local text = wifi_text()
   local bw = T.f.small:getWidth(battery_text()) + 28
-  return T.W - 14 - bw - 18 - T.f.small:getWidth(text) - 24
+  return T.W - 14 - bw - 18 - 18
 end
 
 --- rodape: estado real da rede (lido em segundo plano, sem travar o menu)
 function S:draw_wifi()
   local y = T.H - 26
-  local text, c, off = wifi_text()
-  local tw = T.f.small:getWidth(text)
+  -- so o icone: verde conectado, vermelho riscado desconectado, amarelo verificando
+  local _, c, off = wifi_text()
   local bw = self:draw_battery(y)          -- bateria no canto direito
-  local x = T.W - 14 - bw - 18 - tw        -- Wi-Fi logo a esquerda dela
-  G.text(T.f.small, text, x, y + 1, c)
-  wifi_icon(x - 24, y - 1, c, off)
+  local x = T.W - 14 - bw - 18 - 18        -- Wi-Fi logo a esquerda dela
+  wifi_icon(x, y - 1, c, off)
 end
 
 --- icone de bateria: contorno, carga proporcional e raio quando carregando
@@ -377,7 +441,7 @@ local function battery_icon(x, y, frac, c, charging, unknown)
 end
 
 --- desenha a bateria no rodape e devolve a largura usada
-function S:draw_battery(y)
+function S:draw_battery(y, right)
   local b = Battery.get()
   local text, c, frac, charging, unknown
   if not b.ok then
@@ -393,7 +457,7 @@ function S:draw_battery(y)
     if lv == "critical" and not charging and math.floor(App.t * 2) % 2 == 0 then c = T.c.orange end
   end
   local tw = T.f.small:getWidth(text)
-  local x = T.W - 14 - tw
+  local x = (right or (T.W - 14)) - tw
   G.text(T.f.small, text, x, y + 1, c)
   battery_icon(x - 28, y - 1, frac or 0, c, charging, unknown)
   return tw + 28
@@ -416,6 +480,20 @@ local function power_confirm(kind)
 end
 
 local function exit_dialog()
+  if C.OS_MODE then
+    -- R36 Hub OS: nao ha EmulationStation para onde voltar
+    App.show_dialog({
+      title = L("Energia"), kind = "info", list = true,
+      body = L("O que você quer fazer?"),
+      buttons = {
+        { label = L("Reiniciar a interface"), sub = L("Fecha e abre o R36 Hub OS de novo"), fn = App.quit },
+        { label = L("Reiniciar console"), sub = L("Reinicia o R36S"), danger = true, fn = function() power_confirm("reboot") end },
+        { label = L("Desligar console"), sub = L("Desliga o R36S"), danger = true, fn = function() power_confirm("poweroff") end },
+        { label = L("Voltar") },
+      },
+    })
+    return
+  end
   App.show_dialog({
     title = L("Sair do R36S PORT HUB"),
     kind = "info",
@@ -432,22 +510,39 @@ local function exit_dialog()
 end
 
 function S:action(act)
+  local d = dash()
+  if d then return d.action(S, self, act) end
   if act == "up" then self.sel = (self.sel - 2) % #ITEMS + 1
   elseif act == "down" then self.sel = self.sel % #ITEMS + 1
-  elseif act == "left" or act == "l1" then self:feat_go(-1, true)
-  elseif act == "right" or act == "r1" then self:feat_go(1, true)
-  elseif act == "b" then exit_dialog()
+  elseif act == "select" and require("core.updnotice").pending() then App.push("update")
+  elseif act == "l1" then self:feat_go(-1, true)
+  elseif act == "r1" then self:feat_go(1, true)
+  elseif act == "b" then
+    -- Configuracoes > Preferencias > Botao B no menu principal
+    if require("core.prefs").get("exit_mode") == "quit" and not C.OS_MODE then App.quit() else exit_dialog() end
   elseif act == "a" then
-    local id = ITEMS[self.sel].id
-    if id == "store" then App.push("sections")
-    elseif id == "categories" then App.push("categories")
-    elseif id == "installed" then App.push("store", { mine = true })
-    elseif id == "downloads" then App.open_downloads(false)
-    elseif id == "settings" then App.push("settings")
-    elseif id == "about" then App.push("about")
-    elseif id == "exit" then exit_dialog()
-    end
+    S.open(ITEMS[self.sel].id)
   end
 end
+
+--- abre uma area do menu (usado tambem pelo dashboard NEON GRID)
+function S.open(id)
+  if id == "store" then App.push("sections")
+  elseif id == "library" then App.push("library")
+  elseif id == "categories" then App.push("categories")
+  elseif id == "installed" then App.push("store", { mine = true })
+  elseif id == "favorites" then App.push("store", { favs = true })
+  elseif id == "downloads" then App.open_downloads(false)
+  elseif id == "news" then App.push("news")
+  elseif id == "themes" then App.push("themes")
+  elseif id == "update" then App.push("update")
+  elseif id == "settings" then App.push("settings")
+  elseif id == "about" then App.push("about")
+  elseif id == "exit" then exit_dialog()
+  end
+end
+S.exit_dialog = exit_dialog
+S.wifi_icon, S.wifi_state = wifi_icon, wifi_text
+S.type_color, S.is_tool = type_color, is_tool
 
 return S

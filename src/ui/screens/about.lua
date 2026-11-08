@@ -20,12 +20,12 @@ local CHANNEL_NAME = L("Lag do Lira")
 local CHANNEL_URL = "https://youtube.com/@lagdolira"
 local CHANNEL_SHORT = "youtube.com/@lagdolira"
 
--- Apoio ao projeto (START): Pix "copia e cola" do projeto (BR Code com CRC conferido)
-local PIX_PAYLOAD = L("00020126580014BR.GOV.BCB.PIX01364bcb070b-3155-41a6-b03d-2f24e30d05e15204000053039865802BR5922Lucas Ferreira de Lira6009SAO PAULO62140510hIyqlorhu563044638")
+-- Apoio ao projeto (START): pagina de doacao do LivePix (o QR abre o link no celular)
+local PIX_PAYLOAD = "https://livepix.gg/lagdolira"
 local PIX_TEXT = L("O R36S PORT HUB é gratuito e feito por fãs, nas horas vagas. ")
   .. L("Se ele te ajudou, considere apoiar com qualquer valor: cada contribuição ajuda a trazer novos ports, ")
   .. L("ferramentas e atualizações para a comunidade.")
-local PIX_HOW = L("Abra o app do seu banco, escolha Pix > Pagar com QR Code e aponte a câmera para a tela. Você escolhe o valor.")
+local PIX_HOW = L("Leia o QR Code com a câmera do celular para abrir a página de doação do LivePix (livepix.gg/lagdolira). Lá você escolhe o valor e paga com Pix. Não use a opção Pagar com QR Code do app do banco.")
 
 local TITLE = L("Sobre o R36S PORT HUB")
 local PARAGRAPHS = {
@@ -179,8 +179,12 @@ function S:draw_content()
 
   G.hints({ { "a", L("Canal do YouTube") }, { "start", L("Apoiar o projeto") }, { "dpad", L("Rolar") }, { "b", L("Voltar") } })
 
-  if self.show_qr then self:draw_qr() end
-  if self.show_pix then self:draw_pix() end
+  if self.show_qr then
+    if self.qr_big and self.qr then self:draw_qr_big(self.qr) else self:draw_qr() end
+  end
+  if self.show_pix then
+    if self.pix_big and self.pix_qr then self:draw_qr_big(self.pix_qr) else self:draw_pix() end
+  end
 end
 
 --- QR Code centralizado com zona de silencio (modulos inteiros)
@@ -221,15 +225,33 @@ function S:draw_pix()
     ty = ty + 18
   end
   ty = ty + 10
-  G.tag("PIX", tx, ty, T.c.accent2, T.c.bg0, T.f.pix8)
+  G.tag("LIVEPIX", tx, ty, T.c.accent2, T.c.bg0, T.f.pix8)
   ty = ty + 24
   for _, l in ipairs(G.wrap(T.f.small, PIX_HOW, tw)) do
     G.text(T.f.small, l, tx, ty, T.c.dim)
     ty = ty + 15
   end
   G.text(T.f.bodyb, L("Obrigado pelo apoio!"), tx, y + h - 64, T.c.accent)
+  if self.pix_qr then
+    G.button_icon("a", x + 22, y + h - 30)
+    G.text(T.f.small, L("Ampliar QR Code"), x + 44, y + h - 29, T.c.dim)
+  end
   G.button_icon("b", x + w - 110, y + h - 30)
   G.text(T.f.small, L("Fechar"), x + w - 88, y + h - 29, T.c.dim)
+end
+
+--- QR Code de apoio em tela cheia (fundo branco, modulos grandes: mais facil
+--- para a camera do celular ler na tela pequena do console)
+function S:draw_qr_big(qr)
+  lg.setColor(1, 1, 1, 1)
+  lg.rectangle("fill", 0, 0, T.W, T.H)
+  local n = #qr
+  local m = math.max(1, math.floor(430 / (n + 8)))
+  local size = (n + 8) * m
+  local qx, qy = math.floor((T.W - size) / 2), 6
+  draw_qr_matrix(qr, qx, qy, size)
+  local hint = I18N.tr(L("Aponte a câmera do celular para o QR Code")) .. "   •   " .. I18N.tr(L("A/B: voltar"))
+  G.text(T.f.small, hint, 0, qy + size + 10, { 0.25, 0.25, 0.25, 1 }, "center", T.W)
 end
 
 --- START nesta tela: abre a janela de apoio (em vez da Central de Downloads)
@@ -243,6 +265,7 @@ function S:on_start()
     end
   end
   self.show_pix = not self.show_pix
+  self.pix_big = false
 end
 
 --- Janela com QR Code e endereco (console sem navegador)
@@ -280,7 +303,11 @@ function S:draw_qr()
     G.text(T.f.body, L("Acesse pelo celular ou computador:\n") .. CHANNEL_URL, x + 24, y + 80, T.c.text, "left", w - 48)
     G.text(T.f.small, self.qr_msg or "", x + 24, y + 140, T.c.dim, "left", w - 48)
   end
-  G.button_icon("a", x + w - 120, y + h - 34)
+  if qr then
+    G.button_icon("a", x + 24, y + h - 34)
+    G.text(T.f.small, L("Ampliar QR Code"), x + 46, y + h - 33, T.c.dim)
+  end
+  G.button_icon("b", x + w - 120, y + h - 34)
   G.text(T.f.small, L("Fechar"), x + w - 98, y + h - 33, T.c.dim)
 end
 
@@ -313,15 +340,24 @@ function S:open_channel()
     self.qr_msg = L("Não há navegador disponível neste console. Aponte a câmera do celular para o QR Code ou digite o endereço no navegador do celular ou computador.")
   end
   self.show_qr = true
+  self.qr_big = false
 end
 
 function S:action(act)
   if self.show_pix then
-    if act == "a" or act == "b" then self.show_pix = false end
+    if act == "a" and self.pix_qr then
+      self.pix_big = not self.pix_big
+    elseif act == "b" then
+      if self.pix_big then self.pix_big = false else self.show_pix = false end
+    end
     return
   end
   if self.show_qr then
-    if act == "a" or act == "b" then self.show_qr = false end
+    if act == "a" and self.qr then
+      self.qr_big = not self.qr_big
+    elseif act == "b" or act == "a" then
+      if self.qr_big then self.qr_big = false else self.show_qr = false end
+    end
     return
   end
   if act == "b" then App.pop()

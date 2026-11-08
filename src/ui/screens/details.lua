@@ -17,6 +17,9 @@ local Icons = require("ui.icons")
 local S = {}
 
 local DX, DY, DW, DH = 240, 152, 386, 196 -- caixa da descricao
+-- NEON GRID (layout "dashboard"): outra apresentacao, mesmas funcoes
+local NX, NY, NW, NH = 180, 204, 448, 182 -- caixa da descricao no NEON GRID
+local function neon() return T.style.layout == "dashboard" end
 
 function S:enter(params)
   Manifest.rescan()
@@ -105,9 +108,37 @@ function S:layout()
     para(p.notes)
   end
   self.lines = LN
+  -- NEON GRID: descricao e observacoes (as informacoes ficam na grade ao lado)
+  local NL = {}
+  local function npara(t) for _, l in ipairs(G.wrap(T.f.body, t, NW - 28)) do NL[#NL + 1] = { t = l } end end
+  NL[#NL + 1] = { t = L("DESCRIÇÃO"), h = true }
+  npara(desc ~= "" and desc or L("Sem descrição."))
+  if self.compat then
+    NL[#NL + 1] = { t = "" }
+    NL[#NL + 1] = { t = L("COMPATIBILIDADE"), h = true }
+    npara(I18N.tr(Compat.LABEL[self.compat.status]) .. ": " .. I18N.tr(self.compat.reason))
+  end
+  if p.notes ~= "" then
+    NL[#NL + 1] = { t = "" }
+    NL[#NL + 1] = { t = L("OBSERVAÇÕES"), h = true }
+    npara(p.notes)
+  end
+  if neon() then
+    LN = NL
+    self.lines = NL
+  end
   self.lh = T.f.body:getHeight() * T.f.body:getLineHeight()
-  self.max_lines = math.floor((DH - 20) / self.lh)
+  self.max_lines = math.floor(((neon() and NH or DH) - 20) / self.lh)
   self.scroll = U.clamp(self.scroll, 0, math.max(0, #self.lines - self.max_lines))
+end
+
+--- botoes do layout classico: principal, INICIAR (port instalado com script) e VOLTAR
+function S:classic_buttons()
+  local label, enabled = self:primary()
+  local list = { { id = "primary", label = label, enabled = enabled } }
+  if App.port_script(self.port) then list[#list + 1] = { id = "start", label = L("INICIAR"), enabled = true } end
+  list[#list + 1] = { id = "back", label = "VOLTAR", enabled = true }
+  return list
 end
 
 function S:primary()
@@ -123,6 +154,7 @@ function S:primary()
 end
 
 function S:draw()
+  if neon() then return self:draw_neon() end
   local p = self.port
   G.header(L("Detalhes do port"))
 
@@ -212,21 +244,27 @@ function S:draw()
   end
 
   -- botoes
-  local label, enabled = self:primary()
-  local buttons = { { label = label, enabled = enabled }, { label = "VOLTAR", enabled = true } }
+  local buttons = self:classic_buttons()
+  local widths = #buttons == 3 and { 150, 128, 88 } or { 230, 146 }
+  -- texto: fonte grande quando todos cabem; senao a pixelada menor em todos
+  local f = T.f.pix16
+  for i, b in ipairs(buttons) do
+    if T.f.pix16:getWidth(I18N.tr(b.label)) > widths[i] - 12 then f = T.f.pix8 end
+  end
   local bx = DX
   for i, b in ipairs(buttons) do
-    local w = i == 1 and 230 or 146
+    local w = widths[i]
     local on = i == self.btn
-    local c = (not b.enabled) and T.c.faint or (i == 1 and T.c.accent or T.c.accent2)
+    local c = (not b.enabled) and T.c.faint or (b.id == "back" and T.c.accent2 or T.c.accent)
+    local ty = by + math.floor((40 - f:getHeight()) / 2)
     if on then
       G.rect(bx - 3, by - 3, w + 6, 46, c, 9, App.pulse(0.3, 0.15, 5))
       G.rect(bx, by, w, 40, c, 8)
-      G.text(T.f.pix16, b.label, bx, by + 12, T.c.bg0, "center", w)
+      G.text(f, b.label, bx, ty, T.c.bg0, "center", w)
     else
       G.rect(bx, by, w, 40, T.c.bg2, 8)
       G.frame(bx, by, w, 40, c, 8)
-      G.text(T.f.pix16, b.label, bx, by + 12, c, "center", w)
+      G.text(f, b.label, bx, ty, c, "center", w)
     end
     bx = bx + w + 10
   end
@@ -245,22 +283,176 @@ function S:draw()
   G.hints(hs)
 end
 
+-- ---------------------------------------------------------------------------
+-- NEON GRID: capa em destaque, grade de informacoes, descricao e acoes
+-- (Instalar / Iniciar / Remover / Favoritar) conforme o estado do port
+-- ---------------------------------------------------------------------------
+function S:neon_buttons()
+  local p = self.port
+  local label, enabled = self:primary()
+  local installed = App.status(p) ~= "none"
+  local list = {}
+  list[#list + 1] = { id = "primary", label = label, enabled = enabled }
+  list[#list + 1] = { id = "start", label = L("INICIAR"), enabled = App.port_script(p) ~= nil }
+  list[#list + 1] = { id = "remove", label = L("REMOVER"), enabled = installed and not p.builtin, danger = true }
+  list[#list + 1] = { id = "fav", label = Favorites.is(p) and L("DESFAVORITAR") or L("FAVORITAR"), enabled = not p.builtin }
+  return list
+end
+
+local function info_cell(k, v, x, y, w)
+  G.text(T.f.pix8, k, x, y, T.c.faint)
+  G.text_fit(T.f.small, v, x, y + 11, w, T.c.text)
+end
+
+function S:draw_neon()
+  local p = self.port
+  G.header(L("Detalhes do port"))
+  local acc = p.section == "tools" and T.c.green or T.c.accent
+  -- capa em destaque com moldura neon
+  local cx, cy, cw, ch = 16, 52, 150, 200
+  G.rect(cx - 4, cy - 4, cw + 8, ch + 8, T.c.bg1, 9)
+  G.cover(Covers.get(p), p, cx, cy, cw, ch, Covers.is_loading(p), App.t)
+  G.frame(cx - 2, cy - 2, cw + 4, ch + 4, acc, 8, 2, App.animations() and App.pulse(0.7, 0.25, 2.2) or 0.9)
+  if Favorites.is(p) then Icons.draw("set_favorites", cx + cw - 26, cy + 6, T.c.yellow, 0.85) end
+  -- nome e etiquetas
+  local tx, tw = NX, NW
+  local tl = G.wrap(T.f.h2, p.name, tw)
+  local y = 48
+  for i = 1, math.min(2, #tl) do G.text(T.f.h2, tl[i], tx, y, T.c.text); y = y + 24 end
+  y = y + 2
+  local x = tx
+  x = x + G.tag(p.section == "tools" and L("UTILITÁRIO") or L("JOGO"), x, y, acc, T.c.bg0, T.f.bodyb) + 6
+  if self.compat then
+    local col = T.c[Compat.COLOR[self.compat.status]] or T.c.dim
+    x = x + G.tag(Compat.LABEL[self.compat.status], x, y, col, T.c.bg0) + 6
+  end
+  if p.version ~= "" then G.tag("V" .. U.upper(p.version), x, y, T.c.bg3, T.c.text) end
+  -- grade de informacoes (so dados reais; "nao informado" quando o catalogo nao traz)
+  local gy = y + 30
+  local cwid = (tw - 12) / 3
+  local st = App.status(p)
+  local stt
+  if p.builtin then stt = L("Ferramenta do hub")
+  elseif st == "installed" then stt = L("Instalado") .. (Manifest.installed_version(p) and (" (v" .. Manifest.installed_version(p) .. ")") or "")
+  elseif st == "update" then stt = L("Atualização disponível")
+  else stt = L("Não instalado") end
+  local none = L("não informado")
+  local cells = {
+    { L("PLATAFORMA"), (p.platform or "") ~= "" and p.platform or none },
+    { L("CATEGORIA"), p.category },
+    { L("TAMANHO"), (p.size_label and p.size_label ~= "?") and p.size_label or none },
+    { L("DESENVOLVEDOR"), (p.author or "") ~= "" and p.author or none },
+    { L("COMPATIBILIDADE"), self.compat and Compat.LABEL[self.compat.status] or none },
+    { L("ESTADO"), stt },
+  }
+  G.rect(tx, gy - 4, tw, 74, T.c.bg1, 6, 0.9)
+  for i, c in ipairs(cells) do
+    local col, row = (i - 1) % 3, math.floor((i - 1) / 3)
+    info_cell(c[1], c[2], tx + 10 + col * (cwid + 2), gy + 2 + row * 34, cwid - 12)
+  end
+  -- descricao (rolavel)
+  G.panel(NX, NY, NW, NH, { bg = T.c.bg1 })
+  G.clip(NX + 2, NY + 2, NW - 4, NH - 4)
+  local ty = NY + 10
+  for i = self.scroll + 1, math.min(#self.lines, self.scroll + self.max_lines) do
+    local l = self.lines[i]
+    if l.h then G.text(T.f.pix8, l.t, NX + 14, ty + 5, T.c.accent)
+    else G.text(T.f.body, l.t, NX + 14, ty, T.c.text) end
+    ty = ty + self.lh
+  end
+  G.unclip()
+  if #self.lines > self.max_lines then
+    local track = NH - 12
+    local h = math.max(16, track * self.max_lines / #self.lines)
+    local yy = NY + 6 + (track - h) * (self.scroll / (#self.lines - self.max_lines))
+    G.rect(NX + NW - 6, yy, 3, h, T.c.accent, 1, 0.7)
+  end
+  -- coluna da capa: origem e aviso de arquivos do jogo
+  local ly = cy + ch + 12
+  local found, by = Manifest.found(p)
+  if found then
+    G.text_fit(T.f.small, by == "hub" and L("Instalado pelo hub") or L("Encontrado no console"), cx, ly, cw, T.c.green)
+    ly = ly + 16
+  end
+  if p.requires_files then
+    G.rect(cx, ly, cw, 46, T.c.yellow, 6, 0.14)
+    G.frame(cx, ly, cw, 46, T.c.yellow, 6)
+    G.text(T.f.small, L("Requer arquivos do\njogo original"), cx + 8, ly + 6, T.c.yellow)
+  end
+  -- acoes
+  local btns = self:neon_buttons()
+  self.nbtn = U.clamp(self.nbtn or 1, 1, #btns)
+  local bx, by2 = 16, 396
+  local gap = 8
+  local bw = (T.W - 32 - gap * (#btns - 1)) / #btns
+  for i, b in ipairs(btns) do
+    local on = i == self.nbtn
+    local c = (not b.enabled) and T.c.faint or (b.danger and T.c.red or T.c.accent)
+    if on then
+      G.rect(bx - 2, by2 - 2, bw + 4, 42, c, 9, App.animations() and App.pulse(0.35, 0.15, 4) or 0.4)
+      G.rect(bx, by2, bw, 38, b.enabled and c or T.c.bg2, 8)
+      G.text(T.f.pix8, b.label, bx, by2 + 15, b.enabled and T.c.bg0 or T.c.faint, "center", bw)
+    else
+      G.rect(bx, by2, bw, 38, T.c.bg1, 8)
+      G.frame(bx, by2, bw, 38, c, 8, 1)
+      G.text(T.f.pix8, b.label, bx, by2 + 15, c, "center", bw)
+    end
+    bx = bx + bw + gap
+  end
+  local hs = { { "dpad", L("Escolher / rolar") }, { "a", L("Confirmar") } }
+  if self.compat then hs[#hs + 1] = { "y", L("Compatibilidade") } end
+  hs[#hs + 1] = { "select", Favorites.is(p) and L("Desfavoritar") or L("Favoritar") }
+  hs[#hs + 1] = { "b", L("Voltar") }
+  G.hints(hs)
+end
+
+function S:neon_action(act)
+  local btns = self:neon_buttons()
+  local n = #btns
+  self.nbtn = U.clamp(self.nbtn or 1, 1, n)
+  if act == "left" then self.nbtn = math.max(1, self.nbtn - 1); return true end
+  if act == "right" then self.nbtn = math.min(n, self.nbtn + 1); return true end
+  if act ~= "a" then return false end
+  local b = btns[self.nbtn]
+  if not b.enabled then
+    if b.id == "start" then
+      App.toast(App.status(self.port) == "none" and L("Instale o port para poder iniciá-lo pelo hub.")
+        or L("Não encontrei o script deste port na pasta de ports."), "warn")
+    elseif b.id == "remove" then
+      App.toast(L("Este port não está instalado."), "info")
+    elseif b.id == "primary" then
+      return false   -- mesmo aviso do botao principal classico
+    end
+    return true
+  end
+  if b.id == "start" then App.launch_port(self.port); return true end
+  if b.id == "remove" then App.ask_uninstall(self.port); return true end
+  if b.id == "fav" then return self:action("select") or true end
+  return false        -- primario: segue o fluxo normal de instalar
+end
+
 function S:action(act)
+  if neon() and self:neon_action(act) then return end
+  if neon() and act == "a" then self.btn = 1 end
   if act == "select" then
     local on = Favorites.toggle(self.port)
     App.toast(on and (self.port.name .. L(" adicionado aos favoritos")) or (self.port.name .. L(" removido dos favoritos")), "info")
     return
   end
   if act == "y" and self.compat then App.push("compat", { port = self.port }); return end
-  if act == "left" then self.btn = 1
-  elseif act == "right" then self.btn = 2
+  local cb = self:classic_buttons()
+  self.btn = U.clamp(self.btn or 1, 1, #cb)
+  if act == "left" then self.btn = math.max(1, self.btn - 1)
+  elseif act == "right" then self.btn = math.min(#cb, self.btn + 1)
   elseif act == "up" then self.scroll = math.max(0, self.scroll - 1)
   elseif act == "down" then self.scroll = math.min(math.max(0, #self.lines - self.max_lines), self.scroll + 1)
   elseif act == "l1" then self.scroll = math.max(0, self.scroll - self.max_lines)
   elseif act == "r1" then self.scroll = math.min(math.max(0, #self.lines - self.max_lines), self.scroll + self.max_lines)
   elseif act == "b" then App.pop()
   elseif act == "a" then
-    if self.btn == 2 then App.pop(); return end
+    local cur = cb[self.btn]
+    if cur and cur.id == "back" then App.pop(); return end
+    if cur and cur.id == "start" then App.launch_port(self.port); return end
     local _, enabled = self:primary()
     if not enabled and Downloads.pending(self.port.id) then
       App.toast(self.port.name .. L(" já está na Central de Downloads."), "info")

@@ -110,6 +110,13 @@ function A.update(dt)
   elseif cmd == "dialoglist" then
     A.app.show_dialog({ title = "Teste", kind = "info", list = true, body = "Escolha o que fazer com o item selecionado.",
       buttons = { { label = "Recortar", sub = "Mover para outra pasta depois" }, { label = "Excluir", sub = "Apagar do cartão SD", danger = true }, { label = "Extrair aqui", sub = "Descompactar nesta pasta" }, { label = "Cancelar" } } })
+  elseif cmd == "pushport" or cmd == "uninstport" then
+    local Cat = require("core.catalog")
+    for _, pp in ipairs(Cat.ports) do
+      if pp.id == arg then
+        if cmd == "pushport" then A.app.push("details", { port = pp }) else A.app.ask_uninstall(pp) end
+      end
+    end
   elseif cmd == "theme" then
     require("core.themes").apply(arg, false)
   elseif cmd == "refreshcat" then
@@ -125,6 +132,29 @@ function A.update(dt)
     print(string.format("[autotest] %s: %.1f quadros/s, CPU %.1f%% (eco=%s, animacoes=%s)", arg,
       ((A.frames or 0) - A.frames0) / wall, 100 * (os.clock() - A.cpu0) / wall, tostring(A.app.eco), tostring(A.app.animations())))
     io.stdout:flush()
+  elseif cmd == "pushfiles" then
+    A.app.push("files", { path = arg })
+  elseif cmd == "selrow" then
+    -- seleciona a linha de settings_cat pelo rotulo (chave pt)
+    local cur = A.app.current()
+    for i, r in ipairs(cur and cur.rows or {}) do
+      if tostring(r.label) == arg then cur.sel = i end
+    end
+    local labs = {} for _, r in ipairs(cur and cur.rows or {}) do labs[#labs + 1] = tostring(r.label) end
+    print("[autotest] selrow " .. arg .. " -> " .. tostring(cur and cur.sel) .. " em " .. tostring(cur and cur.name) .. " [" .. table.concat(labs, "|") .. "]"); io.stdout:flush()
+  elseif cmd == "backto" then
+    if A.app.dialog then A.app.close_dialog() end
+    while #A.app.stack > 1 and A.app.current().name ~= arg do A.app.pop() end
+  elseif cmd == "curinfo" then
+    local cur = A.app.current()
+    local names = {} for _, sc in ipairs(A.app.stack) do names[#names + 1] = sc.name end
+    local out = { "tela=" .. tostring(cur and cur.name) .. " pilha=" .. table.concat(names, ">"), "titulo=" .. tostring(cur and cur.p and cur.p.title) }
+    for i, it in ipairs(cur and cur.items or {}) do
+      out[#out + 1] = string.format("[%d] %s | %s | %s", i, tostring(it.tag), tostring(it.text), tostring(it.sub))
+      if i >= 12 then break end
+    end
+    if A.app.dialog then out[#out + 1] = "dialogo=" .. tostring(A.app.dialog.title) .. " | " .. tostring(A.app.dialog.body):gsub("\n", " / ") end
+    print("[autotest] " .. table.concat(out, "\n[autotest]   ")); io.stdout:flush()
   elseif cmd == "sel" then
     local cur = A.app.current()
     if cur then cur.sel = tonumber(arg) end
@@ -207,6 +237,26 @@ function A.update(dt)
     print("[autotest] upd tela=" .. tostring(cur and cur.name) .. " estado=" .. tostring(cur and cur.state) .. " modo=" .. tostring(r and r.mode)
       .. " versao=" .. tostring(r and r.version) .. " troca=" .. tostring(r and r.replace) .. " novos=" .. tostring(r and r.new)
       .. " problemas=[" .. table.concat(probs, " ") .. "] erro=" .. tostring(cur and cur.err) .. " job=" .. tostring(M.job and M.job.op) .. "/" .. tostring(M.job and M.job.state))
+    io.stdout:flush()
+  elseif cmd == "scaninit" then
+    A.scanner = require("dev.scan"); A.scanner.install(A.app)
+  elseif cmd == "scanopen" then
+    local name, id = tostring(arg):match("^(%S+)%s*(%S*)$")
+    A.scanner.open(name, id ~= "" and { id = id } or nil)
+  elseif cmd == "scanpop" then
+    while #A.app.stack > 1 do pcall(A.app.pop) end
+  elseif cmd == "scandump" then
+    A.scanner.dump(arg)
+  elseif cmd == "dumpsettings" then
+    local D = require("ui.settings_defs")
+    for _, c in ipairs(D.LIST) do
+      print("[cat] " .. c.id .. " | " .. tostring(c.name))
+      local ok, rows = pcall(function() return type(c.rows) == "function" and c.rows({}) or c.rows end)
+      for _, r in ipairs(ok and rows or {}) do
+        print("    - " .. tostring(r.kind) .. " | " .. tostring(r.label))
+      end
+      if not ok then print("    ERRO " .. tostring(rows)) end
+    end
     io.stdout:flush()
   elseif cmd == "log" then
     print("[autotest] " .. arg)

@@ -213,6 +213,9 @@ function D.on_finished(j)
   else
     e.state = "error"
     e.error = j.error
+    pcall(function()
+      require("core.netlog").add(L("Download: ") .. tostring(e.name), e.port and e.port.download_url, j.error)
+    end)
   end
   if j.result ~= "done" and e.cur_stage and e.stages[e.cur_stage] then
     e.stages[e.cur_stage].state = j.result == "cancelled" and "cancel" or "fail"

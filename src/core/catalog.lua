@@ -302,7 +302,7 @@ end
 function Catalog.source_label()
   local s = Catalog.source
   if s == "online" then return L("Online") end
-  if s == "cache" then return L("Offline (cache)") end
+  if s == "cache" then return L("Cache (último baixado)") end
   if s == "local" then return L("Catálogo local") end
   if s == "example" then return L("Catálogo embutido") end
   return L("Sem catálogo")

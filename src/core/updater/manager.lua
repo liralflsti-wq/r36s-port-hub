@@ -65,6 +65,9 @@ end
 --- inicia uma operacao. args conforme a operacao. on_done(job) ao terminar
 function M.start(op, args, on_done)
   if M.busy() then return false, L("Já existe uma operação de atualização em andamento.") end
+  -- os arquivos do hub ja foram trocados: o app em execucao nao consegue mais
+  -- ler o proprio pacote (threads e modulos novos). So depois de reiniciar.
+  if M.restart_needed then return false, L("Atualização instalada: reinicie o app antes de continuar.") end
   if op ~= "probe" and op ~= "download" and not M.layout_ok() then
     return false, L("A pasta do R36S PORT HUB não está na estrutura esperada (ports/r36sporthub). Atualização bloqueada por segurança.")
   end

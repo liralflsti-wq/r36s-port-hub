@@ -732,3 +732,229 @@ A hora é a do sistema do console (fuso configurado no dArkOS), lida a cada quad
   `C.BIOS_URL = https://archive.org/download/bios-r-36s/Bios%20r36s.rar`
   (o `bios_url.txt` no cartão continua podendo trocar o link).
 
+## Capa dos jogos na lista de Ports do sistema (0.4.6 BETA)
+
+- Antes a capa só aparecia dentro do hub. Agora, ao instalar um port do
+  catálogo, o hub copia a capa do catálogo para a pasta do jogo
+  (`<id>-cover.png/.jpg`; `ports/images/` se o port não tiver uma pasta só)
+  e põe o jogo no `/roms/ports/gamelist.xml` do EmulationStation com nome,
+  descrição, gênero, `image` e `thumbnail`. Sem capa no catálogo, usa a
+  `cover.png`/`screenshot.png` do próprio port.
+- Entrada já existente: só completa `image`/`thumbnail` que faltam; nada do
+  usuário, do PortMaster ou de scrapers é trocado; outros jogos não são
+  tocados; cópia de segurança `gamelist.xml.porthub.bak` e gravação atômica.
+- O que foi feito fica no `installed.json`; a desinstalação pelo hub remove a
+  entrada que o hub criou (ou só as tags de imagem que ele acrescentou) e a
+  imagem copiada. Reinstalar recoloca a imagem.
+- A mensagem de instalação avisa que o jogo aparece com a capa depois de
+  reiniciar o EmulationStation.
+- Arquivos: `core/esgamelist.lua` (`add_port`, `remove_port`),
+  `core/installer.lua`, `core/uninstall.lua`, `core/covers.lua`
+  (`disk_file`, `fetch_file`), `ui/overlay.lua`, `i18n/en.lua`, `i18n/ru.lua`.
+- Testado no simulador: gamelist.xml com outros jogos (preservados e
+  backup igual ao original), jogo novo com capa do catálogo, jogo sem capa no
+  catálogo com cover.png própria, jogo com entrada do usuário sem imagem (só
+  imagem acrescentada), reinstalação recolocando a capa apagada, desinstalação
+  removendo só o que o hub criou; XML válido. Não testado no
+  EmulationStation real do R36S.
+
+## QR Code ampliado em Sobre o Projeto (0.4.6 BETA)
+
+- Nas janelas **Apoie o projeto** (PIX) e **Canal do YouTube**, o botão A
+  abre o QR Code em tela cheia (fundo branco, módulos maiores). A ou B
+  voltam. Arquivo:
+  `ui/screens/about.lua` (+ textos em en/ru).
+
+## Correções da gravação e do atualizador; gravação a 30 FPS (0.4.6 BETA)
+
+- **Gravação fechava com erro** (`threads/rec_thread.lua:93: attempt to index
+  local 'img' (a nil value)`, relatado no R36S): a thread lia dois quadros
+  seguidos e, quando o primeiro vinha vazio e o segundo chegava no meio,
+  tentava liberar um quadro inexistente. Corrigido: só descarta quadros
+  antigos quando o primeiro existe.
+- **Gravação falhava sem explicar** (`Gravação: falha nil nil`): o fim da
+  gravação agora informa quantos quadros chegaram e quantos foram ao ffmpeg,
+  e a tela mostra "Nenhum quadro da tela chegou à gravação." quando for o caso.
+- **Quadros da gravação**: 10, 15 ou 30 FPS. Ao escolher 30 aparece um aviso
+  (usa mais o processador; no modo econômico a tela vai até 20 FPS).
+- **Hub fechava depois de instalar uma atualização** (`core/updater/manager.lua:85:
+  Could not read from file.`, relatado no R36S): depois de trocar o
+  `game.love`, o app em execução não consegue mais ler o próprio pacote; ao
+  voltar e abrir a Atualização local ele fechava. Agora, depois de instalar
+  (ou restaurar um backup), A ou B reiniciam o app, e o gerenciador recusa
+  novas operações até reiniciar.
+- Varredura de traduções e de todas as telas em pt-BR/en/ru: sem erros novos.
+- Arquivos: `threads/rec_thread.lua`, `core/recorder.lua`,
+  `ui/screens/streamrec.lua`, `core/updater/manager.lua`,
+  `ui/screens/upd_pkg.lua`, `ui/screens/upd_backups.lua`, `i18n/en.lua`,
+  `i18n/ru.lua`, `docs/MANUAL.md`.
+
+## Central de Configurações (0.4.7 BETA)
+
+- A tela de Configurações passou de 9 para 18 categorias, em grade com
+  rolagem (L1/R1 mudam de página, contador n/18 no rodapé). Novas categorias:
+  Preferências, Idiomas, Catálogo de ports, Meus Ports, Servidor FTP,
+  Favoritos e jogos, Atualizações do hub, Ferramentas, Diagnóstico e suporte e
+  Sobre o projeto. Opções que já existiam foram reagrupadas, nenhuma foi
+  removida.
+- Novidades: tela ao abrir, comportamento do B no menu principal, restaurar
+  preferências e aparência, atualização automática do catálogo (liga/desliga) e
+  data da última atualização, ordenação das listas e dos favoritos, limpar cache
+  de capas, avisos de downloads em segundo plano, repetir downloads com falha,
+  espaço ocupado por port, instalações incompletas, verificação dos
+  repositórios, histórico de erros de comunicação, avisos do FTP, jogos
+  acessados recentemente, componentes do hub, exportar/importar configurações
+  no cartão, histórico de backups, diagnóstico do aplicativo com relatório para
+  o suporte, licenças e aviso importante em modo leitura.
+- Segurança: confirmações de exclusão, desinstalação, restauração e
+  atualização continuam obrigatórias. Comandos de verificação rodam em segundo
+  plano e só leem arquivos. A senha do FTP nunca vai para exportações ou
+  relatórios.
+- Comunidade: por enquanto só o canal do YouTube; o link do grupo entra numa
+  próxima versão.
+- Arquivos novos: `core/netlog.lua`, `core/shjob.lua`, `threads/shjob_thread.lua`,
+  `core/diag.lua`, `ui/screens/infolist.lua`, `ui/settings_extra.lua`.
+  Alterados: `ui/settings_defs.lua`, `ui/screens/settings.lua`, `ui/icons.lua`,
+  `core/backup.lua`, `core/errlog.lua`, `ui/screens/disclaimer.lua`, `main.lua`,
+  `ui/screens/menu.lua`, `ui/overlay.lua`, `core/ftp.lua`, `core/downloads.lua`,
+  `ui/screens/store.lua`, `core/update.lua`, `i18n/en.lua`, `i18n/ru.lua`.
+
+## Tela inicial: rodapé da rede e troca do destaque (0.4.7 BETA)
+
+- O rodapé mostra só o ícone do Wi-Fi: verde quando conectado, vermelho
+  riscado quando desconectado e amarelo enquanto verifica. O IP continua em
+  Configurações > Rede e conectividade.
+- EM DESTAQUE troca manualmente só com L1/R1. Direcional e analógicos não
+  mudam mais o destaque. Os ícones L1 e R1 aparecem na parte de baixo da caixa,
+  ao lado dos indicadores.
+- Arquivo: `ui/screens/menu.lua`.
+
+## Aviso de versão nova na tela inicial (0.4.7 BETA)
+
+- Ao abrir o hub, depois que a rede responde, o hub consulta em segundo plano o
+  link oficial de atualização (lê só o começo do pacote, cerca de 256 KB).
+- Se houver versão maior que a instalada, aparece no alto da tela inicial, entre
+  a logo e a data, uma faixa com texto deslizante: versão nova disponível e como
+  atualizar. O texto passa, some e recomeça. Com as animações desligadas, fica
+  parado.
+- SELECT na tela inicial abre a Atualização via rede, e o rodapé mostra a dica.
+  Nada é baixado ou instalado sozinho.
+- O aviso some depois de atualizar e reiniciar. Sem internet, ou com o link fora
+  do ar, não aparece nada.
+- Liga/desliga: Configurações > Atualizações do hub > Avisar quando sair versão
+  nova (chave `upd_notify`, ligado por padrão).
+- Arquivos: `core/updnotice.lua` (novo), `ui/screens/menu.lua`, `main.lua`,
+  `ui/settings_extra.lua`, `i18n/en.lua`, `i18n/ru.lua`.
+
+## NEON GRID — Gaming Dashboard (0.4.7 BETA)
+
+- O tema verde e preto (id `xbox`, "Tema Xbox") virou **NEON GRID — Gaming
+  Dashboard**, com identidade própria: nome, descrição, cores (verde neon
+  #39ff88 sobre quase preto), fundo `neongrid` (grade em perspectiva e
+  horizonte iluminado) e pré-visualização nova. Nenhuma marca ou recurso de
+  terceiros. A pasta passou de `themes/xbox/` para `themes/neongrid/`.
+- Migração: `theme.txt` com `xbox` (inclusive vindo de backup/exportação) é
+  aplicado como `neongrid` e regravado. Ao voltar para a 0.4.6 pelo backup, o
+  hub abre com o Tema Padrão (com aviso) e as preferências continuam.
+- Com o NEON GRID, a tela inicial vira um dashboard (destaque, atalhos, jogos
+  recentes, novidades do catálogo, painel lateral com SELECT) e a página do
+  port ganha grade de informações e as ações Instalar/Iniciar/Remover/Favoritar.
+  O Tema Padrão continua com as telas clássicas.
+- **Iniciar** (novo): o hub grava `conf/.run_port` e fecha; o launcher aceita
+  só um `.sh` existente na raiz da pasta de ports (sem `/` nem `..`), roda com
+  `XDG_DATA_HOME`, `LD_LIBRARY_PATH` e `SDL_GAMECONTROLLERCONFIG` originais e
+  sem as variáveis do hub e, ao sair do jogo, reabre o hub na página do port.
+- Arquivos: `themes/neongrid/` (theme.json e preview.png novos; logos mantidas),
+  `core/themes.lua` (aliases e migração, `style.layout`), `ui/gfx.lua` (fundo
+  `neongrid`), `ui/neon_dash.lua` (novo), `ui/screens/menu.lua`,
+  `ui/screens/details.lua`, `ui/icons.lua` (ícones set_store, set_grid,
+  set_exit), `main.lua` (Iniciar, volta do jogo, migração na restauração),
+  `R36S PORT HUB.sh` (`.run_port`), `ui/screens/themes.lua`, `i18n/en.lua`,
+  `i18n/ru.lua`, `docs/TEMAS.md`, `docs/MANUAL.md`, `README.md`,
+  `GUIA_GITHUB_CATALOGOS.txt`.
+
+## Iniciar também no Tema Padrão (0.4.7 BETA)
+
+- A página do port no Tema Padrão ganhou o botão **INICIAR** entre o botão
+  principal e VOLTAR. Ele só aparece quando o port está instalado e tem script
+  `.sh` na pasta de ports. Usa o mesmo fluxo do NEON GRID (confirmação,
+  `conf/.run_port`, volta para a página do port).
+- Com três botões, todos usam a fonte pixelada menor quando algum texto não cabe.
+- Arquivo: `ui/screens/details.lua`.
+
+## Biblioteca de jogos — etapa 2 do R36 Hub OS (0.4.8 BETA)
+
+- Nova Biblioteca de jogos: lê o `es_systems.cfg` do console (126 sistemas no
+  dArkOSRE-R36), procura as ROMs em segundo plano (`find`, até 3 níveis), usa o
+  `gamelist.xml` para nome, capa e informações e abre o jogo com o mesmo comando
+  do EmulationStation, pelo launcher (`conf/.run_game`), com o hub fechado.
+  Volta para a biblioteca no mesmo sistema ao sair do jogo.
+- Escolha de emulador/core por sistema e por jogo, favoritos e recentes próprios.
+- Menu clássico com 8 itens (passo de 44 px); NEON GRID com 8 atalhos (2x4) e
+  Biblioteca no painel lateral.
+- Arquivos: `core/library.lua`, `ui/screens/library.lua`,
+  `ui/screens/library_games.lua` (novos); `main.lua` (abrir jogo, volta, bloqueio
+  comum com o Iniciar), `ui/screens/menu.lua`, `ui/neon_dash.lua`,
+  `R36S PORT HUB.sh` (`.run_game`), `config.lua` (0.4.8), `i18n/en.lua`,
+  `i18n/ru.lua`, `docs/MANUAL.md`.
+
+## Modo R36 Hub OS no hub (0.4.8 BETA)
+
+- Quando o supervisor do R36 Hub OS abre o hub (variável `R36HUBOS=1`), o hub
+  vira a interface principal: o B do menu e o item "Sair" viram **Energia**
+  (Reiniciar a interface, Reiniciar console, Desligar console), "Reiniciar
+  lista" some, a versão mostra "R36 Hub OS x.y • 0.4.8 BETA" e o NEON GRID
+  mostra "R36 HUB OS" no cabeçalho.
+- O launcher (`R36S PORT HUB.sh`) agora sai com o código do app (o supervisor
+  usa para contar falhas), não reinicia o EmulationStation no modo R36 Hub OS e
+  aceita `--restaurar-ultimo-backup` (usado pelo menu de recuperação).
+- Rodando como port no dArkOSRE normal, nada muda.
+- Arquivos: `config.lua`, `ui/screens/menu.lua`, `ui/neon_dash.lua`, `main.lua`,
+  `ui/overlay.lua`, `R36S PORT HUB.sh`, `i18n/en.lua`, `i18n/ru.lua`.
+
+## Configurações reorganizadas (0.4.8 BETA)
+
+- Cada opção ficou num cartão só, sem repetição. 17 cartões: Preferências,
+  Aparência, Áudio, Rede, Servidor FTP, Catálogo, Downloads, Meus Ports,
+  **Armazenamento** (novo), Bateria e energia, Controles, Informações do console,
+  Atualizações do hub, PortMaster e runtimes, Backup, Diagnóstico e suporte e
+  Sobre o projeto.
+- Removidos: o cartão Idiomas (o idioma fica em Preferências; A abre a tela de
+  escolha com as bandeiras, a mesma da primeira abertura) e o cartão Favoritos e jogos (favoritos e ordenação foram para
+  Meus Ports e Catálogo; a lista de jogos acessados do ES saiu, a Biblioteca tem
+  Recentes).
+- Armazenamento reúne o cartão microSD (espaço de cada cartão), a memória RAM, o
+  espaço ocupado pelos ports, o cache de capas, o Gerenciador de arquivos, o
+  Otimizador do microSD e o Verificador do cartão SD, que saíram dos outros cartões.
+- Informações do console ficou só com o que identifica o aparelho; a Análise da
+  bateria foi para Bateria e energia, e rede e cartão SD saíram dela.
+- Rede ficou com as linhas principais; interface, gateway e DNS continuam no
+  Diagnóstico de rede.
+- Ferramentas virou "PortMaster e runtimes"; Componentes do hub ficam só no
+  Diagnóstico e o Verificador de integridade só em Meus Ports. O Gerenciador de
+  atualizações (que repetia as outras opções) saiu do cartão Atualizações.
+- Novas opções em Preferências: **Posição das notificações** (4 posições, com
+  exemplo na hora) e **Aviso de nova versão do hub** (liga/desliga).
+- Registro de erros: abre um leitor de texto no arquivo mais recente (rolagem,
+  L1/R1 por página, esquerda/direita troca de arquivo) e B volta para
+  Diagnóstico e suporte.
+- Gerenciador de arquivos: nova opção **Copiar** (X ou A no item). Y ou
+  Opções > Colar cola a cópia na pasta aberta; na mesma pasta ela ganha o nome
+  "(cópia)". Nunca sobrescreve, confere o espaço livre e apaga só a cópia
+  incompleta se falhar. Não cola dentro da pasta do hub.
+- Arquivos: `ui/settings_defs.lua`, `ui/settings_extra.lua`, `ui/overlay.lua`,
+  `ui/icons.lua` (set_storage), `ui/screens/files.lua`,
+  `threads/fileop_thread.lua`, `ui/screens/textview.lua` (novo), `main.lua`,
+  `i18n/en.lua`, `i18n/ru.lua`.
+
+## Catálogo: nova tentativa automática (0.4.8 BETA)
+
+- Se o catálogo online falhar na abertura sem o usuário ter pedido (ex.: o Wi-Fi
+  ainda conectando), o hub tenta de novo sozinho a cada 20 s, só com a rede
+  conectada, até 3 vezes, sem mostrar avisos. Para quando o catálogo online
+  carrega ou quando "Atualizar ao abrir o hub" está desligado.
+- O estado "Offline (cache)" virou "Cache (último baixado)": ele só quer dizer
+  que o catálogo em uso é o último baixado, não que o console está sem rede.
+- Arquivos: `main.lua`, `core/catalog.lua`, `i18n/en.lua`, `i18n/ru.lua`.
+
+

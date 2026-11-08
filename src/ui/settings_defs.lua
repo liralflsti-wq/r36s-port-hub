@@ -31,6 +31,7 @@ local Downloads = require("core.downloads")
 local Runtimes = require("core.runtimes")
 local Backup = require("core.backup")
 local SysInfo = require("core.sysinfo")
+local X = require("ui.settings_extra")
 
 local D = {}
 
@@ -51,11 +52,11 @@ local function fmt_date(t) return require("core.clock").datetime(t) end
 local appearance = {
   id = "appearance", icon = "set_appearance", color = "accent",
   name = L("Aparência e personalização"),
-  desc = L("Tema, idioma, brilho e animações."),
+  desc = L("Tema, texto, brilho e animações."),
   status = function()
-    local lb = "?"
-    for _, l in ipairs(I18N.LANGS) do if l.id == I18N.lang then lb = l.label end end
-    return theme_name() .. "  •  " .. lb
+    local fl = ""
+    for _, l in ipairs(T.FONT_LEVELS) do if l.id == T.font_level then fl = I18N.tr(l.label) end end
+    return theme_name() .. (fl ~= "" and ("  •  " .. fl) or "")
   end,
   enter = function() if not Brightness.checked then Brightness.detect() end end,
   update = function(dt)
@@ -65,8 +66,6 @@ local appearance = {
   rows = {
     { kind = "value", label = L("Tema"), desc = L("Escolha a aparência do R36S PORT HUB. A mudança vale na hora."),
       value = theme_name, on_a = function() App.push("themes") end },
-    { kind = "value", label = L("Idioma"), desc = L("Idioma de todo o aplicativo. A mudança vale na hora, sem reiniciar."),
-      value = lang_name, on_a = function() App.push("language", { first = false }) end },
     { kind = "value", label = L("Tamanho do texto"), icon = "set_text",
       desc = L("Esquerda/direita aumenta ou diminui o texto de todo o aplicativo. Se um texto não couber no espaço da tela, ele diminui sozinho até o tamanho padrão e, se ainda assim não couber, é encurtado com reticências. A escolha fica salva."),
       value = function()
@@ -114,6 +113,18 @@ local appearance = {
       end,
       get = function() return App.anim end,
       set = function(v) App.anim = v; Prefs.set("anim", v and "1" or "0") end },
+    { kind = "action", label = L("Restaurar aparência original"),
+      desc = L("Volta ao Tema Padrão, ao tamanho de texto padrão e liga as animações. Brilho e idioma não mudam."),
+      on_a = function()
+        App.show_dialog({ title = L("Restaurar aparência?"), kind = "warn",
+          body = L("O hub volta ao Tema Padrão, com o tamanho de texto padrão e as animações ligadas."),
+          buttons = { { label = L("RESTAURAR"), fn = function()
+            if Themes.current ~= Themes.DEFAULT then Themes.apply(Themes.DEFAULT, true) end
+            App.set_font_level("normal")
+            App.anim = true; Prefs.set("anim", "1")
+            App.toast(L("Aparência original restaurada."), "ok")
+          end }, { label = L("CANCELAR") } } })
+      end },
   },
 }
 
@@ -148,7 +159,7 @@ local function net() return Net.current() end
 local network = {
   id = "network", icon = "set_network", color = "accent2",
   name = L("Rede e conectividade"),
-  desc = L("Wi-Fi, IP local, velocidade, diagnóstico, FTP e transmissão."),
+  desc = L("Wi-Fi, IP local, diagnóstico, repositórios e transmissão."),
   status = function()
     local st = net()
     local s
@@ -192,12 +203,6 @@ local network = {
         if not w then return L("Verificando...") end
         return (w.connected and w.connection) or "—"
       end },
-    { kind = "info", label = L("Tipo de conexão"), desc = L("Como o console está ligado à rede."),
-      value = function()
-        local st = net()
-        if not (st and st.connected) then return "—" end
-        return st.wireless and "Wi-Fi" or L("Cabo/outra")
-      end },
     { kind = "info", label = L("Sinal"), desc = L("Intensidade do sinal Wi-Fi informada pelo sistema."),
       value = function(scr)
         local st = net()
@@ -208,10 +213,6 @@ local network = {
         local s = scr.sig
         return s and (s.quality .. "%" .. (s.dbm and string.format("  (%d dBm)", s.dbm) or "")) or L("Não disponível")
       end },
-    { kind = "info", label = L("Gateway"), desc = L("Roteador usado para sair para a internet."),
-      value = function(scr) return (scr.wst and scr.wst.connected and scr.wst.gateway) or "—" end },
-    { kind = "info", label = "DNS", desc = L("Servidores de nomes em uso."),
-      value = function(scr) return (scr.wst and scr.wst.connected and scr.wst.dns and #scr.wst.dns > 0) and table.concat(scr.wst.dns, ", ") or "—" end },
     { kind = "info", label = L("Conexão"), desc = L("Estado da rede, atualizado sozinho a cada poucos segundos."),
       value = function()
         local st = net()
@@ -219,23 +220,10 @@ local network = {
         return st.connected and L("CONECTADO") or L("DESCONECTADO")
       end,
       color = function() local st = net(); return st and (st.connected and T.c.green or T.c.red) or T.c.dim end },
-    { kind = "info", label = L("Interface"), desc = L("Placa de rede em uso."),
-      value = function()
-        local st = net()
-        if not (st and st.iface and st.iface ~= "?") then return L("Não disponível") end
-        return st.iface .. (st.wireless and L("  (sem fio)") or "")
-      end },
     { kind = "info", label = L("IP local"), desc = L("Endereço do console na rede local (usado pelo FTP)."),
       value = function() local st = net(); return st and st.ip or "—" end },
-    { kind = "info", label = L("Servidor FTP"), desc = L("Estado do servidor FTP do hub."),
-      value = function()
-        if Ftp.state == "on" then return L("ATIVADO") .. "  •  " .. L("porta ") .. Ftp.cfg.port .. "  •  " .. Ftp.clients .. L(" cliente(s)") end
-        if Ftp.running() then return L("AGUARDE") end
-        return L("DESATIVADO")
-      end,
-      color = function() return Ftp.state == "on" and T.c.green or (Ftp.running() and T.c.yellow or T.c.red) end },
     { kind = "action", label = L("Diagnóstico de rede"),
-      desc = L("Wi-Fi, nome da rede, IP, gateway, DNS, sinal, testes de acesso à internet e ao GitHub e velocidade da internet."),
+      desc = L("Todos os detalhes da conexão (interface, gateway, DNS, sinal) e testes de acesso à internet e ao GitHub."),
       on_a = function() App.push("netdiag") end },
     { kind = "action", label = L("Velocidade da internet"),
       desc = L("Mede latência, download e upload com os servidores do teste da Cloudflare. Usa cerca de 33 MB de dados por teste."),
@@ -245,9 +233,6 @@ local network = {
         return string.format("%.1f Mbps", tonumber(dn) * 8 / 1000000) .. "  •  " .. require("core.clock").date(tonumber(tm), true)
       end,
       on_a = function() App.push("netdiag", { speed = true }) end },
-    { kind = "action", label = L("Configurar servidor FTP"),
-      desc = L("Envie e receba arquivos do cartão SD pelo celular ou computador, na rede Wi-Fi."),
-      on_a = function() App.push("ftp") end },
     { kind = "action", label = L("Transmissão e gravação"),
       desc = L("Veja a tela do hub ao vivo no navegador do computador (rede local) e grave vídeos da interface no cartão SD."),
       value = function()
@@ -258,6 +243,7 @@ local network = {
         return #t > 0 and table.concat(t, "  •  ") or L("desligadas")
       end,
       on_a = function() App.push("streamrec") end },
+    X.network_extra_rows()[1],
   },
 }
 
@@ -268,7 +254,7 @@ local HEALTH = { good = L("Boa"), overheat = L("Superaquecida"), dead = L("Esgot
 local battery = {
   id = "battery", icon = "set_battery", color = "green",
   name = L("Bateria e energia"),
-  desc = L("Carga, carregamento e modo econômico."),
+  desc = L("Carga, carregamento, análise da bateria e modo econômico."),
   status = function()
     local b = Battery.get()
     if not b.ok then return L("Bateria indisponível") end
@@ -318,6 +304,9 @@ local battery = {
       rows[#rows + 1] = { kind = "info", label = L("Temperatura da bateria"), desc = L("Temperatura informada pelo sensor da bateria."),
         value = function() local t = (scr.bat or {}).temp; return t and string.format("%.1f °C", t) or L("Não disponível") end }
     end
+    rows[#rows + 1] = { kind = "action", label = L("Análise da bateria"), icon = "set_battery",
+      desc = L("Nível, estado, tensão, corrente e capacidade que o sistema informa, e o tempo estimado para a carga completa. Somente leitura."),
+      on_a = function() App.push("battery") end }
     rows[#rows + 1] = { kind = "toggle", label = L("Modo econômico"),
       desc = L("Reduz a tela de 30 para 20 quadros por segundo e desliga as animações decorativas, diminuindo o uso do processador. Não altera o brilho."),
       get = function() return App.eco end,
@@ -384,33 +373,7 @@ local function dl_status()
   if w > 0 then s = s .. (s ~= "" and "  •  " or "") .. string.format(L("%d na fila"), w) end
   return s
 end
-local downloads = {
-  id = "downloads", icon = "set_downloads", color = "accent2",
-  name = L("Downloads e atualizações"),
-  desc = L("Central de downloads, catálogo, runtimes, PortMaster e versão."),
-  status = dl_status,
-  enter = function(scr) scr.pm = Runtimes.detect_pm() end,
-  resume = function(scr) scr.pm = Runtimes.detect_pm() end,
-  rows = {
-    { kind = "action", label = L("Central de Downloads"),
-      desc = L("Downloads, extrações e instalações feitos pelo hub aparecem aqui.\nPressione START em qualquer tela para voltar a esta central."),
-      value = dl_status, on_a = function() App.open_downloads(true) end },
-    { kind = "action", label = L("Atualizar catálogo"),
-      desc = function()
-        local url = Catalog.get_remote_url()
-        local st = string.format(L("Atual: %s  •  %d ports  •  %d categorias%s"), Catalog.source_label(), #Catalog.ports,
-          #Catalog.categories, Catalog.updated ~= "" and (L("  •  versão ") .. Catalog.updated) or "")
-        return L("Fonte: ") .. (url or L("nenhuma URL configurada (catalog_url.txt)")) .. "\n" .. st
-      end,
-      value = function() return Catalog.remote_state == "loading" and L("Atualizando catálogo...") or Catalog.source_label() end,
-      on_a = function()
-        if Catalog.remote_state == "loading" then return end
-        App.update_free_space()
-        App.refresh_catalog(true, function(okc, msg)
-          App.show_dialog({ title = okc and L("Catálogo") or L("Falha ao atualizar"), kind = okc and "ok" or "error", body = msg })
-        end)
-      end },
-    { kind = "action", label = L("Atualizar runtimes"),
+local runtimes_row = { kind = "action", label = L("Atualizar runtimes"),
       desc = function(scr)
         local where = scr.pm and (L("PortMaster: ") .. scr.pm .. "/libs") or L("PortMaster não encontrado neste console")
         return L("Pacote: ") .. C.RUNTIMES_ZIP_NAME .. L("  (release ") .. C.RUNTIMES_RELEASE .. L(")  •  backup e md5 de cada arquivo") .. "\n" .. where
@@ -428,22 +391,14 @@ local downloads = {
             .. L("Se houver novos ou desatualizados, você verá a lista e o tamanho do download (o pacote completo tem cerca de 1,95 GB) antes de qualquer alteração. Conecte o console à energia e ao Wi-Fi."),
           buttons = { { label = L("VERIFICAR"), fn = App.update_runtimes }, { label = "VOLTAR" } },
         })
-      end },
-    { kind = "action", label = L("Gerenciar PortMaster"),
-      desc = L("Instalar, atualizar, verificar e reparar o PortMaster com a versão estável oficial.\nBackup antes de mudar; ports, saves, configurações e runtimes são preservados."),
-      value = function(scr)
-        if require("core.pmmanager").busy() then return L("em andamento") end
-        return scr.pm and "PortMaster" or L("não instalado")
-      end,
-      on_a = function() App.push("pmmanager") end },
-    { kind = "action", label = L("Atualizações"),
-      desc = L("Versão instalada: ") .. C.VERSION .. L(". Atualização local (pasta update) ou via rede, histórico e backups."),
-      value = function() return "v" .. C.VERSION end,
-      on_a = function() App.push("updmgr") end },
-    { kind = "action", label = L("Gerenciador de arquivos"),
-      desc = L("Navegue pelo cartão SD e extraia arquivos ZIP, RAR e 7z."),
-      on_a = function() App.push("files", { path = C.PORTS_DIR }) end },
-  },
+      end }
+
+local downloads = {
+  id = "downloads", icon = "set_downloads", color = "accent2",
+  name = L("Downloads"),
+  desc = L("Fila, progresso, histórico, avisos e falhas."),
+  status = dl_status,
+  rows = X.downloads_rows(dl_status),
 }
 
 -- ---------------------------------------------------------------------------
@@ -505,7 +460,7 @@ end
 local backup = {
   id = "backup", icon = "set_backup", color = "green",
   name = L("Backup e restauração"),
-  desc = L("Salve e restaure as configurações do hub."),
+  desc = L("Salvar, restaurar, exportar e importar configurações."),
   status = backup_status,
   enter = function(scr) scr.binfo = Backup.info(); scr.bsel = Backup.selected() end,
   rows = function(scr)
@@ -534,6 +489,68 @@ local backup = {
       desc = L("Volta as configurações salvas no último backup. Pede confirmação antes de substituir."),
       enabled = function() return scr.binfo ~= nil end,
       on_a = function() do_restore(scr) end }
+    rows[#rows + 1] = { kind = "action", label = L("Exportar para o cartão"),
+      desc = function()
+        return L("Grava uma cópia dos itens marcados acima numa pasta nova, que dá para copiar pelo FTP ou guardar no PC:\n")
+          .. Backup.EXPORT_DIR .. L("\nA senha do FTP nunca é exportada. Jogos, BIOS e saves não entram.")
+      end,
+      on_a = function()
+        local ok, name, n = Backup.export(scr.bsel)
+        if ok then
+          App.show_dialog({ title = L("Preferências exportadas"), kind = "ok",
+            body = string.format(L("%d arquivo(s) exportado(s) para:\n"), n) .. Backup.EXPORT_DIR .. "/" .. name })
+        else
+          App.show_dialog({ title = L("Não foi possível exportar"), kind = "error", body = name })
+        end
+      end }
+    rows[#rows + 1] = { kind = "action", label = L("Importar do cartão"),
+      desc = function() return L("Restaura uma das exportações da pasta:\n") .. Backup.EXPORT_DIR .. L("\nPede confirmação antes de substituir.") end,
+      value = function() local n = #Backup.exports(); return n == 0 and L("nenhuma exportação") or string.format(I18N.tr(L("%d exportação(ões)")), n) end,
+      on_a = function()
+        local list = Backup.exports()
+        if #list == 0 then App.toast(L("Nenhuma exportação encontrada na pasta configuracoes."), "info"); return end
+        if Downloads.active() or Downloads.waiting_count() > 0 or Ftp.running() then
+          App.show_dialog({ title = L("Aguarde"), kind = "warn", body = L("Pare o FTP e aguarde os downloads terminarem antes de importar.") })
+          return
+        end
+        local buttons = {}
+        for k = 1, math.min(5, #list) do
+          local e = list[k]
+          buttons[#buttons + 1] = { label = require("core.clock").datetime(e.time, true), sub = "v" .. tostring(e.version or "?") .. "  •  " .. group_names(e.groups),
+            fn = function()
+              App.show_dialog({ title = L("Importar estas preferências?"), kind = "warn",
+                body = L("Exportação de ") .. fmt_date(e.time) .. " (v" .. tostring(e.version or "?") .. ")\n\n" .. L("Serão substituídos: ")
+                  .. group_names(e.groups) .. ".\n\n" .. L("Os ports instalados e os arquivos dos jogos não são alterados."),
+                buttons = { { label = L("IMPORTAR"), fn = function()
+                  local ok, done = Backup.import(e.name)
+                  if ok then
+                    App.apply_restored(done)
+                    if scr.rebuild then scr:rebuild() end
+                    App.toast(L("Preferências importadas."), "ok")
+                  else
+                    App.show_dialog({ title = L("Falha na importação"), kind = "error", body = done })
+                  end
+                end }, { label = L("CANCELAR") } } })
+            end }
+        end
+        buttons[#buttons + 1] = { label = L("Voltar") }
+        App.show_dialog({ title = L("Importar do cartão"), kind = "info", list = true, body = L("Escolha a exportação:"), buttons = buttons })
+      end }
+    rows[#rows + 1] = { kind = "action", label = L("Histórico de backups"),
+      desc = L("Backup interno e exportações encontradas no cartão, com data, versão e itens."),
+      on_a = function()
+        local items = {}
+        local info = Backup.info()
+        if info then
+          items[#items + 1] = { tag = L("INTERNO"), tagc = T.c.accent2, text = fmt_date(info.time),
+            sub = "v" .. tostring(info.version or "?") .. "  •  " .. group_names(info.groups) }
+        end
+        for _, e in ipairs(Backup.exports()) do
+          items[#items + 1] = { tag = L("CARTÃO"), tagc = T.c.green, text = fmt_date(e.time),
+            sub = "v" .. tostring(e.version or "?") .. "  •  " .. group_names(e.groups), detail = Backup.EXPORT_DIR .. "/" .. e.name }
+        end
+        App.push("infolist", { title = L("Histórico de backups"), items = items, empty = L("Nenhum backup ainda.") })
+      end }
     return rows
   end,
 }
@@ -566,14 +583,38 @@ local notifications = {
   },
 }
 
+-- processador e resolucao (lidos do sistema; so o que for identificado)
+local function cpu_text()
+  local n = 0
+  for _ in (U.read_file("/proc/cpuinfo") or ""):gmatch("\nprocessor%s*:") do n = n + 1 end
+  if (U.read_file("/proc/cpuinfo") or ""):match("^processor%s*:") then n = n + 1 end
+  local mhz = tonumber(U.trim(U.read_file("/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq") or ""))
+  local last = require("core.consoleid").load_last()
+  local name = last and last.info and last.info.cpu or nil
+  local t = {}
+  if name then t[#t + 1] = name end
+  if n > 0 then t[#t + 1] = string.format(I18N.tr(L("%d núcleos")), n) end
+  if mhz then t[#t + 1] = string.format("%.2f GHz", mhz / 1000000) end
+  return #t > 0 and table.concat(t, "  •  ") or SysInfo.NA
+end
+local function resolution_text()
+  local m = U.capture("cat /sys/class/drm/card*-*/modes 2>/dev/null | head -n 1") or ""
+  m = m:match("(%d+x%d+)")
+  if m then return m end
+  local okd, w, h = pcall(love.window.getDesktopDimensions)
+  if okd and w and w > 0 then return w .. "x" .. h end
+  return SysInfo.NA
+end
+
 -- ---------------------------------------------------------------------------
 -- INFORMACOES DO CONSOLE (dados lidos so ao abrir a categoria)
 local console = {
   id = "console", icon = "set_console", color = "accent",
   name = L("Informações do console"),
-  desc = L("Modelo, sistema, armazenamento e memória."),
+  desc = L("Modelo, processador, tela, sistema, data e hora."),
   status = function()
-    return "v" .. C.VERSION .. (App.free and ("  •  " .. U.format_bytes(App.free) .. L(" livres")) or "")
+    local last = require("core.consoleid").load_last()
+    return (last and last.info and last.info.model) or (C.OS_MODE and C.OS_NAME) or "R36S"
   end,
   enter = function(scr) scr.info = nil; scr.loading = 2 end,     -- coleta depois do 1o quadro desenhado
   resume = function(scr) scr:rebuild() end,
@@ -600,53 +641,23 @@ local console = {
         return require("core.clock").datetime(last.result.time, true)
       end,
       on_a = function() App.push("consoleid") end }
-    local sdmaint = { kind = "action", label = L("Otimizador e manutenção do microSD"), icon = "set_sdmaint",
-      desc = L("Analise o espaço, verifique a integridade e cuide do cartão microSD sem colocar seus jogos em risco."),
-      value = function() return "" end,
-      on_a = function() App.push("sdmaint") end }
     local datetime = { kind = "action", label = L("Data e hora"), icon = "set_clock",
       desc = L("Data, hora, fuso horário, sincronização pela internet e formatos de exibição."),
       value = function() local K = require("core.clock"); return K.date(nil, true) .. "  " .. K.time() end,
       on_a = function() App.push("datetime") end }
-    local sdcheck = { kind = "action", label = L("Verificador do cartão SD"), icon = "set_sdmaint",
-      desc = L("Fabricante, modelo, classe de velocidade e data que o próprio cartão informa, pistas de cartão falsificado e teste rápido de velocidade."),
-      value = function() return "" end,
-      on_a = function() App.push("sdcheck") end }
-    local errlog = { kind = "action", label = L("Registro de erros"), icon = "set_console",
-      desc = function()
-        return L("Erros e problemas do R36S PORT HUB ficam salvos em arquivos de texto na pasta:\n")
-          .. require("core.errlog").dir() .. L("\nA abre a pasta no Gerenciador de arquivos (também dá para copiar pelo FTP).")
-      end,
-      value = function()
-        local n = require("core.errlog").count()
-        return n == 0 and L("nenhum erro registrado") or string.format(L("%d arquivo(s)"), n)
-      end,
-      on_a = function()
-        local d = require("core.errlog").dir()
-        if require("core.errlog").count() == 0 then App.toast(L("Nenhum erro registrado até agora."), "info"); return end
-        App.push("files", { path = d })
-      end }
-    local battery = { kind = "action", label = L("Análise da bateria"), icon = "set_battery",
-      desc = L("Nível, estado, tensão, corrente e capacidade que o sistema informa, e o tempo estimado para a carga completa. Somente leitura."),
-      value = function()
-        local b = Battery.get()
-        return b.ok and (b.pct .. "%" .. (b.charging and ("  •  " .. I18N.tr(L("carregando"))) or "")) or I18N.tr(L("indisponível"))
-      end,
-      on_a = function() App.push("battery") end }
     if not r then
-      return { analyzer, battery, sdmaint, sdcheck, datetime, errlog, { kind = "info", label = L("Lendo informações..."), desc = L("Somente leitura: nada é alterado no console."),
+      return { analyzer, datetime, { kind = "info", label = L("Lendo informações..."), desc = L("Somente leitura: nada é alterado no console."),
         value = function() return "" end } }
     end
     local NA = SysInfo.NA
-    local s = r.storage and r.storage[1] or { ok = false }
     local rows = {
       analyzer,
-      battery,
-      sdmaint,
-      sdcheck,
       datetime,
-      errlog,
       { kind = "info", label = L("Dispositivo"), desc = L("Modelo informado pelo sistema."), value = function() return r.model end },
+      { kind = "info", label = L("Processador"), desc = L("Processador informado pelo sistema (nome identificado pelo Analisador de Console, quando já usado)."),
+        value = function() if not scr.cpu then scr.cpu = cpu_text() end return scr.cpu end },
+      { kind = "info", label = L("Resolução da tela"), desc = L("Resolução informada pelo sistema de vídeo."),
+        value = function() if not scr.res then scr.res = resolution_text() end return scr.res end },
       { kind = "info", label = L("Arquitetura"), desc = L("Arquitetura do processador."), value = function() return r.arch end },
       { kind = "info", label = L("Sistema"), desc = L("Sistema operacional (firmware) instalado."),
         value = function()
@@ -654,14 +665,6 @@ local console = {
           if o and o.name and o.name ~= "" and o.id ~= "unknown" then return o.name .. ((o.version and o.version ~= "") and (" " .. o.version) or "") end
           return r.os
         end },
-      { kind = "info", label = L("Versão do R36S PORT HUB"), desc = L("Versão instalada do aplicativo."), value = function() return C.VERSION end },
-      { kind = "info", label = L("Cartão SD: total"), desc = L("Cartão com a pasta de ports."), value = function() return s.ok and U.format_bytes(s.total) or NA end },
-      { kind = "info", label = L("Cartão SD: usado"), desc = L("Cartão com a pasta de ports."),
-        value = function() return s.ok and (U.format_bytes(s.used) .. string.format(" (%d%%)", math.floor(s.frac * 100 + 0.5))) or NA end },
-      { kind = "info", label = L("Cartão SD: livre"), desc = L("Cartão com a pasta de ports."), value = function() return s.ok and U.format_bytes(s.free) or NA end,
-        color = function() return (s.ok and s.frac > 0.9) and T.c.red or T.c.text end },
-      { kind = "info", label = L("Memória disponível"), desc = L("Memória RAM livre para uso agora."),
-        value = function() return r.mem.ok and (U.format_bytes(r.mem.avail) .. L(" de ") .. U.format_bytes(r.mem.total)) or NA end },
     }
     if scr.temp then
       rows[#rows + 1] = { kind = "info", label = L("Temperatura do processador"), desc = L("Temperatura informada pelo sensor do sistema."),
@@ -669,13 +672,22 @@ local console = {
         color = function() return scr.temp >= 80 and T.c.red or (scr.temp >= 65 and T.c.yellow or T.c.text) end }
     end
     rows[#rows + 1] = { kind = "action", label = L("Todos os detalhes"),
-      desc = L("Armazenamento, memória RAM, sistema e PortMaster deste R36S."),
+      desc = L("Relatório completo do console: sistema, armazenamento, memória RAM e PortMaster."),
       on_a = function() App.push("console") end }
     return rows
   end,
 }
 
-D.LIST = { appearance, audio, network, battery, controls, downloads, backup, notifications, console }
+-- notificacoes passaram para Preferencias (a tabela fica para referencia)
+local _ = notifications
+D.LIST = {
+  X.prefs_category(), appearance, audio,
+  network, X.ftp_category(),
+  X.catalog_category(), downloads, X.myports_category(),
+  X.storage_category(), battery, controls, console,
+  X.updates_category(), X.tools_category(runtimes_row), backup,
+  X.diag_category(), X.about_category(),
+}
 D.BY_ID = {}
 for _, c in ipairs(D.LIST) do D.BY_ID[c.id] = c end
 

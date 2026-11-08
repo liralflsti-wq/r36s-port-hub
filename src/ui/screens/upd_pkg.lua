@@ -119,7 +119,7 @@ function S:draw()
     G.text(T.f.body, tostring(res.from_label or Manager.job.from_version) .. "  →  " .. tostring(res.to_label or res.to), x, y + 146, T.c.text, "center", w)
     G.text(T.f.small, L("Backup da versão anterior: ") .. tostring(res.backup), x, y + 176, T.c.dim, "center", w)
     G.text(T.f.body, L("Reinicie o app para usar a nova versão. Se ela não abrir, a anterior volta sozinha."), x + 30, y + 206, T.c.text, "center", w - 60)
-    hints = { { "a", L("Reiniciar o app agora") }, { "b", L("Depois") } }
+    hints = { { "a", L("Reiniciar o app agora") } }
     if Manager.has_notes(res) then table.insert(hints, 2, { "y", L("Novidades") }) end
     if self.left then table.insert(hints, #hints, { "x", L("Excluir arquivo") }) end
   elseif st == "error" then
@@ -229,8 +229,9 @@ function S:action(act)
       self:ask_delete()
       return
     end
-    if act == "a" then require("ui.screens.updmgr").restart_app()
-    elseif act == "b" then App.pop() end
+    -- os arquivos do hub foram trocados: continuar usando o app sem reiniciar
+    -- faz ele fechar com erro ao abrir uma tela ou tarefa nova
+    if act == "a" or act == "b" then require("ui.screens.updmgr").restart_app() end
     return
   end
   if act == "b" then App.pop()

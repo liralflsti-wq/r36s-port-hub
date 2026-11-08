@@ -65,6 +65,7 @@ local written = 0             -- quadros entregues ao ffmpeg
 local raw = nil               -- ultimo quadro (RGBA) para o ffmpeg
 local bytes = 0               -- modo r36: bytes escritos
 local dropped = 0
+local got = 0                 -- quadros recebidos do hub
 local failed = nil
 local last_stats = 0
 
@@ -89,9 +90,12 @@ while running and not failed do
 
   -- quadro novo (descarta os mais antigos, se houver mais de um)
   local img = FR:pop()
-  local nxt = FR:pop()
-  while nxt do img:release(); img = nxt; nxt = FR:pop() end
   if img then
+    local nxt = FR:pop()
+    while nxt do img:release(); img = nxt; nxt = FR:pop() end
+  end
+  if img then
+    got = got + 1
     if not paused then
       if codec then
         local px, keep = Codec.pixels(img)
@@ -140,5 +144,5 @@ if cfg.log then
   if lf then errtail = (lf:read("*a") or ""):sub(-400); lf:close() end
   if errtail and not errtail:find("%S") then errtail = nil end
 end
-OUT:push({ t = "done", dur = active, size = size, dropped = dropped, error = failed,
+OUT:push({ t = "done", dur = active, size = size, dropped = dropped, error = failed, frames = got, written = written,
   log = errtail, ok = not failed and size > 0, close = tostring(ok_close) })

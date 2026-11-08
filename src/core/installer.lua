@@ -138,7 +138,11 @@ function I.update()
       j.confirm = m.items
     elseif m.t == "done" then
       -- so ports do catalogo entram no registro do hub (arquivos locais nao)
-      if not (j.opts and j.opts.local_file) then Manifest.record(j.port, m.entries) end
+      if not (j.opts and j.opts.local_file) then
+        local prev = Manifest.data[j.port.id] and Manifest.data[j.port.id].gamelist
+        Manifest.record(j.port, m.entries)
+        I.apply_es_cover(j, m.entries, prev)
+      end
       Manifest.rescan(true)
       j.finished, j.result, j.entries, j.deleted = true, "done", m.entries, m.deleted
     elseif m.t == "error" then
@@ -150,6 +154,31 @@ function I.update()
     end
     m = j.out_ch:pop()
   end
+end
+
+--- capa do port na lista de Ports do EmulationStation (gamelist.xml)
+function I.apply_es_cover(j, entries, prev)
+  local p = j.port
+  local ok, err = pcall(function()
+    require("core.covers").fetch_file(p, function(file)
+      local okc, info, why = pcall(require("core.esgamelist").add_port, p, entries, file)
+      if okc and info then
+        -- reinstalacao: a entrada criada antes continua sendo do hub
+        if prev and type(prev.entries) == "table" then
+          local seen = {}
+          for _, e in ipairs(info.entries) do seen[e.script] = true end
+          for _, e in ipairs(prev.entries) do if not seen[e.script] then info.entries[#info.entries + 1] = e end end
+        end
+        local rec = Manifest.data[p.id]
+        if rec then rec.gamelist = info; Manifest.save() end
+        j.es_cover = true
+        U.log("gamelist.xml: capa de " .. tostring(p.name), #info.entries > 0 and info.entries[1].mode or "ja tinha imagem")
+      else
+        U.log("gamelist.xml: capa de " .. tostring(p.name) .. " nao aplicada:", tostring(okc and why or info))
+      end
+    end)
+  end)
+  if not ok then U.log("gamelist.xml: erro ao aplicar a capa:", tostring(err)) end
 end
 
 function I.cancel()

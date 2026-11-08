@@ -356,12 +356,16 @@ function F.update()
         x.status = m.result == "done" and "CONCLUÍDO" or (m.result == "cancelled" and "CANCELADO" or "ERRO")
         x.reason = m.reason
         hist_add(x)
+        -- Configuracoes > Servidor FTP > avisos (ligados por padrao)
+        local P = require("core.prefs")
         if m.result == "done" then
-          notify((x.op == "recv" and L("Recebido: ") or L("Enviado: ")) .. x.name, "ok")
-        elseif m.result == "cancelled" then
-          notify(L("Transferência cancelada: ") .. x.name, "warn")
-        else
-          notify(L("Falha na transferência: ") .. x.name .. " (" .. (m.reason or "erro") .. ")", "error")
+          if P.get("ftp_notif_done") ~= "0" then notify((x.op == "recv" and L("Recebido: ") or L("Enviado: ")) .. x.name, "ok") end
+        elseif P.get("ftp_notif_fail") ~= "0" then
+          if m.result == "cancelled" then
+            notify(L("Transferência cancelada: ") .. x.name, "warn")
+          else
+            notify(L("Falha na transferência: ") .. x.name .. " (" .. (m.reason or "erro") .. ")", "error")
+          end
         end
       end
     end

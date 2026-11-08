@@ -7,6 +7,9 @@
 
 XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 XDG_DATA_HOME_ORIG="$XDG_DATA_HOME"
+# ambiente original do sistema (usado ao iniciar um port pelo hub)
+PH_LD_SET=${LD_LIBRARY_PATH+1}; PH_LD_ORIG="$LD_LIBRARY_PATH"
+PH_SDL_SET=${SDL_GAMECONTROLLERCONFIG+1}; PH_SDL_ORIG="$SDL_GAMECONTROLLERCONFIG"
 
 if [ -d "/opt/system/Tools/PortMaster/" ]; then
   controlfolder="/opt/system/Tools/PortMaster"
@@ -50,6 +53,8 @@ export PORTHUB_PORTS_DIR="/$directory/ports"
 
 rm -f "$CONFDIR/.restart_es"
 rm -f "$CONFDIR/.run_tool"
+rm -f "$CONFDIR/.run_port"
+rm -f "$CONFDIR/.run_game"
 rm -f "$CONFDIR/.power"
 rm -f "$CONFDIR/.es_theme"
 rm -f "$CONFDIR/.restart_app"
@@ -106,6 +111,20 @@ upd_recover() {
   mv -f "$UPD_J" "$UPD_J.invalido" 2>/dev/null
   return 1
 }
+# R36 Hub OS (menu de recuperacao): volta para o ultimo backup feito antes de
+# uma atualizacao do hub e sai, sem abrir o app
+if [ "$1" = "--restaurar-ultimo-backup" ]; then
+  LAST_B=$(ls -1dt "$GAMEDIR"/backups/*/ 2>/dev/null | head -n 1)
+  LAST_ID=$(basename "${LAST_B%/}" 2>/dev/null)
+  if [ -n "$LAST_ID" ] && upd_restore "$LAST_ID"; then
+    rm -f "$UPD_J"
+    echo "Versao anterior restaurada (backup $LAST_ID)."
+    exit 0
+  fi
+  echo "Nenhum backup de atualizacao encontrado."
+  exit 1
+fi
+
 case "$(upd_get state)" in
   applying) upd_recover "instalacao interrompida" ;;
   booting) upd_recover "a versao nova nao abriu" ;;
@@ -136,6 +155,7 @@ while true; do
   elif command -v love >/dev/null 2>&1; then
     echo "[launcher] Runtime love_11.5 do PortMaster nao encontrado; usando 'love' do sistema."
     love "$GAMEDIR/game.love"
+    LOVE_RC=$?
   else
     echo "[launcher] ERRO: runtime LOVE 11.5 nao encontrado."
     echo "[launcher] Abra o PortMaster e instale qualquer port que use LOVE (ex.: o KMP) para baixar o runtime love_11.5."
@@ -157,6 +177,7 @@ while true; do
     sed -i -E 's/(PASS |[Ss]enha[ =:]+|[Pp]assword[ =:]+|psk[ =:]+)[^ ]+/\1******/g' "$LOGF" 2>/dev/null
     echo "[launcher] Registro do erro salvo em $LOGF"
   fi
+  LAST_LOVE_RC="${LOVE_RC:-0}"
   LOVE_RC=""
 
   # o app nao confirmou que a versao nova abriu: volta para a anterior e abre de novo
@@ -174,6 +195,63 @@ while true; do
     continue
   fi
 
+  # o app pediu para abrir um jogo da Biblioteca (emuladores). Linha 1: sistema
+  # (para voltar ao mesmo lugar); linha 2: o comando do es_systems.cfg ja com
+  # %ROM%/%EMULATOR%/%CORE% preenchidos pelo app (igual ao EmulationStation).
+  if [ -f "$CONFDIR/.run_game" ]; then
+    GAME_SYS=$(sed -n 1p "$CONFDIR/.run_game" 2>/dev/null | tr -cd 'A-Za-z0-9_-')
+    GAME_CMD=$(sed -n 2p "$CONFDIR/.run_game" 2>/dev/null)
+    rm -f "$CONFDIR/.run_game"
+    if [ -n "$GAME_CMD" ]; then
+      echo "[launcher] Abrindo jogo ($GAME_SYS): $GAME_CMD"
+      sync
+      (
+        cd "${HOME:-/home/ark}" 2>/dev/null || cd /
+        unset PORTHUB_DIR PORTHUB_PORTS_DIR PORTHUB_PM_DIR PORTHUB_XDG_ORIG PORTHUB_RETURN
+        export XDG_DATA_HOME="$XDG_DATA_HOME_ORIG"
+        if [ -n "$PH_LD_SET" ]; then export LD_LIBRARY_PATH="$PH_LD_ORIG"; else unset LD_LIBRARY_PATH; fi
+        if [ -n "$PH_SDL_SET" ]; then export SDL_GAMECONTROLLERCONFIG="$PH_SDL_ORIG"; else unset SDL_GAMECONTROLLERCONFIG; fi
+        bash -c "$GAME_CMD"
+      )
+      echo "[launcher] Jogo encerrado (codigo $?); voltando ao R36S PORT HUB"
+      export PORTHUB_RETURN="game|$GAME_SYS"
+    fi
+    continue
+  fi
+
+  # o app pediu para iniciar um port (Detalhes do port > INICIAR). So um script
+  # .sh que existe na raiz da pasta de ports; roda com o ambiente original do
+  # sistema e, ao sair do jogo, o R36S PORT HUB abre de novo na pagina do port.
+  if [ -f "$CONFDIR/.run_port" ]; then
+    PORT_REQ=$(head -n 1 "$CONFDIR/.run_port" 2>/dev/null)
+    rm -f "$CONFDIR/.run_port"
+    PORT_SH=${PORT_REQ%%|*}
+    PORT_ID=$(printf '%s' "${PORT_REQ#*|}" | tr -cd 'A-Za-z0-9_-')
+    PORTS_ROOT="/$directory/ports"
+    case "$PORT_SH" in
+      ""|*/*|*..*) PORT_SH="" ;;
+      *.sh|*.SH) ;;
+      *) PORT_SH="" ;;
+    esac
+    if [ -n "$PORT_SH" ] && [ -f "$PORTS_ROOT/$PORT_SH" ]; then
+      echo "[launcher] Iniciando port: $PORT_SH"
+      sync
+      (
+        cd "$PORTS_ROOT" || exit 1
+        unset PORTHUB_DIR PORTHUB_PORTS_DIR PORTHUB_PM_DIR PORTHUB_XDG_ORIG PORTHUB_RETURN
+        export XDG_DATA_HOME="$XDG_DATA_HOME_ORIG"
+        if [ -n "$PH_LD_SET" ]; then export LD_LIBRARY_PATH="$PH_LD_ORIG"; else unset LD_LIBRARY_PATH; fi
+        if [ -n "$PH_SDL_SET" ]; then export SDL_GAMECONTROLLERCONFIG="$PH_SDL_ORIG"; else unset SDL_GAMECONTROLLERCONFIG; fi
+        bash "./$PORT_SH"
+      )
+      echo "[launcher] Port encerrado (codigo $?); voltando ao R36S PORT HUB"
+      export PORTHUB_RETURN="port|$PORT_ID"
+    else
+      echo "[launcher] Pedido de port ignorado (script invalido): $PORT_REQ"
+    fi
+    continue
+  fi
+
   [ -f "$CONFDIR/.run_tool" ] || break
   TOOL_REQ=$(head -n 1 "$CONFDIR/.run_tool" 2>/dev/null)
   rm -f "$CONFDIR/.run_tool"
@@ -188,6 +266,9 @@ while true; do
   echo "[launcher] Ferramenta encerrada; voltando ao R36S PORT HUB"
   export PORTHUB_RETURN="$TOOL_REQ"
 done
+
+# R36 Hub OS: nao ha EmulationStation para reiniciar (a interface e o proprio hub)
+if [ "$R36HUBOS" = "1" ]; then rm -f "$CONFDIR/.restart_es" "$CONFDIR/.es_theme"; fi
 
 # O app pede para reiniciar o EmulationStation (para a lista de Ports atualizar)
 if [ -f "$CONFDIR/.restart_es" ] && [ ! -f "$CONFDIR/.power" ]; then
@@ -247,3 +328,6 @@ if [ -f "$CONFDIR/.power" ]; then
       ;;
   esac
 fi
+
+# codigo de saida do app (o supervisor do R36 Hub OS usa para detectar falhas)
+exit "${LAST_LOVE_RC:-0}"

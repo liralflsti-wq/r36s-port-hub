@@ -1,0 +1,26 @@
+{
+  "id": "neongrid",
+  "name": "NEON GRID",
+  "description": "Gaming dashboard próprio do R36S PORT HUB: fundo escuro com grade, verde neon nos destaques, cartões de jogos, painéis organizados e painel lateral de navegação rápida.",
+  "version": "2.0",
+  "author": "R36S PORT HUB",
+  "preview": "preview.png",
+  "colors": {
+    "bg0": "#07090b", "bg1": "#10151a", "bg2": "#18212a", "bg3": "#123826", "line": "#243039",
+    "text": "#eefcf3", "dim": "#9fb3a8", "faint": "#5d6f66",
+    "accent": "#39ff88", "accent2": "#7dffc0",
+    "yellow": "#ffd23f", "green": "#39ff88", "red": "#ff4d6a", "orange": "#ff9f43",
+    "black": "#000000", "shadow": "#00000090"
+  },
+  "buttons": {
+    "a": "#39ff88", "b": "#ff4d6a", "x": "#3fb6ff", "y": "#ffd23f",
+    "l1": "#9fb3a8", "r1": "#9fb3a8", "start": "#9fb3a8", "select": "#9fb3a8", "dpad": "#9fb3a8"
+  },
+  "style": {
+    "background": "neongrid",
+    "layout": "dashboard",
+    "round": 0.7,
+    "glow": "#1fd170",
+    "scanlines": false
+  }
+}

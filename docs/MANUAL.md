@@ -37,7 +37,7 @@ Projeto **independente** do KMP: nenhum arquivo do KMP foi alterado ou é necess
   - No primeiro acesso, vêm depois **SELECT LANGUAGE** (Português, English, Русский) e o **Aviso importante** no idioma escolhido. **A** confirma.
   - Nos acessos seguintes, a splash leva ao **Aviso importante** (sempre aparece ao abrir) e depois ao menu.
 - **Menu principal**: Central de Conteúdo (antiga Loja de Ports), Categorias, Meus Ports, Configurações, Sobre o Projeto, Sair (com opção de reiniciar o EmulationStation)
-  - **EM DESTAQUE** (caixa à direita): vitrine com os jogos e utilitários marcados com `"featured": true` no catálogo, na ordem do catálogo (ou de `featured_order`). Cada item mostra capa, nome, etiqueta JOGO/UTILITÁRIO, categoria e tamanho, e o contador (ex.: 2/4). A troca é automática a cada 5 s, com deslizamento suave, um brilho discreto na capa e indicadores que mostram o tempo até o próximo. **Esquerda/direita** (ou L1/R1) trocam manualmente e pausam a rotação por alguns segundos. Com as animações desligadas ou no modo econômico, não há rotação automática e a troca manual é instantânea. Funciona offline com o catálogo e as capas em cache.
+  - **EM DESTAQUE** (caixa à direita): vitrine com os jogos e utilitários marcados com `"featured": true` no catálogo, na ordem do catálogo (ou de `featured_order`). Cada item mostra capa, nome, etiqueta JOGO/UTILITÁRIO, categoria e tamanho, e o contador (ex.: 2/4). A troca é automática a cada 5 s, com deslizamento suave, um brilho discreto na capa e indicadores que mostram o tempo até o próximo. **L1/R1** (indicados na parte de baixo da caixa) trocam manualmente e pausam a rotação por alguns segundos; o direcional e os analógicos não mexem no destaque. Com as animações desligadas ou no modo econômico, não há rotação automática e a troca manual é instantânea. Funciona offline com o catálogo e as capas em cache.
 - **Central de Conteúdo**: três áreas independentes, **Ports de Jogos**, **BIOS do Sistema** e **Ports Utilitários e Ferramentas**. As áreas de ports têm suas abas (Todos, categorias da área, Instalados); jogos, ferramentas e BIOS nunca aparecem na mesma lista. Detalhes de BIOS em **BIOS do Sistema** abaixo.
 - **Categorias**: 13 categorias de jogos e 4 de utilitários (Manutenção, Diagnóstico do sistema, Testes de controles, Ferramentas de sistema), com ícones. "Testes de controles" reúne os três tipos de teste (analógicos, botões e completo), cada um identificado na lista. Cada bloco abre a área certa já filtrada, e uma categoria vazia avisa que não há ports disponíveis nela.
 - **Meus Ports**: abas Ports de Jogos e Utilitários & Ferramentas, só com o que está instalado
@@ -52,29 +52,57 @@ Projeto **independente** do KMP: nenhum arquivo do KMP foi alterado ou é necess
 - **Página do port**: capa, nome, categoria, versão, tamanho, status, descrição rolável e botão **INSTALAR / REINSTALAR / ATUALIZAR**
 - **Instalação**: etapas Download → Verificação → Extração → Instalação, com barra, MB baixados, velocidade e tempo restante
 
-## Configurações
+## Biblioteca de jogos (emuladores) — 0.4.8
 
-A tela principal mostra 9 cartões. Cada cartão tem ícone, nome, descrição curta e o estado atual. Direcional escolhe, **A** abre e **B** volta. Dentro de cada categoria:
+Menu principal → **Biblioteca de jogos** (no NEON GRID: atalho **Biblioteca** e painel lateral). Primeira etapa do **R36 Hub OS**: os jogos dos emuladores abrem direto pelo hub.
+
+- O hub lê o `es_systems.cfg` do próprio console (`/etc/emulationstation/es_systems.cfg` no dArkOS/dArkOSRE): sistemas, pastas de ROMs, extensões, comando e emuladores/cores. Nada é copiado nem alterado.
+- Procura os jogos em segundo plano nas pastas de cada sistema (até 3 níveis de subpasta). Sistemas sem jogos não aparecem. **Y** procura de novo.
+- Nomes, capas, descrição, desenvolvedor e gênero vêm do `gamelist.xml` de cada pasta (o mesmo do EmulationStation). Nada é gravado nas pastas de ROMs.
+- **A** joga: o hub fecha, o launcher roda o comando do sistema com `%ROM%`, `%EMULATOR%`, `%CORE%` e `%GOVERNOR%` preenchidos como o EmulationStation faz e, ao sair do jogo, o hub abre de novo no mesmo sistema.
+- **X** escolhe o emulador/core: na lista de sistemas, o padrão do sistema; na lista de jogos, só daquele jogo. Sem escolha, vale o primeiro emulador e o primeiro core do `es_systems.cfg`.
+- **SELECT** marca favorito; **Recentes** e **Favoritos** aparecem no topo da biblioteca.
+- Os ports continuam em Meus Ports (o sistema "ports" não entra na biblioteca).
+- Arquivos do hub: `library_choices.json`, `library_favorites.json` e `library_recent.json` (pasta de dados do app).
+
+## Configurações (Central de Configurações, reorganizada na 0.4.8)
+
+A tela principal mostra 17 cartões em 3 colunas (3 linhas visíveis por vez). Cada cartão tem ícone, nome, descrição curta e o estado atual. Direcional escolhe, **L1/R1** passam uma página, **A** abre e **B** volta; o rodapé mostra a posição (ex.: 5/17). Cada opção aparece num cartão só. Dentro de cada categoria:
 
 - Interruptores ligam e desligam (A, ou esquerda/direita).
-- Sliders ajustam de 5 em 5 (esquerda/direita).
+- Escolhas e sliders mudam com esquerda/direita.
 - Embaixo aparece a explicação da opção escolhida.
+- Telas de lista e de leitura abrem com A; B volta.
 
 | Categoria | Opções |
 |---|---|
-| Aparência e personalização | Tema, Idioma, Tamanho do texto, Brilho da tela, Ajustes do console (R36 Control), Animações da interface |
+| Preferências | Idioma (A abre a tela de escolha com as bandeiras; a troca vale na hora), Tela ao abrir, Botão B no menu principal, Notificações na tela, **Posição das notificações** (embaixo no centro, em cima no centro, canto superior direito, canto inferior direito), Confirmações e informações, Alertas e erros, **Aviso de nova versão do hub**, Som das notificações, Testar notificação, Restaurar preferências |
+| Aparência e personalização | Tema, Tamanho do texto, Brilho da tela, Ajustes do console (R36 Control), Animações da interface, Restaurar aparência original |
 | Áudio | Música de fundo, Volume da música, Efeitos sonoros, Volume dos efeitos |
-| Rede e conectividade | Conexão, interface e IP local (atualizados sozinhos), estado do FTP, Diagnóstico de rede, Velocidade da internet, Configurar servidor FTP, Transmissão e gravação |
-| Bateria e energia | Carga, estado e, se o sistema informar, alimentação, tensão, saúde e temperatura da bateria; Modo econômico (20 em vez de 30 quadros por segundo, sem animações decorativas) |
-| Controles | Testar analógicos e botões (R36S Analog Tester, integrado), Último relatório, Todos os testes de controles, Mapa dos botões |
-| Downloads e atualizações | Central de Downloads, Atualizar catálogo, Atualizar runtimes, Gerenciar PortMaster, Atualizações, Gerenciador de arquivos |
-| Backup e restauração | Último backup, escolha do que entra (preferências, favoritos, FTP, históricos), Fazer backup agora, Restaurar backup (sempre com confirmação) |
-| Notificações | Notificações na tela, Confirmações e informações, Alertas e erros, Som das notificações, Testar notificação |
-| Informações do console | **Analisador de Console**, Dispositivo, arquitetura, sistema, versão do hub, cartão SD, memória disponível e temperatura do processador (se o sistema informar), Todos os detalhes |
+| Rede e conectividade | Gerenciar Wi-Fi, Rede Wi-Fi, Sinal, Conexão, IP local, Diagnóstico de rede (interface, gateway, DNS e testes), Velocidade da internet, Transmissão e gravação, Verificação dos repositórios |
+| Servidor FTP | Ligar/desligar, Endereço, Usuário, Senha, Estado, Configurar servidor FTP, Tutorial, Transferências e histórico, Avisar transferências concluídas, Avisar falhas |
+| Catálogo de ports | Atualizar catálogo agora, Atualizar ao abrir o hub, Última atualização online, Conteúdo, Ordenação das listas, Ordenar favoritos |
+| Downloads | Central de Downloads, Avisos de downloads em segundo plano, Histórico, Repetir downloads com falha, Limpar histórico |
+| Meus Ports | Abrir Meus Ports, Abrir Favoritos, Ports encontrados, Verificador de integridade, Instalações incompletas, Atualizar informações, Limpar favoritos |
+| **Armazenamento** | Espaço de cada cartão (livre, total e % usado), Memória RAM, Espaço ocupado pelos ports, Cache de capas (limpar), Gerenciador de arquivos, Otimizador e manutenção do microSD, Verificador do cartão SD |
+| Bateria e energia | Carga, Estado e os dados que o sistema informar (alimentação, tensão, saúde, temperatura), Análise da bateria, Modo econômico |
+| Controles | Testar analógicos e botões (R36S Analog Tester), Último relatório, Todos os testes de controles, Mapa dos botões |
+| Informações do console | Analisador de Console, Data e hora, Dispositivo, Processador, Resolução da tela, Arquitetura, Sistema, Temperatura do processador, Todos os detalhes |
+| Atualizações do hub | Versão instalada, Atualização via rede, Atualização local, Histórico de atualizações, Backups e recuperação |
+| PortMaster e runtimes | Gerenciar PortMaster, Atualizar runtimes |
+| Backup e restauração | Último backup, o que entra (preferências, favoritos, FTP, históricos, catálogo local), Fazer backup agora, Restaurar backup, Exportar para o cartão, Importar do cartão, Histórico de backups |
+| Diagnóstico e suporte | Executar diagnóstico (Y repete, X exporta relatório), **Registro de erros** (abre o leitor no arquivo mais recente; esquerda/direita troca de arquivo; B volta para Diagnóstico e suporte), Histórico de erros de comunicação, Componentes do hub, Informações para o suporte |
+| Sobre o projeto | Nome, Versão, Desenvolvedor, Sobre o R36S PORT HUB, Licenças, Aviso importante (só leitura) |
 
 - **Efeitos sonoros**: os sons são gerados pelo próprio app, sem arquivos de áudio.
 - **Backup**: fica em `conf/love/r36sporthub/backup/`. Nunca inclui ports instalados nem arquivos de jogos.
-- **Onde ficam as escolhas**: em `settings.txt`, nas chaves `music_vol`, `sfx`, `sfx_vol`, `anim`, `eco`, `notif`, `notif_info`, `notif_alert`, `notif_sound` e `backup_groups`.
+- **Exportar para o cartão**: cria `ports/r36sporthub/configuracoes/<data>/` com os itens marcados. A senha do FTP nunca é exportada. **Importar do cartão** lista as 5 exportações mais recentes e pede confirmação antes de substituir.
+- **Restaurar preferências**: volta tela inicial, saída, notificações, sons, música, animações, tamanho do texto, ordenação e gravação ao padrão. Idioma, tema, brilho, FTP, favoritos e históricos não mudam. Uma cópia fica em `settings.antes_de_restaurar.txt`.
+- **Aviso de versão nova**: ao abrir o hub (com Wi-Fi), ele confere em segundo plano o link oficial de atualização, lendo só o começo do pacote. Se a versão for maior que a instalada, um texto desliza no alto da tela inicial, entre a logo e a data, e o rodapé mostra **SELECT Atualizar**. SELECT abre a Atualização via rede. Nada é baixado sozinho. O aviso some depois de atualizar e reiniciar. Sem internet, não aparece nada. Desliga em Atualizações do hub > Avisar quando sair versão nova (chave `upd_notify`).
+- **Relatório para o suporte**: `ports/r36sporthub/logs/relatorio_suporte_<data>.txt` (os 5 mais recentes ficam guardados). Senhas não entram.
+- **Histórico de erros de comunicação**: até 30 falhas de acesso à internet (catálogo, atualizações, downloads, repositórios), só com o endereço do servidor, em `netlog.json`.
+- **Instalações incompletas**: ports instalados pelo hub em que falta algum item registrado na instalação (script ou pasta principal).
+- **Onde ficam as escolhas**: em `settings.txt`, nas chaves `start_screen`, `exit_mode`, `notif_pos`, `upd_notify`, `cat_auto`, `cat_last`, `list_sort`, `fav_sort`, `notif_downloads`, `ftp_notif_done`, `ftp_notif_fail`, `music_vol`, `sfx`, `sfx_vol`, `anim`, `eco`, `notif`, `notif_info`, `notif_alert`, `notif_sound` e `backup_groups`.
 
 ## Registro de erros
 
@@ -328,7 +356,7 @@ Configurações → Rede e conectividade → **Transmissão e gravação** mostr
 - **INICIAR GRAVAÇÃO**, **PAUSAR/RETOMAR** e **FINALIZAR GRAVAÇÃO**. Transmissão e gravação são independentes.
 - Arquivos em `r36sporthub/gravacoes/`, com nome automático de data e hora (`gravacao_AAAA-MM-DD_HH-MM-SS`).
 - Formato **MP4** quando o console tem o `ffmpeg` com codificador H.264 (libx264) ou MPEG-4. Sem ele, o hub avisa e grava no formato leve **.r36rec**: copie o arquivo pelo FTP e abra `converter_gravacao.html` (fica na mesma pasta) no Firefox ou Chromium do PC para assistir ou converter em vídeo WebM (a conversão leva o mesmo tempo da gravação).
-- **Quadros da gravação**: 10 ou 15 por segundo. Sem som.
+- **Quadros da gravação**: 10, 15 ou 30 por segundo. Sem som. 30 FPS usa mais o processador; no modo econômico a tela do hub tem no máximo 20 quadros por segundo.
 - Durante a gravação aparece **REC** com a duração no canto inferior direito (só no console). A tela mostra formato, duração, tamanho e arquivo.
 - Nada começa sozinho e nada é apagado automaticamente. Com menos de 64 MB livres a gravação não começa; se o cartão chegar perto de encher, ela é finalizada e salva. Ao sair do app, a gravação é finalizada e salva.
 - **Gravações salvas** lista os arquivos com data, duração e tamanho; **Abrir pasta das gravações** abre a pasta no Gerenciador de arquivos.
@@ -349,6 +377,8 @@ Configurações → Rede e conectividade → **Configurar servidor FTP** transfe
 ## Capa na lista de Ports
 
 O pacote traz `cover.png` (capa), `logo.png` (marquee) e `fanart.png` (fundo) em `r36sporthub/`. Quem instala pelo PortMaster recebe a capa pelo `gameinfo.xml`. Quem só extrai o ZIP em `/roms/ports`: abra o R36S PORT HUB uma vez (ele acrescenta a própria entrada no `gamelist.xml`, sem mexer nos outros jogos) e use **Sair → Reiniciar lista**.
+
+**Capa dos jogos instalados pelo hub:** ao instalar um port do catálogo, o hub copia a capa do catálogo (a mesma que aparece no hub) para a pasta do jogo, com o nome `<id>-cover.png` (ou `.jpg`), e coloca o jogo no `gamelist.xml` da pasta de Ports com nome, descrição, gênero e capa. Se o catálogo não tiver capa, usa a `cover.png`/`screenshot.png` que o próprio port trouxer. Se o jogo já tiver entrada no `gamelist.xml`, o hub só completa a imagem que faltar; nunca troca o que você, o PortMaster ou um scraper colocaram, e não mexe em outros jogos (cópia de segurança em `gamelist.xml.porthub.bak` na primeira alteração). A capa aparece depois de **Sair → Reiniciar lista**. Ao desinstalar pelo hub, ele desfaz só o que ele mesmo colocou.
 
 ## Otimizador e manutenção do microSD
 
@@ -479,7 +509,34 @@ Para quem desenvolve: `tools/make_update.py` gera o manifesto do pacote completo
 
 ## Temas
 
-Configurações → Aparência e personalização → **Tema**: **Tema Padrão** (original) e **Tema Xbox** (verde e preto, inspirado no Xbox, sem marcas oficiais). A aplica na hora; a escolha fica salva e volta ao abrir o app. **Baixar novos temas** ficará ativo quando o catálogo de temas no GitHub for configurado. Detalhes em `docs/TEMAS.md`.
+Configurações → Aparência e personalização → **Tema**: **Tema Padrão** (original) e **NEON GRID — Gaming Dashboard** (identidade própria: fundo escuro com grade e verde neon; a tela inicial vira um dashboard e a página do port ganha as ações Instalar, Iniciar, Remover e Favoritar). A aplica na hora; a escolha fica salva e volta ao abrir o app. **Baixar novos temas** ficará ativo quando o catálogo de temas no GitHub for configurado. Detalhes em `docs/TEMAS.md`.
+
+### NEON GRID — dashboard da tela inicial
+
+Com o NEON GRID ativo, a tela inicial vira um dashboard:
+
+- **Cabeçalho**: logo, nome do tema e versão, aviso de versão nova (quando houver), Wi-Fi, bateria, data e hora.
+- **Destaque**: capa grande, nome, JOGO/UTILITÁRIO, plataforma (se o catálogo informar), categoria, tamanho, se está instalado e a compatibilidade. **L1/R1** trocam o destaque.
+- **Atalhos**: Conteúdo, Categorias, Meus Ports, Favoritos, Downloads e Configurações (com contadores quando há o que mostrar).
+- **Jogos recentes**: ports abertos pela lista de Ports do EmulationStation (lastplayed) e instalados pelo hub, mais novos primeiro.
+- **Novidades do catálogo**: o que o catálogo marca como novo ou atualizado e atualizações disponíveis para o que está instalado.
+- Ao escolher um cartão, o destaque mostra os dados dele (**SELECIONADO**).
+
+Controles: **direcional** navega entre destaque, atalhos e fileiras; **A** abre; **X** favorita/desfavorita o cartão; **Y** mostra as informações (tipo, categoria, plataforma, desenvolvedor, tamanho, estado e compatibilidade); **SELECT** abre e fecha o **painel lateral de navegação rápida** (Central de Conteúdo, Categorias, Meus Ports, Favoritos, Central de Downloads, Novidades, Temas, Configurações, Sobre e Sair; com versão nova, "Atualizar o hub agora" aparece primeiro); **START** continua abrindo os Downloads; **B** sai (como no menu clássico).
+
+### NEON GRID — página do port
+
+Capa em destaque, grade com Plataforma, Categoria, Tamanho, Desenvolvedor, Compatibilidade e Estado ("não informado" quando o catálogo não traz o dado), descrição rolável e as ações conforme o estado:
+
+- **INSTALAR / REINSTALAR / ATUALIZAR**: mesmo fluxo de sempre (com as confirmações).
+- **INICIAR**: só para ports instalados com script `.sh` na pasta de ports. Pede confirmação; o hub fecha, o launcher roda o script do port com o ambiente original do sistema e, ao sair do jogo, o hub abre de novo na página do port. Se o FTP estiver ligado, ele é parado antes.
+- **REMOVER**: abre a mesma confirmação de desinstalação de Meus Ports.
+- **FAVORITAR / DESFAVORITAR** (também com SELECT).
+
+Esquerda/direita escolhem a ação, cima/baixo rolam a descrição, Y abre a compatibilidade e B volta.
+
+No **Tema Padrão**, a página do port também mostra o botão **INICIAR** (entre o botão principal e VOLTAR) quando o port está instalado e tem script `.sh` na pasta de ports. Funciona do mesmo jeito: confirmação, o hub fecha, o jogo abre e o hub volta na página do port.
+
 
 ## Loja de Temas (EmulationStation)
 

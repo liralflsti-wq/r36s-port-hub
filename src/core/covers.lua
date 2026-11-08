@@ -91,6 +91,27 @@ function Covers.get(p)
   return nil
 end
 
+--- caminho absoluto da capa ja baixada (ou nil)
+function Covers.disk_file(p)
+  if not p or not p.cover or p.cover == "" then return nil end
+  if not p.cover:match("^https?://") then
+    local abs = p.cover:sub(1, 1) == "/" and p.cover or (C.APP_DIR .. "/" .. p.cover)
+    return U.file_size(abs) and abs or nil
+  end
+  if love.filesystem.getInfo(file_for(p)) then return Covers.abs_dir .. "/" .. file_name(p) end
+  return nil
+end
+
+--- garante a capa em disco e chama cb(caminho ou nil)
+function Covers.fetch_file(p, cb)
+  local f = Covers.disk_file(p)
+  if f or not p or not p.cover or not p.cover:match("^https?://") then cb(f); return end
+  Fetcher.get("cover", p.cover, Covers.abs_dir .. "/" .. file_name(p), function(ok)
+    if ok then Covers.state[p.slug] = "disk" end
+    cb(ok and Covers.disk_file(p) or nil)
+  end)
+end
+
 function Covers.is_loading(p)
   return p and Covers.state[p.slug] == "loading"
 end
