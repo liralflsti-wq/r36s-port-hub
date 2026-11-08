@@ -24,6 +24,10 @@
       "name": "Corrida"
     },
     {
+      "id": "luta",
+      "name": "Luta"
+    },
+    {
       "id": "tiro",
       "name": "Tiro"
     },
@@ -287,6 +291,23 @@
       "size_label": "239.8 MB",
       "download_url": "https://archive.org/download/katana-zero_202611/Katana%20ZERO.zip",
       "cover": "https://archive.org/download/katana-zero_202611/katana-zero-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "dragon-ball-z-budokai-tenkaichi-4",
+      "name": "Dragon Ball Z: Budokai Tenkaichi 4",
+      "short": "Lutas 3D com os guerreiros de Dragon Ball.",
+      "description": "Port para R36S.\n\nBatalhas em arenas 3D com um enorme elenco de personagens de Dragon Ball, com voos, rajadas de ki e transformações.\n\nArquivo hospedado no Internet Archive.",
+      "category": "luta",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 2469606195,
+      "size_label": "2.3 GB",
+      "download_url": "https://archive.org/download/dragon-ball-z-budokai-tenkaichi-4_202611/Dragon%20Ball%20Z%3A%20Budokai%20Tenkaichi%204.zip",
+      "cover": "https://archive.org/download/dragon-ball-z-budokai-tenkaichi-4_202611/dragon-ball-z-budokai-tenkaichi-4-cover.png",
       "author": "Comunidade",
       "requires_files": false,
       "featured": true,
