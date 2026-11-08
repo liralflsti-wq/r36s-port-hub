@@ -1,47 +1,42 @@
 {
   "catalog_version": 1,
   "title": "R36S PORT HUB - ports (R36S)",
-  "updated": "2026-11-02",
+  "updated": "2026-11-08",
   "categories": [
     {
-      "id": "corrida",
-      "name": "Corrida"
+      "id": "acao",
+      "name": "Ação"
     },
     {
       "id": "aventura",
       "name": "Aventura"
     },
     {
-      "id": "estrategia",
-      "name": "Estratégia"
+      "id": "rpg",
+      "name": "RPG"
+    },
+    {
+      "id": "plataforma",
+      "name": "Plataforma"
+    },
+    {
+      "id": "corrida",
+      "name": "Corrida"
+    },
+    {
+      "id": "tiro",
+      "name": "Tiro"
     },
     {
       "id": "terror",
       "name": "Terror"
     },
     {
-      "id": "plataforma",
-      "name": "Plataforma"
+      "id": "estrategia",
+      "name": "Estratégia"
     }
   ],
   "ports": [
-    {
-      "id": "daytona-usa-arcade",
-      "name": "Daytona USA Arcade",
-      "short": "Corrida arcade clássica.",
-      "description": "Port para R36S.\n\nArquivo hospedado no Internet Archive.",
-      "category": "corrida",
-      "section": "games",
-      "version": "1.0",
-      "size_bytes": 16567296,
-      "size_label": "15.8 MB",
-      "download_url": "https://archive.org/download/daytona-usa-arcade/Daytona%20USA%20Arcade.rar",
-      "cover": "https://archive.org/download/daytona-usa-arcade/daytona-usa-arcade-cover.png",
-      "author": "Comunidade",
-      "requires_files": false,
-      "featured": false,
-      "added": "2026-11-01"
-    },
     {
       "id": "need-for-speed-underground",
       "name": "Need For Speed Underground",
@@ -126,6 +121,176 @@
       "requires_files": false,
       "featured": false,
       "added": "2026-11-02"
+    },
+    {
+      "id": "call-of-duty-black-ops-zombies",
+      "name": "Call of Duty: Black Ops Zombies",
+      "short": "Sobrevivência contra hordas de zumbis.",
+      "description": "Port para R36S.\n\nResista a ondas cada vez maiores de zumbis, ganhe pontos, compre armas e abra novas áreas do mapa.\n\nArquivo hospedado no Internet Archive.",
+      "category": "tiro",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 398563738,
+      "size_label": "380.1 MB",
+      "download_url": "https://archive.org/download/cod-black-ops-zombies/COD%20-%20Black%20Ops%20Zombies.zip",
+      "cover": "https://archive.org/download/cod-black-ops-zombies/COD%20-%20Black-Ops-%20Zombies-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "chrono-trigger",
+      "name": "Chrono Trigger",
+      "short": "RPG clássico de viagem no tempo.",
+      "description": "Port para R36S.\n\nViaje entre eras com Crono e seus amigos para impedir a destruição do mundo, em batalhas por turnos com técnicas combinadas.\n\nArquivo hospedado no Internet Archive.",
+      "category": "rpg",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 557842432,
+      "size_label": "532.0 MB",
+      "download_url": "https://archive.org/download/chrono-trigger_202611/Chrono%20Trigger.zip",
+      "cover": "https://archive.org/download/chrono-trigger_202611/chrono-trigger-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "chasm",
+      "name": "Chasm",
+      "short": "Ação e exploração em masmorras.",
+      "description": "Port para R36S.\n\nExplore minas e cavernas que mudam a cada partida, enfrente monstros e encontre equipamentos neste jogo de ação em estilo metroidvania.\n\nArquivo hospedado no Internet Archive.",
+      "category": "acao",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 583113114,
+      "size_label": "556.1 MB",
+      "download_url": "https://archive.org/download/chasm_202611/Chasm.zip",
+      "cover": "https://archive.org/download/chasm_202611/chasm-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "celeste",
+      "name": "Celeste",
+      "short": "Plataforma desafiador na escalada de uma montanha.",
+      "description": "Port para R36S.\n\nAjude Madeline a escalar a Montanha Celeste, superando fases de plataforma precisas e seus próprios medos.\n\nArquivo hospedado no Internet Archive.",
+      "category": "plataforma",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 992791757,
+      "size_label": "946.8 MB",
+      "download_url": "https://archive.org/download/celeste_202611/Celeste.zip",
+      "cover": "https://archive.org/download/celeste_202611/celeste-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "carmageddon",
+      "name": "Carmageddon",
+      "short": "Corrida destrutiva e sem regras.",
+      "description": "Port para R36S.\n\nVença as corridas cruzando a linha de chegada, destruindo os adversários ou atropelando tudo pela frente.\n\nArquivo hospedado no Internet Archive.",
+      "category": "corrida",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 209505485,
+      "size_label": "199.8 MB",
+      "download_url": "https://archive.org/download/carmageddon_202611/Carmageddon.zip",
+      "cover": "https://archive.org/download/carmageddon_202611/carmageddon-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "beard-blade",
+      "name": "Beard Blade",
+      "short": "Ação com uma barba que vira espada.",
+      "description": "Port para R36S.\n\nUse a barba como arma para cortar inimigos e atravessar fases cheias de perigos neste jogo de ação e plataforma.\n\nArquivo hospedado no Internet Archive.",
+      "category": "acao",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 49073357,
+      "size_label": "46.8 MB",
+      "download_url": "https://archive.org/download/beard-blade/Beard%20Blade.zip",
+      "cover": "https://archive.org/download/beard-blade/beard-blade-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "battletech-tabletop",
+      "name": "BattleTech TableTop",
+      "short": "Estratégia por turnos com robôs gigantes.",
+      "description": "Port para R36S.\n\nComande BattleMechs em combates táticos por turnos inspirados no jogo de tabuleiro.\n\nArquivo hospedado no Internet Archive.",
+      "category": "estrategia",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 38902170,
+      "size_label": "37.1 MB",
+      "download_url": "https://archive.org/download/battle-tech-table-top/BattleTech%20TableTop.zip",
+      "cover": "https://archive.org/download/battle-tech-table-top/battletech-tabletop-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "bully-anniversary-edition",
+      "name": "Bully: Anniversary Edition",
+      "short": "Aventura escolar em mundo aberto.",
+      "description": "Port para R36S.\n\nComo Jimmy Hopkins, enfrente valentões, professores e gangues na Bullworth Academy, em um mundo aberto cheio de missões e aulas.\n\nArquivo hospedado no Internet Archive.",
+      "category": "acao",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 2147483648,
+      "size_label": "2.0 GB",
+      "download_url": "https://archive.org/download/bully-anniversary-edition_202611/Bully%20-%20Anniversary%20Edition.zip",
+      "cover": "https://archive.org/download/bully-anniversary-edition_202611/bully-anniversary-edition-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "castle-of-illusion",
+      "name": "Castle of Illusion",
+      "short": "Plataforma clássico em um castelo mágico.",
+      "description": "Port para R36S.\n\nAtravesse florestas, bibliotecas e torres encantadas de um castelo mágico neste remake do clássico de plataforma.\n\nArquivo hospedado no Internet Archive.",
+      "category": "plataforma",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 533515469,
+      "size_label": "508.8 MB",
+      "download_url": "https://archive.org/download/castle-of-illusion_202611/Castle%20of%20Illusion.zip",
+      "cover": "https://archive.org/download/castle-of-illusion_202611/castle-of-illusion-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "katana-zero",
+      "name": "Katana ZERO",
+      "short": "Ação estilosa com espada e câmera lenta.",
+      "description": "Port para R36S.\n\nUm assassino com uma katana e o poder de desacelerar o tempo atravessa fases curtas e letais, onde um golpe basta para morrer.\n\nArquivo hospedado no Internet Archive.",
+      "category": "acao",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 251448525,
+      "size_label": "239.8 MB",
+      "download_url": "https://archive.org/download/katana-zero_202611/Katana%20ZERO.zip",
+      "cover": "https://archive.org/download/katana-zero_202611/katana-zero-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-08"
     }
   ]
 }
