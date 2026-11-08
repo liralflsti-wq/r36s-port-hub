@@ -1,7 +1,7 @@
 {
   "catalog_version": 1,
   "title": "R36S PORT HUB - ports (R36S)",
-  "updated": "2026-11-02",
+  "updated": "2026-11-08",
   "categories": [
     {
       "id": "corrida",
@@ -10,122 +10,46 @@
     {
       "id": "aventura",
       "name": "Aventura"
-    },
-    {
-      "id": "estrategia",
-      "name": "Estratégia"
-    },
-    {
-      "id": "terror",
-      "name": "Terror"
-    },
-    {
-      "id": "plataforma",
-      "name": "Plataforma"
     }
   ],
   "ports": [
     {
-      "id": "daytona-usa-arcade",
-      "name": "Daytona USA Arcade",
-      "short": "Corrida arcade clássica.",
-      "description": "Port para R36S.\n\nArquivo hospedado no Internet Archive.",
-      "category": "corrida",
-      "section": "games",
-      "version": "1.0",
-      "size_bytes": 16567296,
-      "size_label": "15.8 MB",
-      "download_url": "https://archive.org/download/daytona-usa-arcade/Daytona%20USA%20Arcade.rar",
-      "cover": "https://archive.org/download/daytona-usa-arcade/daytona-usa-arcade-cover.png",
-      "author": "Comunidade",
-      "requires_files": false,
-      "featured": false,
-      "added": "2026-11-01"
-    },
-    {
-      "id": "need-for-speed-underground",
-      "name": "Need For Speed Underground",
-      "short": "Corrida de rua arcade.",
-      "description": "Port para R36S.\n\nArquivo hospedado no Internet Archive.",
-      "category": "corrida",
-      "section": "games",
-      "version": "1.0",
-      "size_bytes": 270742323,
-      "size_label": "258.2 MB",
-      "download_url": "https://archive.org/download/need-for-speed-underground_202611/Need%20For%20Speed%20Underground.rar",
-      "cover": "https://archive.org/download/need-for-speed-underground_202611/need-for-speed-underground-cover.png",
-      "author": "Comunidade",
-      "requires_files": false,
-      "featured": true,
-      "added": "2026-11-02"
-    },
-    {
-      "id": "animal-crossing",
-      "name": "Animal Crossing",
-      "short": "Vida tranquila numa vila de animais.",
-      "description": "Port para R36S.\n\nMude-se para uma vila habitada por animais, decore sua casa, pesque, colete insetos e faça amizade com os vizinhos.\n\nArquivo hospedado no Internet Archive.",
+      "id": "torre-do-eco",
+      "name": "Torre do Eco",
+      "short": "Aventura misteriosa numa torre sob a lua.",
+      "description": "Port para R36S.\n\nSuba a Torre do Eco andar por andar e descubra de onde vem o som que ecoa à noite. Jogo fictício de demonstração do R36S PORT HUB.",
       "category": "aventura",
       "section": "games",
       "version": "1.0",
-      "size_bytes": 20744685,
-      "size_label": "19.8 MB",
-      "download_url": "https://archive.org/download/animal-crossing_202611/Animal%20Crossing.zip",
-      "cover": "https://archive.org/download/animal-crossing_202611/animal-crossing-cover.png",
-      "author": "Comunidade",
+      "size_bytes": 23069513,
+      "size_label": "22.0 MB",
+      "download_url": "https://archive.org/download/torre-do-eco/Torre-do-Eco.zip",
+      "cover": "https://archive.org/download/torre-do-eco/torre-do-eco-cover.png",
+      "sha256": "4f8902f49cd9d5b345e959e34c7f9a95809e632b9a291d0b0b4e39b62fbae0ee",
+      "author": "R36S PORT HUB",
       "requires_files": false,
       "featured": true,
-      "added": "2026-11-02"
+      "added": "2026-11-03",
+      "md5": "e757dc1b446ba85de654acc4b55a6d9c"
     },
     {
-      "id": "balatro",
-      "name": "Balatro",
-      "short": "Roguelike de cartas com mãos de pôquer.",
-      "description": "Port para R36S.\n\nMonte mãos de pôquer, combine curingas com efeitos especiais e vença as apostas cada vez maiores neste roguelike de construção de baralho.\n\nArquivo hospedado no Internet Archive.",
-      "category": "estrategia",
+      "id": "lontra-turbo",
+      "name": "Lontra Turbo",
+      "short": "Corrida arcade com uma lontra muito apressada.",
+      "description": "Port para R36S.\n\nAcelere pela estrada ao pôr do sol com a lontra mais rápida do rio. Jogo fictício de demonstração do R36S PORT HUB.",
+      "category": "corrida",
       "section": "games",
       "version": "1.0",
-      "size_bytes": 113664576,
-      "size_label": "108.4 MB",
-      "download_url": "https://archive.org/download/balatro-cover/Balatro.zip",
-      "cover": "https://archive.org/download/balatro-cover/balatro-cover.png",
-      "author": "Comunidade",
+      "size_bytes": 18875213,
+      "size_label": "18.0 MB",
+      "download_url": "https://archive.org/download/lontra-turbo/Lontra-Turbo.zip",
+      "cover": "https://archive.org/download/lontra-turbo/lontra-turbo-cover.png",
+      "sha256": "2b49c576f9ad8a28bf76558160e080179b547b94f99ea6e809817056ee186b06",
+      "author": "R36S PORT HUB",
       "requires_files": false,
       "featured": true,
-      "added": "2026-11-02"
-    },
-    {
-      "id": "dead-space",
-      "name": "Dead Space",
-      "short": "Terror e sobrevivência numa nave mineradora.",
-      "description": "Port para R36S.\n\nComo o engenheiro Isaac Clarke, enfrente os necromorfos a bordo da nave USG Ishimura, desmembrando inimigos com ferramentas de mineração.\n\nArquivo hospedado no Internet Archive.",
-      "category": "terror",
-      "section": "games",
-      "version": "1.0",
-      "size_bytes": 153613948,
-      "size_label": "146.5 MB",
-      "download_url": "https://archive.org/download/dead-space-cover/Dead%20Space.zip",
-      "cover": "https://archive.org/download/dead-space-cover/dead-space-cover.png",
-      "author": "Comunidade",
-      "requires_files": false,
-      "featured": true,
-      "added": "2026-11-02"
-    },
-    {
-      "id": "banjo-kazooie",
-      "name": "Banjo-Kazooie",
-      "short": "Plataforma 3D clássico com o urso e a ave.",
-      "description": "Port para R36S.\n\nGuie Banjo e Kazooie pelos mundos da bruxa Gruntilda, coletando notas musicais e peças de quebra-cabeça para resgatar Tooty.\n\nArquivo hospedado no Internet Archive.",
-      "category": "plataforma",
-      "section": "games",
-      "version": "1.0",
-      "size_bytes": 46661632,
-      "size_label": "44.5 MB",
-      "download_url": "https://archive.org/download/banjo-kazooie-cover/Banjo%20Kazooie%20%28Lighthouse%29.zip",
-      "cover": "https://archive.org/download/banjo-kazooie-cover/banjo-kazooie-cover.png",
-      "author": "Comunidade",
-      "requires_files": false,
-      "featured": false,
-      "added": "2026-11-02"
+      "added": "2026-11-03",
+      "md5": "c5bcbb16295772a56884a7cc4da80453"
     }
   ]
 }
