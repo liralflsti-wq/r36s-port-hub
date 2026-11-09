@@ -312,6 +312,40 @@
       "requires_files": false,
       "featured": true,
       "added": "2026-11-08"
+    },
+    {
+      "id": "the-legend-of-zelda-ocarina-of-time-hd",
+      "name": "The Legend of Zelda: Ocarina of Time - Full HD",
+      "short": "A clássica aventura de Link em Hyrule.",
+      "description": "Port para R36S.\n\nViaje no tempo com Link, explore masmorras e use a Ocarina do Tempo para impedir que Ganondorf domine Hyrule.\n\nArquivo hospedado no Internet Archive.",
+      "category": "aventura",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 567279616,
+      "size_label": "541.0 MB",
+      "download_url": "https://archive.org/download/legend-of-zelda-ocarina-of-time-full-hd/The-Legend%20Of%20Zelda%20Ocarina%20Of%20Time%20-%20Full%20HD.zip",
+      "cover": "https://archive.org/download/legend-of-zelda-ocarina-of-time-full-hd/the-legend-of-zelda-ocarina-of-time-hd-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "mighty-morphin-power-rangers-ritas-rewind",
+      "name": "Mighty Morphin Power Rangers: Rita's Rewind",
+      "short": "Pancadaria clássica com os Power Rangers.",
+      "description": "Port para R36S.\n\nMorfe com os Power Rangers originais e enfrente as forças de Rita Repulsa neste beat 'em up em estilo arcade, sozinho ou em dupla.\n\nArquivo hospedado no Internet Archive.",
+      "category": "acao",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 1503238554,
+      "size_label": "1.4 GB",
+      "download_url": "https://archive.org/download/mighty-morphin-power-rangers-ritas-rewind/Mighty%20Morphin%20Power%20Rangers%20-%20Rita%27s%20Rewind.zip",
+      "cover": "https://archive.org/download/mighty-morphin-power-rangers-ritas-rewind/mighty-morphin-power-rangers-ritas-rewind-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
     }
   ]
 }
