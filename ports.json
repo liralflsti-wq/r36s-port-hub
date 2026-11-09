@@ -346,6 +346,40 @@
       "requires_files": false,
       "featured": false,
       "added": "2026-11-08"
+    },
+    {
+      "id": "blasphemous",
+      "name": "Blasphemous",
+      "short": "Ação sombria em estilo metroidvania.",
+      "description": "Port para R36S.\n\nComo o Penitente, atravesse a terra amaldiçoada de Cvstodia em combates brutais com espada e explore um mundo cheio de segredos.\n\nArquivo hospedado no Internet Archive.",
+      "category": "acao",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 1825361101,
+      "size_label": "1.7 GB",
+      "download_url": "https://archive.org/download/blasphemous_202611/Blasphemous.zip",
+      "cover": "https://archive.org/download/blasphemous_202611/blasphemous-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-08"
+    },
+    {
+      "id": "super-mario-galaxy-pt-br",
+      "name": "Super Mario Galaxy (PT-BR)",
+      "short": "Plataforma 3D pelo espaço, em português.",
+      "description": "Port para R36S.\n\nViaje por galáxias com Mario, saltando entre planetas com gravidade própria para resgatar a Princesa Peach. Versão traduzida para o português do Brasil.\n\nArquivo hospedado no Internet Archive.",
+      "category": "plataforma",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 3328599654,
+      "size_label": "3.1 GB",
+      "download_url": "https://archive.org/download/super-mario-galaxy-pt-br/Super%20Mario%20Galaxy%20PT_BR.zip",
+      "cover": "https://archive.org/download/super-mario-galaxy-pt-br/super-mario-galaxy-cover.png",
+      "author": "Comunidade",
+      "requires_files": false,
+      "featured": true,
+      "added": "2026-11-08"
     }
   ]
 }
