@@ -133,6 +133,58 @@ function Covers.clear_disk()
   Covers.mem, Covers.order, Covers.state = {}, {}, {}
 end
 
+-- ---------------------------------------------------------------------------
+-- Baixar todas as capas do catalogo (Configuracoes > Armazenamento)
+-- Uma capa por vez, na mesma fila das capas da tela (tipo proprio, para que a
+-- troca de tela nao cancele o lote). So capas da internet que ainda nao estao
+-- no console. Cancelar: termina a capa em andamento e para.
+Covers.bulk = nil
+
+--- ports do catalogo com capa da internet que ainda nao foi baixada
+function Covers.missing(ports)
+  local list = {}
+  for _, p in ipairs(ports or {}) do
+    if p.cover and p.cover:match("^https?://") and not Covers.disk_file(p) then list[#list + 1] = p end
+  end
+  return list
+end
+
+--- inicia o lote. on_done(job) ao terminar ou cancelar
+function Covers.bulk_start(ports, on_done)
+  if Covers.bulk then return false end
+  local list = Covers.missing(ports)
+  local job = { list = list, total = #list, i = 0, ok = 0, failed = 0, cancel = false, on_done = on_done }
+  Covers.bulk = job
+  local function step()
+    if job.cancel or job.i >= job.total then
+      Covers.bulk = nil
+      job.finished = true
+      U.log("capas: lote terminado", job.ok, "ok,", job.failed, "falhas de", job.total, job.cancel and "(cancelado)" or "")
+      if job.on_done then pcall(job.on_done, job) end
+      return
+    end
+    job.i = job.i + 1
+    local p = job.list[job.i]
+    job.cur = p
+    if Covers.disk_file(p) then job.ok = job.ok + 1; return step() end
+    Fetcher.get("cover_all", p.cover, Covers.abs_dir .. "/" .. file_name(p), function(ok)
+      if ok then
+        job.ok = job.ok + 1
+        if Covers.state[p.slug] ~= "ready" then Covers.state[p.slug] = "disk" end
+      else
+        job.failed = job.failed + 1
+      end
+      step()
+    end)
+  end
+  step()
+  return true
+end
+
+function Covers.bulk_cancel()
+  if Covers.bulk then Covers.bulk.cancel = true end
+end
+
 --- Tentar de novo capas que falharam (ex.: depois de reconectar)
 function Covers.retry_failed()
   for k, v in pairs(Covers.state) do

@@ -10,10 +10,28 @@ local lg = love.graphics
 local G = { sx = 1, ox = 0, oy = 0 }
 
 --- Recorte em coordenadas logicas (640x480), respeitando a escala da tela
+-- Recortes aninhados: um recorte dentro de outro fica so na intersecao, e o
+-- unclip volta ao recorte de fora (ex.: G.cover dentro da coluna de capas).
+local CLIPS = {}
 function G.clip(x, y, w, h)
-  lg.setScissor(math.floor(G.ox + x * G.sx), math.floor(G.oy + y * G.sx), math.ceil(w * G.sx), math.ceil(h * G.sx))
+  CLIPS[#CLIPS + 1] = { lg.getScissor() }
+  local sx, sy = math.floor(G.ox + x * G.sx), math.floor(G.oy + y * G.sx)
+  local sw, sh = math.ceil(w * G.sx), math.ceil(h * G.sx)
+  if #CLIPS > 1 and CLIPS[#CLIPS][1] then
+    lg.intersectScissor(sx, sy, math.max(0, sw), math.max(0, sh))
+  else
+    lg.setScissor(sx, sy, math.max(0, sw), math.max(0, sh))
+  end
 end
-function G.unclip() lg.setScissor() end
+function G.unclip()
+  local prev = table.remove(CLIPS)
+  if prev and prev[1] then lg.setScissor(prev[1], prev[2], prev[3], prev[4]) else lg.setScissor() end
+end
+--- inicio de cada quadro: descarta recortes que ficaram abertos
+function G.clip_reset()
+  CLIPS = {}
+  lg.setScissor()
+end
 
 function G.color(c, a)
   if a then lg.setColor(c[1], c[2], c[3], (c[4] or 1) * a) else lg.setColor(c) end
@@ -224,8 +242,14 @@ end
 function G.hints(list, y, maxx)
   y = y or (T.H - 26)
   maxx = maxx or (T.W - 10)
-  G.rect(0, y - 6, T.W, 32, T.c.bg0, 0, 0.92)
-  G.rect(0, y - 6, T.W, 1, T.c.line)
+  if T.style.chrome == "pill" then
+    G.rect(8, y - 4, T.W - 16, 28, T.c.shadow, 14)
+    G.rect(8, y - 6, T.W - 16, 28, T.c.bg1, 14)
+    G.frame(8, y - 6, T.W - 16, 28, T.c.line, 14, 1)
+  else
+    G.rect(0, y - 6, T.W, 32, T.c.bg0, 0, 0.92)
+    G.rect(0, y - 6, T.W, 1, T.c.line)
+  end
   -- texto maior: se as dicas nao couberem na largura, a fonte delas desce
   local font
   for _, f in ipairs(T.shrink_chain(T.f.small)) do
@@ -388,10 +412,90 @@ local function background_neongrid(cv)
   end
 end
 
+--- Fundo Wii Blue: azul profundo em degrade, luz suave no alto, faixas
+--- horizontais bem discretas (como o menu de canais) e um arco claro na base.
+--- Desenhado uma vez num canvas (custo zero por quadro).
+local function background_wii(cv)
+  local top, bot = T.c.bg1, T.c.bg0
+  for i = 0, T.H - 1, 4 do
+    local k = i / T.H
+    lg.setColor(top[1] + (bot[1] - top[1]) * k, top[2] + (bot[2] - top[2]) * k, top[3] + (bot[3] - top[3]) * k, 1)
+    lg.rectangle("fill", 0, i, T.W, 4)
+  end
+  local g = T.style.glow or T.c.accent
+  -- luz suave no alto
+  for i = 24, 1, -1 do
+    lg.setColor(g[1], g[2], g[3], 0.014)
+    lg.ellipse("fill", T.W * 0.5, -60, i * 22, i * 9)
+  end
+  -- faixas horizontais discretas
+  lg.setColor(1, 1, 1, 0.022)
+  for y = 0, T.H, 6 do lg.rectangle("fill", 0, y, T.W, 2) end
+  -- arcos claros na base (lembra a barra curva do menu do Wii)
+  lg.setLineWidth(2)
+  for i = 0, 2 do
+    lg.setColor(g[1], g[2], g[3], 0.10 - i * 0.03)
+    lg.arc("line", "open", T.W / 2, T.H + 560 - i * 10, 640, -math.pi * 0.86, -math.pi * 0.14, 48)
+  end
+  lg.setLineWidth(1)
+end
+
+--- Fundo Pastel Pop: moldura em degrade (ciano -> azul -> roxo), area clara
+--- arredondada com grade de pontos e formas pastel desfocadas nos cantos.
+--- Desenhado uma vez num canvas (custo zero por quadro).
+local function background_pastel(cv)
+  -- moldura em degrade diagonal
+  local c1, c2, c3 = { 0.33, 0.80, 0.98 }, { 0.40, 0.55, 0.98 }, { 0.68, 0.45, 0.97 }
+  for y = 0, T.H - 1, 2 do
+    for x = 0, T.W - 1, 16 do
+      local k = (x / T.W + y / T.H) / 2
+      local a, b, t
+      if k < 0.5 then a, b, t = c1, c2, k * 2 else a, b, t = c2, c3, (k - 0.5) * 2 end
+      lg.setColor(a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t, 1)
+      lg.rectangle("fill", x, y, 16, 2)
+    end
+  end
+  -- area clara arredondada
+  G.rect(4, 4, T.W - 8, T.H - 8, T.c.bg0, 16)
+  -- grade de pontos
+  lg.setColor(T.c.faint[1], T.c.faint[2], T.c.faint[3], 0.16)
+  for y = 14, T.H - 10, 10 do
+    for x = 14, T.W - 10, 10 do lg.rectangle("fill", x, y, 1, 1) end
+  end
+  -- formas pastel "desfocadas" (camadas com pouca opacidade)
+  local function blob(x, y, w, h, c, rot)
+    lg.push(); lg.translate(x + w / 2, y + h / 2); lg.rotate(rot or 0)
+    for i = 10, 1, -1 do
+      lg.setColor(c[1], c[2], c[3], 0.045)
+      local g = i * 2.4
+      lg.rectangle("fill", -w / 2 - g, -h / 2 - g, w + 2 * g, h + 2 * g, 14 + g, 14 + g)
+    end
+    lg.setColor(c[1], c[2], c[3], 0.20)
+    lg.rectangle("fill", -w / 2, -h / 2, w, h, 14, 14)
+    lg.pop()
+  end
+  blob(548, 26, 62, 56, { 0.86, 0.55, 0.98 }, 0.12)    -- roxo/rosa (alto, direita)
+  blob(12, 300, 52, 60, { 0.98, 0.55, 0.60 }, -0.2)    -- vermelho claro (esquerda)
+  blob(500, 330, 70, 50, { 0.45, 0.90, 0.65 }, 0.05)   -- verde (direita, baixo)
+  blob(200, 18, 46, 40, { 0.45, 0.85, 0.95 }, -0.1)    -- ciano (alto)
+end
+
 function G.build_background()
   if G.bg and G.bg.release then G.bg:release() end
   local cv = lg.newCanvas(T.W, T.H)
   lg.setCanvas(cv)
+  if T.style.background == "pastel" then
+    background_pastel(cv)
+    lg.setCanvas()
+    G.bg = cv
+    return
+  end
+  if T.style.background == "wii" then
+    background_wii(cv)
+    lg.setCanvas()
+    G.bg = cv
+    return
+  end
   if T.style.background == "neongrid" then
     background_neongrid(cv)
     lg.setCanvas()
@@ -477,18 +581,127 @@ function G.logo(x, y, variant)
   return f:getWidth("R36S PORT HUB"), f:getHeight() + 8
 end
 
+-- ---------------------------------------------------------------------------
+-- Cartoes do tema (componente compartilhado pelos temas)
+-- Canais da tela inicial, areas da Central, categorias e cartoes de
+-- configuracao usam o mesmo cartao. O tema decide a aparencia:
+--   style.card   = cores proprias do cartao (Wii Blue: branco com texto escuro)
+--   style.effect = "soft" (halo azul e leve aumento) | "neon" (contorno luminoso
+--                  e cantos de mira) | nil (moldura simples, Tema Padrao)
+-- A funcao devolve a paleta que o conteudo do cartao deve usar.
+
+local FK = {}
+--- animacao do foco (0..1) de um cartao identificado por `key`
+function G.focus_k(key, on)
+  local target = on and 1 or 0
+  if not (App and App.animations and App.animations()) then FK[key] = target; return target end
+  local v = FK[key] or target
+  v = v + (target - v) * math.min(1, love.timer.getDelta() * 14)
+  if math.abs(v - target) < 0.01 then v = target end
+  FK[key] = v
+  return v
+end
+
+--- paleta do conteudo dos cartoes (sem desenhar)
+function G.card_palette(on)
+  local cd = T.style.card
+  if cd then
+    return { text = cd.text, dim = cd.dim or cd.text, faint = cd.faint or cd.dim or cd.text,
+      icon = on and (T.style.focus or cd.icon or T.c.accent) or (cd.icon or T.c.accent), light = (cd.fill[1] + cd.fill[2] + cd.fill[3]) > 2 }
+  end
+  return { text = on and T.c.text or T.c.dim, dim = on and T.c.dim or T.c.faint, faint = T.c.faint,
+    icon = on and T.c.accent or T.c.dim }
+end
+
+--- cor de status legivel dentro do cartao: em cartao claro (Wii Blue) a cor
+--- fica mais escura para manter o contraste com o fundo branco
+function G.ink(c, pal)
+  if not (pal and pal.light) then return c end
+  return { c[1] * 0.62, c[2] * 0.62, c[3] * 0.62, c[4] or 1 }
+end
+
+--- Desenha o cartao. on = selecionado; k = animacao do foco (0..1, opcional).
+--- Devolve paleta, x, y, w, h (posicao final, ja com o aumento do foco).
+function G.card(x, y, w, h, on, k, r, tint)
+  k = k or (on and 1 or 0)
+  r = r or 10
+  local st, cd = T.style, T.style.card
+  local fc = st.focus or T.c.accent
+  if st.effect == "soft" and k > 0 then
+    local g = 3 * k
+    x, y, w, h = x - g, y - g, w + 2 * g, h + 2 * g
+  elseif st.effect == "pop" then
+    -- Pastel Pop: cartao "salta" (sobe e cresce um pouco), borda colorida
+    local g = 2 * k
+    x, y, w, h = x - g, y - g - 3 * k, w + 2 * g, h + 2 * g
+    r = r + 4
+    G.rect(x + 1, y + 5 + 3 * k, w, h, T.c.shadow, r)
+    G.rect(x + 2, y + 3, w - 4, h, T.c.shadow, r)
+    if k > 0 then
+      local c2 = T.c.accent2
+      for i = 5, 1, -1 do G.frame(x - i * 1.6, y - i * 1.6, w + i * 3.2, h + i * 3.2, i % 2 == 0 and fc or c2, r + i * 1.6, 2, 0.07 * k) end
+    end
+    G.rect(x, y, w, h, cd and cd.fill or T.c.bg1, r)
+    local bc = tint or (cd and cd.line) or T.c.line
+    G.frame(x, y, w, h, bc, r, tint and 2 or 1, tint and 0.75 or 1)
+    if k > 0 then
+      G.frame(x, y, w, h, fc, r, 3, k)
+      G.frame(x + 3, y + 3, w - 6, h - 6, T.c.accent2, r - 3, 1, 0.5 * k)
+    end
+    return G.card_palette(on), x, y, w, h
+  end
+  -- sombra
+  G.rect(x + 2, y + 4, w, h, T.c.shadow, r)
+  -- halo do foco (por baixo do cartao)
+  if k > 0 and st.effect == "soft" then
+    for i = 4, 1, -1 do G.frame(x - i * 1.5, y - i * 1.5, w + i * 3, h + i * 3, fc, r + i, 2, 0.10 * k) end
+  elseif k > 0 and st.effect == "neon" then
+    for i = 3, 1, -1 do G.frame(x - i * 2, y - i * 2, w + i * 4, h + i * 4, fc, r + i * 2, 2, 0.09 * k) end
+  end
+  if cd then
+    G.rect(x, y, w, h, cd.fill, r)
+    if on and st.effect == "neon" then G.rect(x, y, w, h, fc, r, 0.07 * k) end
+    G.frame(x, y, w, h, cd.line or T.c.line, r, 1)
+  else
+    G.rect(x, y, w, h, on and T.c.bg2 or T.c.bg1, r)
+    G.frame(x, y, w, h, T.c.line, r, 1)
+  end
+  if k > 0 then
+    G.frame(x, y, w, h, fc, r, 2, (st.effect == "neon" and App and App.pulse) and App.pulse(0.85, 0.15, 2.2) * k or k)
+    if st.effect == "neon" then
+      -- cantos de mira
+      local c, l = 10, 2
+      G.color(fc, k)
+      lg.rectangle("fill", x - 3, y - 3, c, l); lg.rectangle("fill", x - 3, y - 3, l, c)
+      lg.rectangle("fill", x + w + 3 - c, y - 3, c, l); lg.rectangle("fill", x + w + 1, y - 3, l, c)
+      lg.rectangle("fill", x - 3, y + h + 1, c, l); lg.rectangle("fill", x - 3, y + h + 3 - c, l, c)
+      lg.rectangle("fill", x + w + 3 - c, y + h + 1, c, l); lg.rectangle("fill", x + w + 1, y + h + 3 - c, l, c)
+    end
+  end
+  return G.card_palette(on), x, y, w, h
+end
+
 --- Cabecalho padrao das telas da loja
 function G.header(title, right)
-  G.rect(0, 0, T.W, 40, T.c.bg0, 0, 0.85)
-  G.rect(0, 40, T.W, 1, T.c.line)
-  G.rect(0, 40, 120, 1, T.c.accent)
-  G.rect(120, 40, 80, 1, T.c.accent2)
-  local lw = G.logo(12, 4, "header")
+  if T.style.chrome == "pill" then
+    G.rect(8, 6, T.W - 16, 36, T.c.shadow, 18)
+    G.rect(8, 4, T.W - 16, 36, T.c.bg1, 18)
+    G.frame(8, 4, T.W - 16, 36, T.c.line, 18, 1)
+  else
+    G.rect(0, 0, T.W, 40, T.c.bg0, 0, 0.85)
+    G.rect(0, 40, T.W, 1, T.c.line)
+    G.rect(0, 40, 120, 1, T.c.accent)
+    G.rect(120, 40, 80, 1, T.c.accent2)
+  end
+  local pill = T.style.chrome == "pill"
+  local lw = G.logo(pill and 20 or 12, pill and 6 or 4, "header")
+  if pill then lw = lw + 8 end
   -- relogio (hora do sistema do console) sempre no canto direito
   local clock = require("core.clock").time()
   local cf = T.base_font(T.f.bodyb)   -- a faixa tem 40 px: relogio no tamanho padrao
   local cw = cf:getWidth(clock)
-  G.text(cf, clock, T.W - 14 - cw, 11, T.c.text)
+  G.text(cf, clock, T.W - (pill and 24 or 14) - cw, 11, T.c.text)
+  if pill then cw = cw + 10 end
   local tx = 12 + lw + 24
   local limit = T.W - 14 - cw - 12          -- onde o texto da faixa precisa parar
   local room = limit - tx

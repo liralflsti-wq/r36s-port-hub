@@ -8,6 +8,7 @@ local U = require("lib.util")
 local Lib = require("core.library")
 local Icons = require("ui.icons")
 local lg = love.graphics
+local CV = require("ui.coverview")
 
 local S = {}
 
@@ -59,6 +60,7 @@ end
 -- capa: carrega a imagem do gamelist.xml (fora da pasta do app) so do item
 -- escolhido, depois de um instante parado (rolar a lista fica leve)
 function S:update(dt)
+  if CV.active() then CV.update(self, self.sel, dt) end
   local it = self.list[self.sel]
   local want = it and it.g.image or nil
   if want ~= self.img_for then
@@ -95,6 +97,7 @@ function S:draw()
     G.hints({ { "b", L("Voltar") } })
     return
   end
+  if CV.active() then self:draw_showcase(); return end
   if self.sel > self.top + VIS then self.top = self.sel - VIS end
   if self.sel <= self.top then self.top = self.sel - 1 end
   -- lista
@@ -152,6 +155,60 @@ function S:draw()
     ty = ty + 17
   end
   G.text_fit(T.f.small, g.rel or g.file, PX + 12, PY + PH - 22, PW - 24, T.c.faint)
+  local hs = { { "a", L("Jogar") } }
+  if #sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador") } end
+  hs[#hs + 1] = { "select", Lib.is_fav(g) and L("Desfavoritar") or L("Favoritar") }
+  hs[#hs + 1] = { "y", L("Info") }
+  hs[#hs + 1] = { "b", L("Voltar") }
+  G.hints(hs)
+end
+
+-- Pastel Pop: vitrine de capas (ui/coverview.lua). So a capa do jogo escolhido
+-- e carregada (as outras aparecem como cartoes com o nome do sistema).
+local function fit_image(img, x, y, w, h, cover)
+  local iw, ih = img:getDimensions()
+  local s = cover and math.max(w / iw, h / ih) or math.min(w / iw, h / ih)
+  G.clip(x, y, w, h)
+  lg.setColor(1, 1, 1, 1)
+  lg.draw(img, x + (w - iw * s) / 2, y + (h - ih * s) / 2, 0, s, s)
+  G.unclip()
+end
+
+function S:draw_showcase()
+  local list = self.list
+  local it = list[self.sel]
+  local g, sys = it.g, it.sys
+  local function cover(i, x, y, w, h, on)
+    G.rect(x, y, w, h, T.c.bg1, 10)
+    if on and self.img then
+      fit_image(self.img, x + 3, y + 3, w - 6, h - 6, false)
+      return
+    end
+    G.rect(x + 4, y + 4, w - 8, h - 8, T.c.accent, 8, 0.08)
+    local isz = math.min(w, h) * 0.42
+    Icons.draw("games", x + (w - isz) / 2, y + h * 0.28, T.c.accent, isz / 24)
+    G.text_fit(T.f.pix8, U.upper(list[i].sys.name or ""), x + 6, y + h - 18, w - 12, T.c.faint)
+  end
+  local emu, core = Lib.choice(sys, g)
+  local rows = {
+    { L("Sistema"), sys.fullname },
+    { L("Emulador"), emu and (emu .. (core and (" / " .. core) or "")) or L("comando do sistema") },
+  }
+  if g.developer and g.developer ~= "" then rows[#rows + 1] = { L("Desenvolvedor"), g.developer } end
+  if g.genre and g.genre ~= "" then rows[#rows + 1] = { L("Gênero"), g.genre } end
+  if g.releasedate and g.releasedate:match("^%d%d%d%d") then rows[#rows + 1] = { L("Lançamento"), g.releasedate:sub(1, 4) } end
+  if g.players and g.players ~= "" then rows[#rows + 1] = { L("Jogadores"), g.players } end
+  if g.size then rows[#rows + 1] = { L("Tamanho"), U.format_bytes(g.size) } end
+  local sections = { { title = L("Detalhes"), rows = rows } }
+  sections[#sections + 1] = { title = L("Descrição"), text = (g.desc and g.desc ~= "") and g.desc or L("Sem descrição no gamelist.xml.") }
+  local tags = {}
+  if Lib.is_fav(g) then tags[#tags + 1] = { L("FAVORITO"), T.c.yellow } end
+  if Lib.has_game_choice(g) then tags[#tags + 1] = { L("EMULADOR PRÓPRIO"), T.c.accent2 } end
+  CV.draw(self, {
+    top = 48, n = #list, sel = self.sel, draw_cover = cover,
+    bg_cover = self.img and function(x, y, w, h) fit_image(self.img, x, y, w, h, true) end or nil,
+    name = g.name, pills = { { sys.fullname, T.c.accent2 }, { g.rel or g.file, T.c.line } }, tags = tags, sections = sections,
+  })
   local hs = { { "a", L("Jogar") } }
   if #sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador") } end
   hs[#hs + 1] = { "select", Lib.is_fav(g) and L("Desfavoritar") or L("Favoritar") }

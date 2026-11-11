@@ -19,7 +19,7 @@ local S = {}
 local DX, DY, DW, DH = 240, 152, 386, 196 -- caixa da descricao
 -- NEON GRID (layout "dashboard"): outra apresentacao, mesmas funcoes
 local NX, NY, NW, NH = 180, 204, 448, 182 -- caixa da descricao no NEON GRID
-local function neon() return T.style.layout == "dashboard" end
+local function neon() return T.style.layout ~= nil end   -- dashboard, channels ou carousel
 
 function S:enter(params)
   Manifest.rescan()

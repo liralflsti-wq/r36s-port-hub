@@ -75,9 +75,17 @@ function S:draw()
   row(L("Sistema"), r.os, sx, sy, T.W - 48)
   row(L("Dispositivo"), r.model, sx, sy + 20, T.W - 48)
   row(L("Arquitetura"), r.arch, sx, sy + 40, T.W - 48)
-  row(L("Kernel"), r.kernel, sx, sy + 60, T.W - 48)
-  row(L("Núcleos CPU"), r.cores, sx, sy + 80, T.W - 48)
-  row(L("Ligado há"), r.uptime, sx, sy + 100, T.W - 48)
+  row(L("Kernel"), r.kernel, sx, sy + 60, 296)
+  row(L("Núcleos CPU"), r.cores, sx, sy + 80, 296)
+  row(L("Ligado há"), r.uptime, sx, sy + 100, 296)
+  -- coluna da direita: bateria, rede e versao do hub (leituras reais)
+  local rx, rw = 330, T.W - 24 - 330
+  local b = require("core.battery").get()
+  row(L("Bateria"), b.ok and (b.pct .. "%" .. (b.charging and L("  •  carregando") or "")) or NA, rx, sy + 60, rw)
+  local st = require("core.net").current()
+  local net = (not st) and L("Verificando...") or (st.connected and (L("Conectado  •  ") .. tostring(st.ip)) or L("Desconectado"))
+  row(L("Rede"), net, rx, sy + 80, rw)
+  row(L("PORT HUB"), require("config").VERSION, rx, sy + 100, rw)
   local rts = r.pm.runtimes or {}
   if #rts > 0 then
     local shown = {}

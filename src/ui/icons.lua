@@ -336,6 +336,28 @@ end
 -- Sao pintados com a cor pedida. Se o arquivo nao existir, usa o desenho abaixo.
 local IMG = {}
 local IMG_ALIAS = { testes_de_analogicos = "testes_de_controles", testes_de_botoes = "testes_de_controles" }
+-- Familia de linha (0.5.0): assets/icons/line/<id>.png, 64x64, traco unico
+-- (tools/make_icons.py). Tem prioridade sobre os icones antigos; filtro linear
+-- porque e desenhada em varios tamanhos (24 px nas listas, 40+ nos cartoes).
+local LINE = {}
+local function line_for(id)
+  local v = LINE[id]
+  if v == nil then
+    v = false
+    local path = "assets/icons/line/" .. tostring(id) .. ".png"
+    if love.filesystem.getInfo(path) then
+      local ok, img = pcall(love.graphics.newImage, path, { mipmaps = true })
+      if ok and img then
+        img:setFilter("linear", "linear")
+        pcall(img.setMipmapFilter, img, "linear")
+        v = img
+      end
+    end
+    LINE[id] = v
+  end
+  return v or nil
+end
+
 local function image_for(id)
   local name = IMG_ALIAS[id] or id
   local v = IMG[name]
@@ -356,6 +378,14 @@ end
 
 --- Desenha o icone `id` (24x24) com a cor `c`; scale opcional
 function I.draw(id, x, y, c, scale)
+  local li = line_for(id)
+  if li then
+    local size = 24 * (scale or 1)
+    local s = size / li:getWidth()
+    lg.setColor(c)
+    lg.draw(li, x, y, 0, s, s)
+    return
+  end
   local img = image_for(id)
   if img then
     local size = 24 * (scale or 1)
@@ -382,6 +412,6 @@ function I.draw(id, x, y, c, scale)
   lg.setLineWidth(1)
 end
 
-function I.has(id) return D[id] ~= nil end
+function I.has(id) return D[id] ~= nil or line_for(id) ~= nil end
 
 return I

@@ -54,7 +54,7 @@ Projeto **independente** do KMP: nenhum arquivo do KMP foi alterado ou é necess
 
 ## Biblioteca de jogos (emuladores) — 0.4.8
 
-Menu principal → **Biblioteca de jogos** (no NEON GRID: atalho **Biblioteca** e painel lateral). Primeira etapa do **R36 Hub OS**: os jogos dos emuladores abrem direto pelo hub.
+Menu principal → **Biblioteca de jogos** (canal **Biblioteca de jogos** no Wii Blue e no Neon Grid). Primeira etapa do **R36 Hub OS**: os jogos dos emuladores abrem direto pelo hub.
 
 - O hub lê o `es_systems.cfg` do próprio console (`/etc/emulationstation/es_systems.cfg` no dArkOS/dArkOSRE): sistemas, pastas de ROMs, extensões, comando e emuladores/cores. Nada é copiado nem alterado.
 - Procura os jogos em segundo plano nas pastas de cada sistema (até 3 níveis de subpasta). Sistemas sem jogos não aparecem. **Y** procura de novo.
@@ -84,7 +84,7 @@ A tela principal mostra 17 cartões em 3 colunas (3 linhas visíveis por vez). C
 | Catálogo de ports | Atualizar catálogo agora, Atualizar ao abrir o hub, Última atualização online, Conteúdo, Ordenação das listas, Ordenar favoritos |
 | Downloads | Central de Downloads, Avisos de downloads em segundo plano, Histórico, Repetir downloads com falha, Limpar histórico |
 | Meus Ports | Abrir Meus Ports, Abrir Favoritos, Ports encontrados, Verificador de integridade, Instalações incompletas, Atualizar informações, Limpar favoritos |
-| **Armazenamento** | Espaço de cada cartão (livre, total e % usado), Memória RAM, Espaço ocupado pelos ports, Cache de capas (limpar), Gerenciador de arquivos, Otimizador e manutenção do microSD, Verificador do cartão SD |
+| **Armazenamento** | Espaço de cada cartão (livre, total e % usado), Memória RAM, Espaço ocupado pelos ports, Cache de capas (limpar), **Baixar todas as capas do catálogo** (de uma vez, em segundo plano; A de novo cancela), Gerenciador de arquivos, Otimizador e manutenção do microSD, Verificador do cartão SD |
 | Bateria e energia | Carga, Estado e os dados que o sistema informar (alimentação, tensão, saúde, temperatura), Análise da bateria, Modo econômico |
 | Controles | Testar analógicos e botões (R36S Analog Tester), Último relatório, Todos os testes de controles, Mapa dos botões |
 | Informações do console | Analisador de Console, Data e hora, Dispositivo, Processador, Resolução da tela, Arquitetura, Sistema, Temperatura do processador, Todos os detalhes |
@@ -509,22 +509,66 @@ Para quem desenvolve: `tools/make_update.py` gera o manifesto do pacote completo
 
 ## Temas
 
-Configurações → Aparência e personalização → **Tema**: **Tema Padrão** (original) e **NEON GRID — Gaming Dashboard** (identidade própria: fundo escuro com grade e verde neon; a tela inicial vira um dashboard e a página do port ganha as ações Instalar, Iniciar, Remover e Favoritar). A aplica na hora; a escolha fica salva e volta ao abrir o app. **Baixar novos temas** ficará ativo quando o catálogo de temas no GitHub for configurado. Detalhes em `docs/TEMAS.md`.
+Configurações → Aparência e personalização → **Tema**. A partir da 0.5.0 o hub tem duas identidades visuais oficiais com a **mesma estrutura de telas, menus, botões e funções**, e o tema original continua disponível:
 
-### NEON GRID — dashboard da tela inicial
+- **Pastel Pop Edition** (padrão na primeira abertura): visual claro e arredondado inspirado nos menus do 3DS e do Wii U — moldura em degradê azul e roxo, fundo claro pontilhado com formas pastel, cartões brancos com bordas coloridas que "saltam" ao selecionar, barras em pílula e **tela inicial em carrossel**.
+- **Wii Blue Edition**: inspirada no menu de canais do Nintendo Wii — fundo azul profundo, cartões brancos arredondados, ícones azuis, seleção com halo azul e leve aumento do cartão.
+- **Neon Grid Edition**: interface gamer futurista — fundo quase preto com grade em perspectiva, cartões escuros, contorno neon pulsante e cantos de mira na seleção.
+- **Tema Padrão**: o visual original (menu em lista).
 
-Com o NEON GRID ativo, a tela inicial vira um dashboard:
+**A** aplica na hora, sem reiniciar: todas as telas mudam juntas. A escolha fica salva e volta ao abrir o app. **Restaurar aparência original** volta ao Pastel Pop Edition. Na mesma tela de Aparência, **Temas do EmulationStation** abre a Loja de Temas do EmulationStation. **Baixar novos temas** ficará ativo quando o catálogo de temas no GitHub for configurado. Detalhes em `docs/TEMAS.md`.
 
-- **Cabeçalho**: logo, nome do tema e versão, aviso de versão nova (quando houver), Wi-Fi, bateria, data e hora.
-- **Destaque**: capa grande, nome, JOGO/UTILITÁRIO, plataforma (se o catálogo informar), categoria, tamanho, se está instalado e a compatibilidade. **L1/R1** trocam o destaque.
-- **Atalhos**: Conteúdo, Categorias, Meus Ports, Favoritos, Downloads e Configurações (com contadores quando há o que mostrar).
-- **Jogos recentes**: ports abertos pela lista de Ports do EmulationStation (lastplayed) e instalados pelo hub, mais novos primeiro.
-- **Novidades do catálogo**: o que o catálogo marca como novo ou atualizado e atualizações disponíveis para o que está instalado.
-- Ao escolher um cartão, o destaque mostra os dados dele (**SELECIONADO**).
+### Tela inicial em carrossel (Pastel Pop)
 
-Controles: **direcional** navega entre destaque, atalhos e fileiras; **A** abre; **X** favorita/desfavorita o cartão; **Y** mostra as informações (tipo, categoria, plataforma, desenvolvedor, tamanho, estado e compatibilidade); **SELECT** abre e fecha o **painel lateral de navegação rápida** (Central de Conteúdo, Categorias, Meus Ports, Favoritos, Central de Downloads, Novidades, Temas, Configurações, Sobre e Sair; com versão nova, "Atualizar o hub agora" aparece primeiro); **START** continua abrindo os Downloads; **B** sai (como no menu clássico).
+Uma fileira horizontal com os mesmos 9 canais da grade (cada um com sua cor pastel). O canal selecionado fica maior e "salta"; embaixo, um balão mostra o nome, o resumo real numa pílula, uma descrição curta, o botão **A Abrir** e o estado do catálogo e do espaço livre. Na pílula do topo: logo, tema, versão, hora e data, Wi-Fi (só o ícone) e bateria. **Esquerda/direita** (ou cima/baixo) navegam; **A** abre; **B** sai; **SELECT** atualiza quando há versão nova. A tela inicial do Pastel Pop não mostra o EM DESTAQUE (os outros temas mostram).
 
-### NEON GRID — página do port
+### Vitrine de capas (Pastel Pop)
+
+No Pastel Pop, as listas de **Ports de Jogos**, **Ports Utilitários**, **Meus Ports**, **Favoritos** e os **jogos da Biblioteca** viram uma vitrine no estilo do 3DS/Wii U:
+
+- **fundo** com a capa do item escolhido, esmaecida;
+- **coluna de capas** à esquerda: a escolhida grande, com contorno roxo, e as vizinhas menores acima e abaixo (rolagem suave);
+- **no meio**: nome grande, pílulas (categoria, tamanho, versão; na Biblioteca, sistema e arquivo) e selos (INSTALADO, ATUALIZAR, FAVORITO, INTEGRADO);
+- **à direita**: painel com blocos **Detalhes** (plataforma, versão, tamanho, desenvolvedor, estado; na Biblioteca: sistema, emulador, desenvolvedor, gênero, lançamento, jogadores, tamanho), **Descrição** e **Compatibilidade** com o selo do resultado.
+
+Botões e ações são os mesmos da lista: **cima/baixo** trocam o item, **esquerda/direita** pulam uma página, **L1/R1** trocam a aba, **A**, **X**, **Y**, **SELECT** e **B** como antes. Nos outros temas as listas continuam como eram.
+
+### Biblioteca em prateleiras (Pastel Pop)
+
+No Pastel Pop, a **Biblioteca de jogos** vira duas fileiras, no estilo do 3DS/Wii U:
+
+- **em cima, os consoles**: Recentes, Favoritos e cada sistema com jogos, com ícone do tipo de aparelho (portátil, portátil vertical, duas telas, console de cartucho, disco, fliperama, computador) e o nome curto. Ao lado, o nome completo do console e quantos jogos ele tem;
+- **embaixo, os jogos** do console escolhido, com as capas do gamelist.xml (carregadas uma por vez e reduzidas, para economizar memória). O jogo escolhido fica grande, com o nome e o emulador/tamanho em pílulas.
+
+Controles: **esquerda/direita** andam na fileira; **baixo** (ou **A** no console) desce para os jogos; **cima** (ou **B**) volta para os consoles; **A** num jogo joga; **X** escolhe o emulador (do console ou do jogo); **SELECT** favorita; **Y** mostra as informações do jogo (nos consoles, procura de novo); **L1/R1** pulam vários itens; **B** nos consoles sai. Ao voltar de um jogo, o hub abre no mesmo console, com o jogo escolhido. Os ícones são silhuetas genéricas, sem logotipos de fabricantes.
+
+**Ícones de console:** o hub traz uma família própria de ícones (arte original, `assets/systems/`, 154 sistemas: cartão claro com borda em degradê e o desenho genérico do aparelho, sem logotipos nem personagens). **Ícones do usuário:** o hub não traz ícones de terceiros, mas usa os seus no lugar dos dele se você colocar no cartão, em `r36sporthub/icones/sistemas/`, um PNG com o nome do sistema do `es_systems.cfg` em minúsculas (ex.: `snes.png`, `nds.png`, `psx.png`, `ports.png`). O ícone ocupa o cartão do console; sistemas sem arquivo continuam com a silhueta. As imagens são reduzidas ao carregar (até 4 MB cada) e carregadas uma por vez.
+
+### Tela inicial em canais (Wii Blue e Neon Grid)
+
+Grade 3x3 de canais, cada um com ícone, nome e um resumo real:
+
+| Canal | Resumo |
+|---|---|
+| Central de Conteúdo | capa e nome do EM DESTAQUE, nº de ports e categorias |
+| Biblioteca de jogos | jogos dos emuladores |
+| Categorias | navegar por gênero |
+| Meus Ports | quantos ports há no console |
+| Favoritos | quantos favoritos |
+| Downloads | quantos em andamento (selo no canto) ou "Atalho: START" |
+| Configurações | aparência, rede, sistema |
+| Sobre o Projeto | créditos e avisos |
+| Sair / Energia | voltar ao EmulationStation (ou desligar/reiniciar no modo sistema) |
+
+No alto: logo do tema, nome do tema, versão, aviso de versão nova (faixa deslizante), data e hora. Embaixo: estado do catálogo, espaço livre, dicas dos botões, ícone do Wi-Fi (sem o IP) e bateria. Controles: **direcional** navega na grade; **A** abre; **B** sai (ou Energia); **L1/R1** trocam o destaque; **SELECT** atualiza o hub quando há versão nova; **START** continua abrindo os Downloads. Ao abrir, os canais entram com uma animação curta (desligada junto com as animações da interface).
+
+A Central de Conteúdo, as Categorias e as Configurações usam os mesmos cartões do tema (claros no Wii Blue, escuros com contorno neon no Neon Grid). As listas, a página do port e as demais telas usam as cores do tema ativo.
+
+### Painel NEON GRID antigo (dashboard)
+
+O painel da 0.4.7 (destaque grande, atalhos, jogos recentes, novidades e painel lateral) continua no app como layout `"dashboard"` para temas que o usem; o Neon Grid Edition passou para a grade de canais.
+
+### Página do port (Wii Blue e Neon Grid)
 
 Capa em destaque, grade com Plataforma, Categoria, Tamanho, Desenvolvedor, Compatibilidade e Estado ("não informado" quando o catálogo não traz o dado), descrição rolável e as ações conforme o estado:
 

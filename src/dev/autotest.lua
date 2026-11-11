@@ -96,6 +96,10 @@ function A.update(dt)
   elseif cmd == "push" then
     local name, path = tostring(arg):match("^(%S+)%s+(.+)$")
     if name then A.app.push(name, { path = path }) else A.app.push(arg) end
+  elseif cmd == "pushjson" then
+    -- abre uma tela com parametros em JSON (ex.: pushjson store {"mine":true})
+    local name, js = tostring(arg):match("^(%S+)%s+(.+)$")
+    A.app.push(name, require("lib.json").decode(js))
   elseif cmd == "pushid" then
     -- abre uma tela com { id = ... } (ex.: pushid settings_cat appearance)
     local name, id = tostring(arg):match("^(%S+)%s+(%S+)$")

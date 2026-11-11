@@ -699,6 +699,46 @@ function X.storage_category()
             App.toast(L("Cache de capas limpo."), "ok")
           end }, { label = L("CANCELAR") } } })
       end }
+    rows[#rows + 1] = { kind = "action", label = L("Baixar todas as capas do catálogo"),
+      desc = L("Baixa de uma vez as capas do catálogo que ainda não estão no console, em segundo plano (pode sair desta tela). Depois, as capas aparecem mesmo sem internet. A de novo cancela."),
+      value = function()
+        local J = require("core.covers").bulk
+        if J then return string.format(I18N.tr(L("baixando %d de %d")), J.i, J.total) end
+        if scr.cmiss == nil then return "" end
+        return scr.cmiss == 0 and I18N.tr(L("todas no console")) or string.format(I18N.tr(L("%d faltando")), scr.cmiss)
+      end,
+      color = function() return require("core.covers").bulk and T.c.accent2 or nil end,
+      on_a = function()
+        local Covers = require("core.covers")
+        if Covers.bulk then
+          App.show_dialog({ title = L("Cancelar o download das capas?"), kind = "warn",
+            body = L("A capa em andamento termina e o download para. As capas já baixadas ficam no console."),
+            buttons = { { label = L("CANCELAR DOWNLOAD"), fn = function() Covers.bulk_cancel() end }, { label = L("CONTINUAR") } }, sel = 2 })
+          return
+        end
+        local Catalog = require("core.catalog")
+        local miss = #Covers.missing(Catalog.ports)
+        scr.cmiss = miss
+        if miss == 0 then App.toast(L("Todas as capas do catálogo já estão no console."), "info"); return end
+        local st = require("core.net").current()
+        if st and not st.connected then App.toast(L("Sem internet: conecte o Wi-Fi para baixar as capas."), "warn"); return end
+        App.show_dialog({ title = L("Baixar as capas?"), kind = "info",
+          body = string.format(I18N.tr(L("%d capas do catálogo ainda não estão no console. Elas serão baixadas uma por vez, em segundo plano, e ficam guardadas no Cache de capas.")), miss),
+          buttons = { { label = L("BAIXAR"), fn = function()
+            Covers.bulk_start(Catalog.ports, function(job)
+              scr.csize = covers_size()
+              scr.cmiss = #Covers.missing(Catalog.ports)
+              App.update_free_space()
+              if job.cancel then
+                App.toast(string.format(I18N.tr(L("Download das capas cancelado: %d baixadas.")), job.ok), "info")
+              elseif job.failed > 0 then
+                App.toast(string.format(I18N.tr(L("Capas: %d baixadas, %d falharam.")), job.ok, job.failed), "warn")
+              else
+                App.toast(string.format(I18N.tr(L("Capas: %d baixadas.")), job.ok), "ok")
+              end
+            end)
+          end }, { label = L("CANCELAR") } } })
+      end }
     rows[#rows + 1] = { kind = "action", label = L("Gerenciador de arquivos"),
       desc = L("Navegue pelo cartão SD: copiar, recortar, colar, excluir e extrair arquivos ZIP, RAR e 7z."),
       on_a = function() App.push("files", { path = C.PORTS_DIR }) end }
@@ -718,14 +758,15 @@ function X.storage_category()
       return App.free and (U.format_bytes(App.free) .. I18N.tr(L(" livres"))) or I18N.tr(L("Cartão microSD"))
     end,
     -- leitura depois do 1o quadro (a tela abre na hora)
-    enter = function(scr) scr.sinfo = nil; scr.sload = 2; scr.csize = covers_size() end,
-    resume = function(scr) scr.csize = covers_size(); scr.sinfo = nil; scr.sload = 2 end,
+    enter = function(scr) scr.sinfo = nil; scr.sload = 2; scr.csize = covers_size(); scr.cmiss = nil end,
+    resume = function(scr) scr.csize = covers_size(); scr.sinfo = nil; scr.sload = 2; scr.cmiss = nil end,
     update = function(dt, scr)
       if scr.sload then
         scr.sload = scr.sload - 1
         if scr.sload <= 0 then
           scr.sload = nil
           scr.sinfo = SysInfo.collect()
+          scr.cmiss = #require("core.covers").missing(require("core.catalog").ports)
           scr:rebuild()
         end
       end

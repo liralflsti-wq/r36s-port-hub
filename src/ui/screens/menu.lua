@@ -13,11 +13,14 @@ local lg = love.graphics
 
 local S = {}
 
-local Dash   -- ui/neon_dash.lua (carregado so quando o tema usa o layout dashboard)
+-- Layouts alternativos da tela inicial (carregados so quando o tema usa):
+--   "channels"  -> ui/channels.lua  (grade de canais: Wii Blue e Neon Grid)
+--   "dashboard" -> ui/neon_dash.lua (painel NEON GRID antigo)
+local LAYOUTS = { channels = "ui.channels", dashboard = "ui.neon_dash", carousel = "ui.carousel" }
 local function dash()
-  if T.style.layout ~= "dashboard" then return nil end
-  Dash = Dash or require("ui.neon_dash")
-  return Dash
+  local mod = LAYOUTS[T.style.layout or ""]
+  if not mod then return nil end
+  return require(mod)
 end
 
 
@@ -45,6 +48,7 @@ local HOLD = 8.0         -- pausa extra depois de uma troca manual
 local SHINE = 0.7        -- brilho que passa na capa ao chegar
 
 function S:enter()
+  self.ch_t = 0          -- animacao de entrada dos canais (layout "channels")
   self.sel = self.sel or 1
   self.feat_i = self.feat_i or 1
   self.feat_t = 0

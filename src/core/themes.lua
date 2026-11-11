@@ -13,7 +13,10 @@ local U = require("lib.util")
 local json = require("lib.json")
 local T = require("ui.theme")
 
-local M = { list = {}, current = "default", DEFAULT = "default" }
+local M = { list = {}, current = "wiiblue", DEFAULT = "default" }
+-- tema da primeira abertura (sem escolha salva): Pastel Pop Edition (0.5.0).
+-- O Tema Padrao continua sendo a reserva quando um tema falha.
+M.FIRST = "pastel"
 -- ids antigos -> ids atuais (quem usava o tema antigo continua com ele, ja renomeado)
 M.ALIASES = { xbox = "neongrid" }
 local function resolve(id) return M.ALIASES[id] or id end
@@ -48,9 +51,26 @@ local function load_def(dir, builtin)
     if c then th.buttons[k] = c end
   end
   local st = type(d.style) == "table" and d.style or {}
-  th.style.background = (st.background == "modern" or st.background == "neongrid") and st.background or "retro"
-  -- layout da tela inicial: "dashboard" (NEON GRID) ou o classico
-  th.style.layout = (st.layout == "dashboard") and "dashboard" or nil
+  local BGS = { modern = true, neongrid = true, wii = true, pastel = true }
+  th.style.background = BGS[st.background] and st.background or "retro"
+  -- layout da tela inicial: "channels" (grade de canais: Wii Blue e NEON GRID),
+  -- "dashboard" (painel NEON GRID antigo) ou o classico (lista)
+  local LAYS = { dashboard = true, channels = true, carousel = true }
+  th.style.layout = LAYS[st.layout or ""] and st.layout or nil
+  -- barras do topo e do rodape: "pill" = pilulas brancas flutuantes (Pastel Pop)
+  th.style.chrome = (st.chrome == "pill") and "pill" or nil
+  -- cartoes (canais, areas, categorias, cartoes de configuracao): cores proprias
+  -- opcionais. Sem elas, o cartao usa as cores dos paineis do tema.
+  if type(st.card) == "table" then
+    local cd = {}
+    for _, k in ipairs({ "fill", "line", "text", "dim", "faint", "icon" }) do cd[k] = T.parse_hex(st.card[k]) end
+    if cd.fill and cd.text then th.style.card = cd end
+  end
+  -- foco (cartao selecionado): cor e efeito ("soft" = halo suave e leve
+  -- aumento; "neon" = contorno luminoso e cantos de mira)
+  th.style.focus = T.parse_hex(st.focus) or th.colors.accent
+  local EFX = { neon = true, soft = true, pop = true }
+  th.style.effect = EFX[st.effect or ""] and st.effect or nil
   th.style.round = U.clamp(tonumber(st.round) or 1, 0, 1.5)
   th.style.glow = T.parse_hex(st.glow) or th.colors.accent
   th.style.scanlines = st.scanlines ~= false
@@ -75,10 +95,15 @@ function M.scan()
       U.log("tema ignorado:", dir, err)
     end
   end
-  -- inclusos: padrao primeiro
-  add(BUILTIN_DIR .. "/default", true)
+  -- inclusos: Pastel Pop, Wii Blue, Neon Grid e Padrao primeiro (nessa ordem), depois os outros
+  local FIXED = { "pastel", "wiiblue", "neongrid", "default" }
+  local fixed = {}
+  for _, n in ipairs(FIXED) do
+    fixed[n] = true
+    if love.filesystem.getInfo(BUILTIN_DIR .. "/" .. n, "directory") then add(BUILTIN_DIR .. "/" .. n, true) end
+  end
   for _, n in ipairs(love.filesystem.getDirectoryItems(BUILTIN_DIR)) do
-    if n ~= "default" then add(BUILTIN_DIR .. "/" .. n, true) end
+    if not fixed[n] then add(BUILTIN_DIR .. "/" .. n, true) end
   end
   -- instalados (futuro: baixados do catalogo de temas)
   if love.filesystem.getInfo(M.USER_DIR, "directory") then
@@ -103,8 +128,8 @@ end
 function M.init()
   M.scan()
   local ok, saved = pcall(love.filesystem.read, PREF)
-  saved = ok and saved and U.trim(saved) or M.DEFAULT
-  if saved == "" then saved = M.DEFAULT end
+  saved = ok and saved and U.trim(saved) or (M.by_id[M.FIRST] and M.FIRST or M.DEFAULT)
+  if saved == "" then saved = M.by_id[M.FIRST] and M.FIRST or M.DEFAULT end
   -- migracao: tema salvo com o id antigo (ex.: xbox -> neongrid) e regravado com o novo
   if M.ALIASES[saved] then
     U.log("tema: id antigo", saved, "migrado para", resolve(saved))

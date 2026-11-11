@@ -1,0 +1,30 @@
+{
+  "id": "pastel",
+  "name": "Pastel Pop Edition",
+  "description": "Visual claro e arredondado, inspirado nos menus do 3DS e do Wii U: moldura em degradê azul e roxo, fundo claro pontilhado com formas pastel, cartões brancos com bordas coloridas, barras em formato de pílula e tela inicial em carrossel.",
+  "version": "1.0",
+  "author": "R36S PORT HUB",
+  "preview": "preview.png",
+  "colors": {
+    "bg0": "#f3f4f9", "bg1": "#ffffff", "bg2": "#f6f3ff", "bg3": "#ece6ff", "line": "#dfe2ee",
+    "text": "#2d3142", "dim": "#5f6578", "faint": "#9aa0b4",
+    "accent": "#8b5cf6", "accent2": "#3aa0f0",
+    "yellow": "#d99a00", "green": "#1fa968", "red": "#e5484d", "orange": "#ee7a2b",
+    "black": "#000000", "shadow": "#5a4e9a24"
+  },
+  "buttons": {
+    "a": "#8b5cf6", "b": "#f06292", "x": "#3aa0f0", "y": "#1fa968",
+    "l1": "#9aa0b4", "r1": "#9aa0b4", "start": "#9aa0b4", "select": "#9aa0b4", "dpad": "#9aa0b4"
+  },
+  "style": {
+    "background": "pastel",
+    "layout": "carousel",
+    "chrome": "pill",
+    "round": 1.6,
+    "glow": "#a78bfa",
+    "scanlines": false,
+    "focus": "#8b5cf6",
+    "effect": "pop",
+    "card": { "fill": "#ffffff", "line": "#e4e6f0", "text": "#2d3142", "dim": "#5f6578", "faint": "#9aa0b4", "icon": "#8b5cf6" }
+  }
+}

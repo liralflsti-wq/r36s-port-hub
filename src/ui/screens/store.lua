@@ -13,6 +13,7 @@ local PortRow = require("ui.portrow")
 local Favorites = require("core.favorites")
 local Tools = require("core.tools")
 local Icons = require("ui.icons")
+local CV = require("ui.coverview")
 
 local S = {}
 
@@ -214,12 +215,78 @@ function S:draw_preview()
   end
 end
 
+function S:update(dt)
+  if CV.active() then CV.update(self, self.sel, dt) end
+end
+
+-- Pastel Pop: vitrine de capas (ui/coverview.lua) no lugar da lista + previa
+function S:draw_showcase()
+  local items = self.items
+  local function cover(i, x, y, w, h)
+    local p = items[i]
+    if p.builtin then
+      G.rect(x, y, w, h, T.c.bg1, 10)
+      G.rect(x + 4, y + 4, w - 8, h - 8, T.c.green, 8, 0.10)
+      local isz = math.min(w, h) * 0.5
+      Icons.draw(p.icon, x + (w - isz) / 2, y + (h - isz) / 2, T.c.green, isz / 24)
+    else
+      G.cover(Covers.get(p), p, x, y, w, h, Covers.is_loading(p), App.t)
+    end
+  end
+  local p = items[self.sel]
+  local pills, tags = {}, {}
+  pills[#pills + 1] = { PortRow.subtitle(p):match("^(.-)  •") or p.category, T.c.accent2 }
+  if not p.builtin then
+    if p.size_label and p.size_label ~= "?" then pills[#pills + 1] = { p.size_label, T.c.line } end
+    if (p.version or "") ~= "" then pills[#pills + 1] = { "v" .. p.version, T.c.line } end
+    local b = PortRow.BADGE[App.status(p)]
+    if b then tags[#tags + 1] = { b[1], b[2] } end
+    if Favorites.is(p) then tags[#tags + 1] = { L("FAVORITO"), T.c.yellow } end
+  else
+    tags[#tags + 1] = { L("INTEGRADO"), T.c.green }
+  end
+  local none = L("não informado")
+  local sections = {}
+  if p.builtin then
+    sections[#sections + 1] = { title = L("Ferramenta integrada"), text = p.short or "" }
+  else
+    local st = App.status(p)
+    local stt = st == "installed" and L("Instalado") or (st == "update" and L("Atualização disponível") or L("Não instalado"))
+    sections[#sections + 1] = { title = L("Detalhes"), rows = {
+      { L("Plataforma"), (p.platform or "") ~= "" and p.platform or none },
+      { L("Versão"), (p.version or "") ~= "" and p.version or none },
+      { L("Tamanho"), (p.size_label and p.size_label ~= "?") and p.size_label or none },
+      { L("Desenvolvedor"), (p.author or "") ~= "" and p.author or none },
+      { L("Estado"), stt, st == "installed" and T.c.green or (st == "update" and T.c.yellow or nil) },
+    } }
+    local short = Catalog.text(p, "short")
+    sections[#sections + 1] = { title = L("Descrição"), text = short ~= "" and short or L("Sem descrição.") }
+    local r = Compat.evaluate(p)
+    if r then
+      local det = {}
+      if r.reason then det[1] = r.reason end
+      for _, it in ipairs(r.items or {}) do det[#det + 1] = I18N.tr(it.label) .. ": " .. I18N.tr(it.detail or "") end
+      sections[#sections + 1] = { title = L("Compatibilidade"), badge = { Compat.LABEL[r.status], T.c[Compat.COLOR[r.status]] or T.c.dim },
+        text = table.concat(det, "\n") }
+    end
+  end
+  CV.draw(self, {
+    top = 82, n = #items, sel = self.sel, draw_cover = cover,
+    bg_cover = (not p.builtin) and function(x, y, w, h) G.cover(Covers.get(p), p, x, y, w, h, false, App.t) end or nil,
+    name = p.name, pills = pills, tags = tags, sections = sections,
+  })
+end
+
 function S:draw()
   local right = string.format(L("%d de %d"), #self.items > 0 and self.sel or 0, #self.items)
   G.header(self:title(), right)
   self:draw_tabs()
-  self:draw_list()
-  self:draw_preview()
+  if CV.active() and #self.items > 0 then
+    self:draw_showcase()
+  else
+    self:draw_list()
+    self:draw_preview()
+  end
   local tabword = (self.mine or self.favs) and L("Área") or L("Categoria")
   if self.filter == "installed" then
     G.hints({ { "a", L("Detalhes") }, { "x", L("Desinstalar") }, { "select", L("Favorito") }, { "b", L("Voltar") }, { "l1", "" }, { "r1", tabword } })

@@ -1,0 +1,29 @@
+{
+  "id": "wiiblue",
+  "name": "Wii Blue Edition",
+  "description": "Inspirado no menu de canais do Nintendo Wii: fundo azul profundo, cartões brancos arredondados, ícones azuis e seleção com contorno azul luminoso. Visual limpo, com animações discretas.",
+  "version": "1.0",
+  "author": "R36S PORT HUB",
+  "preview": "preview.png",
+  "colors": {
+    "bg0": "#071827", "bg1": "#0c263c", "bg2": "#12324e", "bg3": "#174268", "line": "#25465f",
+    "text": "#ffffff", "dim": "#afc5d8", "faint": "#6f8ba3",
+    "accent": "#35b7ff", "accent2": "#8bd8ff",
+    "yellow": "#ffd75e", "green": "#4fe08f", "red": "#ff6b7a", "orange": "#ffa95e",
+    "black": "#000000", "shadow": "#0003088c"
+  },
+  "buttons": {
+    "a": "#35b7ff", "b": "#ffffff", "x": "#8bd8ff", "y": "#4fe08f",
+    "l1": "#afc5d8", "r1": "#afc5d8", "start": "#afc5d8", "select": "#afc5d8", "dpad": "#afc5d8"
+  },
+  "style": {
+    "background": "wii",
+    "layout": "channels",
+    "round": 1.25,
+    "glow": "#168fe5",
+    "scanlines": false,
+    "focus": "#35b7ff",
+    "effect": "soft",
+    "card": { "fill": "#ffffff", "line": "#d3e4f2", "text": "#0c263c", "dim": "#4d6b84", "faint": "#8aa3b8", "icon": "#168fe5" }
+  }
+}

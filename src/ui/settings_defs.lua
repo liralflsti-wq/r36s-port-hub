@@ -66,6 +66,9 @@ local appearance = {
   rows = {
     { kind = "value", label = L("Tema"), desc = L("Escolha a aparência do R36S PORT HUB. A mudança vale na hora."),
       value = theme_name, on_a = function() App.push("themes") end },
+    { kind = "action", label = L("Temas do EmulationStation"), icon = "set_appearance",
+      desc = L("Abre a Loja de Temas do EmulationStation (Ferramentas de sistema): temas compatíveis com o sistema do console, com prévia, tamanho de tela e compatibilidade."),
+      on_a = function() App.push("esthemes", { from = "settings" }) end },
     { kind = "value", label = L("Tamanho do texto"), icon = "set_text",
       desc = L("Esquerda/direita aumenta ou diminui o texto de todo o aplicativo. Se um texto não couber no espaço da tela, ele diminui sozinho até o tamanho padrão e, se ainda assim não couber, é encurtado com reticências. A escolha fica salva."),
       value = function()
@@ -114,12 +117,13 @@ local appearance = {
       get = function() return App.anim end,
       set = function(v) App.anim = v; Prefs.set("anim", v and "1" or "0") end },
     { kind = "action", label = L("Restaurar aparência original"),
-      desc = L("Volta ao Tema Padrão, ao tamanho de texto padrão e liga as animações. Brilho e idioma não mudam."),
+      desc = L("Volta ao tema Pastel Pop Edition, ao tamanho de texto padrão e liga as animações. Brilho e idioma não mudam."),
       on_a = function()
         App.show_dialog({ title = L("Restaurar aparência?"), kind = "warn",
-          body = L("O hub volta ao Tema Padrão, com o tamanho de texto padrão e as animações ligadas."),
+          body = L("O hub volta ao tema Pastel Pop Edition, com o tamanho de texto padrão e as animações ligadas."),
           buttons = { { label = L("RESTAURAR"), fn = function()
-            if Themes.current ~= Themes.DEFAULT then Themes.apply(Themes.DEFAULT, true) end
+            local first = Themes.by_id and Themes.by_id[Themes.FIRST] and Themes.FIRST or Themes.DEFAULT
+            if Themes.current ~= first then Themes.apply(first, true) end
             App.set_font_level("normal")
             App.anim = true; Prefs.set("anim", "1")
             App.toast(L("Aparência original restaurada."), "ok")

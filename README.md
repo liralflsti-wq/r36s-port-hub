@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.4.8%20BETA-ff4f8b?style=for-the-badge" alt="Versão 0.4.8 BETA">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.5.0%20BETA-ff4f8b?style=for-the-badge" alt="Versão 0.5.0 BETA">
   <img src="https://img.shields.io/badge/console-R36S-38d6ff?style=for-the-badge" alt="R36S">
   <img src="https://img.shields.io/badge/sistema-dArkOSRE%20%7C%20dArkOS%20%7C%20ArkOS-ffd447?style=for-the-badge" alt="dArkOSRE, dArkOS, ArkOS">
   <img src="https://img.shields.io/badge/L%C3%96VE-11.5-e74a99?style=for-the-badge" alt="LÖVE 11.5">
@@ -95,7 +95,7 @@ echo "https://raw.githubusercontent.com/liralflsti-wq/r36s-port-hub/main/update.
 | 🧩 | **Verificador de compatibilidade** | Compara o que o port pede (arquitetura, sistema, runtimes, tela) com o console. |
 | 🛠️ | **Gerenciar PortMaster** | Instala, atualiza, verifica e repara o PortMaster com a versão estável oficial, com backup e recuperação. |
 | 📚 | **Runtimes** | Confere e atualiza os runtimes do PortMaster (md5 de cada arquivo). |
-| 🎨 | **Temas do hub** | Tema Padrão e NEON GRID (gaming dashboard), aplicados na hora. |
+| 🎨 | **Temas do hub** | Pastel Pop Edition (padrão, carrossel claro), Wii Blue Edition, Neon Grid Edition e Tema Padrão, trocados na hora. |
 | 🖼️ | **Loja de Temas do EmulationStation** | Usa as fontes do ThemeMaster (galeria OGA e coleções do GitHub), escolhe tamanho de tela, reconhece os temas do console e mostra qual está ativo. |
 | 📶 | **Wi-Fi** | Procura redes, conecta, mostra sinal e faz diagnóstico de rede e teste de velocidade. |
 | 📁 | **FTP e gerenciador de arquivos** | Servidor FTP para copiar jogos pelo PC; gerenciador com extrair, recortar, colar e excluir. |

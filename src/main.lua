@@ -1040,6 +1040,7 @@ local function draw_live_badges()
 end
 
 function love.draw()
+  G.clip_reset()
   -- canvas logico: no PC (tela de outro tamanho) ou enquanto a interface e capturada
   local cv = App.canvas or (Cap.active() and Cap.get_canvas()) or nil
   if cv then

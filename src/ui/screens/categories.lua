@@ -85,20 +85,20 @@ function S:draw()
       local c = COLOR[t.section]
       local tools = #Tools.for_filter(t.section, "cat:" .. t.cat.id)
       local empty = t.cat.count == 0 and tools == 0
-      G.panel(x, y, TW, TH, { bg = on and T.c.bg3 or T.c.bg1, border = on and c or T.c.line, lw = on and 2 or 1, r = 8 })
+      local pal, cx, cy, cw, ch = G.card(x, y, TW, TH, on, G.focus_k("cat" .. i, on), 8)
+      local cc = G.ink(c, pal)
       -- utilitarios: borda tracejada a esquerda para diferenciar dos jogos
       if t.section == "tools" then
-        for k = 0, TH - 8, 6 do G.rect(x, y + 4 + k, 4, 3, c, 0, on and 1 or 0.6) end
+        for k = 0, ch - 8, 6 do G.rect(cx, cy + 4 + k, 4, 3, cc, 0, on and 1 or 0.6) end
       else
-        G.rect(x, y + 4, 4, TH - 8, c, 2, on and 1 or 0.6)
+        G.rect(cx, cy + 4, 4, ch - 8, cc, 2, on and 1 or 0.6)
       end
-      G.rect(x + 10, y + 9, 32, 32, T.c.bg0, 6)
-      Icons.draw(t.cat.icon, x + 14, y + 13, (empty and not on) and T.c.faint or c)
-      local nf = T.f.bodyb:getWidth(t.cat.name) <= TW - 58 and T.f.bodyb or T.f.small
-      G.text_fit(nf, t.cat.name, x + 50, y + (nf == T.f.bodyb and 8 or 10), TW - 58, on and T.c.text or (empty and T.c.faint or T.c.dim))
+      Icons.draw(t.cat.icon, cx + 12, cy + 9, (empty and not on) and pal.faint or (on and pal.icon or cc), 32 / 24)
+      local nf = T.f.bodyb:getWidth(t.cat.name) <= cw - 58 and T.f.bodyb or T.f.small
+      G.text_fit(nf, t.cat.name, cx + 52, cy + (nf == T.f.bodyb and 8 or 10), cw - 60, (empty and not on) and pal.faint or pal.text)
       local label = empty and L("VAZIA") or string.format(t.cat.count == 1 and L("%d PORT") or L("%d PORTS"), t.cat.count)
       if tools > 0 then label = (t.cat.count > 0 and (label .. " + ") or "") .. tools .. L(" FERRAM.") end
-      G.text(T.f.pix8, label, x + 50, y + 31, empty and T.c.faint or c)
+      G.text(T.f.pix8, label, cx + 52, cy + 31, empty and pal.faint or cc)
     end
   end
   G.unclip()

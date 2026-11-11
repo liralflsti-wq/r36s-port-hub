@@ -43,40 +43,43 @@ function S:draw()
     local col, row = (i - 1) % COLS, math.floor((i - 1) / COLS) - self.top
     local x, y = X0 + col * (CW + GAP), Y0 + row * (CH + GAP)
     local on = i == self.sel
-    local c = color(cat.color)
-    G.panel(x, y, CW, CH, { bg = on and T.c.bg3 or T.c.bg1, border = on and c or T.c.line, lw = on and 2 or 1 })
-    if on then G.rect(x, y + 10, 4, CH - 20, c, 2) end
+    local pal, cx, cy = G.card(x, y, CW, CH, on, G.focus_k("set" .. i, on), 8)
+    local c = G.ink(color(cat.color), pal)
+    local gw = cx - x                 -- deslocamento do foco (Wii Blue)
+    x, y = cx, cy
+    local cw, chh = CW - 2 * gw, CH - 2 * gw
+    if on then G.rect(x, y + 10, 4, chh - 20, c, 2) end
 
     -- icone num quadro com a cor da categoria
     G.rect(x + 12, y + 12, 36, 36, c, 8, on and 0.22 or 0.12)
-    Icons.draw(cat.icon, x + 18, y + 18, on and c or T.c.dim, 1)
+    Icons.draw(cat.icon, x + 16, y + 16, on and pal.icon or c, 28 / 24)
 
     -- nome (ate 2 linhas)
-    local nl = G.wrap(T.f.bodyb, cat.name, CW - 64)
+    local nl = G.wrap(T.f.bodyb, cat.name, cw - 64)
     local nstep = G.step(T.f.bodyb, 17)
     local ny = #nl > 1 and y + 12 or y + 21
     if #nl > 1 then ny = ny - (nstep - 17) end   -- texto maior: sobe um pouco
     for k = 1, math.min(2, #nl) do
       local s = nl[k]
-      if k == 2 and #nl > 2 then s = U.ellipsize(T.f.bodyb, s .. " …", CW - 64) end
-      G.text(T.f.bodyb, s, x + 56, ny + (k - 1) * nstep, on and T.c.text or T.c.dim)
+      if k == 2 and #nl > 2 then s = U.ellipsize(T.f.bodyb, s .. " …", cw - 64) end
+      G.text(T.f.bodyb, s, x + 56, ny + (k - 1) * nstep, pal.text)
     end
 
     -- descricao curta: com texto maior, diminui ate caber ou e encurtada com "…"
     local dtop = math.max(y + 56, ny + math.min(2, #nl) * nstep + 4)
-    local df, dl = G.fit_lines(T.f.small, cat.desc, CW - 24, y + CH - 32 - dtop, true)
+    local df, dl = G.fit_lines(T.f.small, cat.desc, cw - 24, y + chh - 32 - dtop, true)
     local dstep = G.step(df, 15)
     for k = 1, #dl do
-      G.text(df, dl[k], x + 12, dtop + (k - 1) * dstep, T.c.faint)
+      G.text(df, dl[k], x + 12, dtop + (k - 1) * dstep, pal.faint)
     end
 
     -- estado atual + indicador de acesso
-    G.rect(x + 12, y + CH - 30, CW - 24, 1, T.c.line, 0, 0.8)
+    G.rect(x + 12, y + chh - 30, cw - 24, 1, T.style.card and T.style.card.line or T.c.line, 0, 0.8)
     local ok, st = pcall(cat.status)
-    G.text_fit(T.f.small, ok and st or "", x + 12, y + CH - 22, CW - 40, on and c or T.c.dim)
-    G.color(on and c or T.c.faint)
+    G.text_fit(T.f.small, ok and st or "", x + 12, y + chh - 22, cw - 40, on and c or pal.dim)
+    G.color(on and c or pal.faint)
     lg.setLineWidth(2)
-    local ax, ay = x + CW - 20, y + CH - 21
+    local ax, ay = x + cw - 20, y + chh - 21
     lg.line(ax, ay, ax + 5, ay + 5, ax, ay + 10)
     lg.setLineWidth(1)
   end

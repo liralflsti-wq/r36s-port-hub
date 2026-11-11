@@ -958,3 +958,20 @@ A hora é a do sistema do console (fuso configurado no dArkOS), lida a cada quad
 - Arquivos: `main.lua`, `core/catalog.lua`, `i18n/en.lua`, `i18n/ru.lua`.
 
 
+
+## 0.5.0 BETA — Redesign: Wii Blue Edition + Neon Grid Edition
+
+- **Pastel Pop Edition** (novo, padrão na primeira abertura, tema claro): inspirado nos menus do 3DS e do Wii U — moldura em degradê azul e roxo, fundo claro pontilhado com formas pastel, cartões brancos com bordas coloridas que saltam ao selecionar, barras em pílula e **tela inicial em carrossel** (`ui/carousel.lua`) com balão de informações do canal.
+- Pastel Pop: tela inicial sem o EM DESTAQUE (os outros temas mantêm).
+- **Vitrine de capas** no Pastel Pop (`ui/coverview.lua`): listas de Ports de Jogos/Utilitários, Meus Ports, Favoritos e jogos da Biblioteca com fundo da capa esmaecida, coluna de capas, nome grande com pílulas e painel com Detalhes, Descrição e Compatibilidade. Recortes de tela aninhados (`G.clip`) para capas dentro da coluna.
+- Biblioteca: família própria de ícones de console (154 sistemas, arte original, `tools/make_system_icons.py` → `assets/systems/`) e ícones do próprio usuário em `r36sporthub/icones/sistemas/<sistema>.png` (o hub não inclui ícones de terceiros).
+- **Biblioteca em prateleiras** no Pastel Pop (`ui/shelf.lua`): consoles em cima (ícones genéricos por tipo de aparelho, 8 novos na família de linha), jogos do console embaixo com miniaturas das capas do gamelist (120x160, cache de 14); cima/baixo trocam de fileira.
+- **Wii Blue Edition** (novo): fundo azul profundo em degradê, cartões brancos arredondados, ícones azuis, seleção com halo azul e leve aumento; logos azuis próprias.
+- **Neon Grid Edition** (NEON GRID atualizado): paleta nova (fundos #080B16/#10172A/#151D32, verde neon, ciano, rosa), cartões escuros com contorno neon pulsante e cantos de mira. Mantém a grade em perspectiva e as logos verdes.
+- **Tela inicial em canais** nos dois temas (substitui o dashboard do NEON GRID): grade 3x3 com Central de Conteúdo (com o destaque), Biblioteca, Categorias, Meus Ports, Favoritos, Downloads, Configurações, Sobre e Sair; resumos reais; animação de entrada; L1/R1 trocam o destaque. Só o ícone do Wi-Fi (sem IP).
+- **Cartões compartilhados** (`G.card`) na Central de Conteúdo, Categorias e Configurações; página do port com capa em destaque e ações nos dois temas.
+- **Família de ícones de linha** (79 ícones, `assets/icons/line/`, gerada por `tools/make_icons.py`), pintada com a cor de cada tema.
+- Informações do Console: bateria, rede/IP e versão do PORT HUB.
+- Armazenamento: **Baixar todas as capas do catálogo** — baixa de uma vez, em segundo plano, as capas que ainda não estão no console (mostra quantas faltam e o progresso; A de novo cancela; troca de tela não interrompe).
+- Aparência: atalho **Temas do EmulationStation**; Restaurar aparência volta ao Wii Blue Edition. Ordem dos temas: Wii Blue, Neon Grid, Padrão.
+- Tema Padrão mantido (menu em lista). Nenhuma função removida; o painel NEON GRID antigo continua disponível como layout `dashboard`.

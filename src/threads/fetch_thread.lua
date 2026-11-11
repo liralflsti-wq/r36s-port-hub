@@ -52,7 +52,7 @@ while true do
     local size = fsize(tmp)
     local okres = (rc == 0 and size > 0)
     local reason = okres and "" or ("rc=" .. tostring(rc))
-    if okres and req.kind == "cover" then
+    if okres and (req.kind == "cover" or req.kind == "cover_all") then
       local h = read_head(tmp, 12)
       local is_png = h:sub(1, 8) == "\137PNG\r\n\26\n"
       local is_jpg = h:sub(1, 3) == "\255\216\255"
