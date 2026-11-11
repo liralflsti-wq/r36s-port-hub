@@ -448,6 +448,23 @@
       "requires_files": false,
       "featured": false,
       "added": "2026-11-10"
+    },
+    {
+      "id": "the-legend-of-zelda-ocarina-of-time-3d",
+      "name": "The Legend of Zelda: Ocarina of Time 3D",
+      "short": "A aventura de Link recompilada do 3DS.",
+      "description": "Port para R36S.\n\nA versão de 3DS da clássica aventura de Link, rodando de forma nativa no console por recompilação, sem emulação completa.\n\nPort por: projeto Pocket Native (github.com/whovian64/pocket-native), de whovian64, baseado no Zakuro e no 3dsrecomp de fearkov.\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "aventura",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 352845824,
+      "size_label": "336.5 MB",
+      "download_url": "https://archive.org/download/zelda-ocarina-of-time-3-d/The%20Legend%20of%20Zelda%3A%20Ocarina%20of%20Time%203D.zip",
+      "cover": "https://archive.org/download/zelda-ocarina-of-time-3-d/the-legend-of-zelda-ocarina-of-time-3d-cover.png",
+      "author": "whovian64 (Pocket Native)",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-10"
     }
   ]
 }
