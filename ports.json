@@ -1,7 +1,7 @@
 {
   "catalog_version": 1,
   "title": "R36S PORT HUB - ports (R36S)",
-  "updated": "2026-11-08",
+  "updated": "2026-11-10",
   "categories": [
     {
       "id": "acao",
@@ -380,6 +380,74 @@
       "requires_files": false,
       "featured": true,
       "added": "2026-11-08"
+    },
+    {
+      "id": "trial-xtreme-3",
+      "name": "Trial Xtreme 3",
+      "short": "Manobras de moto em pistas de obstáculos.",
+      "description": "Port para R36S.\n\nPilote motos de trial por pistas cheias de rampas, loopings e obstáculos, equilibrando velocidade e controle para chegar inteiro ao fim.\n\nPort por: Lucas (Mega Ports).\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "corrida",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 104123597,
+      "size_label": "99.3 MB",
+      "download_url": "https://archive.org/download/trial-xtreme-3/Trial-Xtreme-3.zip",
+      "cover": "https://archive.org/download/trial-xtreme-3/Trial-Xtreme-3-cover.png",
+      "author": "Lucas (Mega Ports)",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-10"
+    },
+    {
+      "id": "killer-instinct-arcade",
+      "name": "Killer Instinct (Arcade)",
+      "short": "Luta arcade com combos gigantes.",
+      "description": "Port para R36S.\n\nO clássico de luta dos arcades, com personagens marcantes, combos longos e os famosos golpes finais.\n\nPort por: dehalbuq.\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "luta",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 104752742,
+      "size_label": "99.9 MB",
+      "download_url": "https://archive.org/download/killer-instinct-arcade-cover/Killer%20Instinct%20Arcade%20Port.zip",
+      "cover": "https://archive.org/download/killer-instinct-arcade-cover/killer-instinct-arcade-port-cover.png",
+      "author": "dehalbuq",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-10"
+    },
+    {
+      "id": "shadowgun",
+      "name": "Shadowgun",
+      "short": "Tiro em terceira pessoa com coberturas.",
+      "description": "Port para R36S.\n\nComo o mercenário John Slade, invada a fortaleza de um cientista maluco e enfrente soldados e robôs em combates de tiro com cobertura.\n\nPort por: Lucas (Mega Ports).\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "tiro",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 337536614,
+      "size_label": "321.9 MB",
+      "download_url": "https://archive.org/download/shadow-gun_202611/Shadow%20Gun.zip",
+      "cover": "https://archive.org/download/shadow-gun_202611/shadowgun-cover.png",
+      "author": "Lucas (Mega Ports)",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-10"
+    },
+    {
+      "id": "ducktales-remastered",
+      "name": "DuckTales: Remastered",
+      "short": "Plataforma clássico com o Tio Patinhas.",
+      "description": "Port para R36S.\n\nAjude o Tio Patinhas a buscar tesouros pelo mundo, pulando com sua bengala em fases redesenhadas do clássico de plataforma.\n\nPort por: grupo R36S PORTS BR no Telegram (t.me/R36SPORTSBR).\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "plataforma",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 500065894,
+      "size_label": "476.9 MB",
+      "download_url": "https://archive.org/download/ducktales-remastered-cover/DuckTales%20Remastered.zip",
+      "cover": "https://archive.org/download/ducktales-remastered-cover/ducktales-remastered-cover.png",
+      "author": "R36S PORTS BR (Telegram)",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-10"
     }
   ]
 }
