@@ -183,6 +183,27 @@ Gerar o pacote: `tools/build.sh` → `build/R36S-PORT-HUB-BETA.zip`.
 
 ---
 
+## Licença
+
+Copyright (C) 2026 Lag do Lira (@lagdolira / liralflsti-wq)
+
+O código do R36S PORT HUB é distribuído sob a **GNU General Public License v3.0**. Veja o arquivo [LICENSE](LICENSE).
+
+Você pode usar, modificar e redistribuir o código, desde que o seu projeto também seja distribuído sob a GPL-3.0, com o código-fonte disponível e este aviso de autoria mantido.
+
+### Nome e marca
+
+A licença cobre **apenas o código**. O nome "R36S PORT HUB", o logo e a marca **Lag do Lira** não estão licenciados e não podem ser usados em outros projetos sem autorização.
+
+Se você usar este código no seu projeto, pedimos que inclua no README e na tela "Sobre" um crédito como:
+"Baseado no R36S PORT HUB, por Lag do Lira — youtube.com/@lagdolira"
+
+### Conteúdo de terceiros
+
+Ports, jogos, ferramentas e demais arquivos listados no catálogo pertencem aos seus respectivos autores e seguem as licenças deles. O R36S PORT HUB não hospeda esses arquivos.
+
+---
+
 ## 🙏 Créditos e licenças
 
 - Fontes **Press Start 2P**, **Chakra Petch** e **Inter**: SIL Open Font License.
