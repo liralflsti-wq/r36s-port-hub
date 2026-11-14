@@ -1,7 +1,7 @@
 {
   "catalog_version": 1,
   "title": "R36S PORT HUB - ports (R36S)",
-  "updated": "2026-11-10",
+  "updated": "2026-11-14",
   "categories": [
     {
       "id": "acao",
@@ -465,6 +465,40 @@
       "requires_files": false,
       "featured": false,
       "added": "2026-11-10"
+    },
+    {
+      "id": "pokemon-y",
+      "name": "Pokemon Y",
+      "short": "RPG de turnos: capture e treine Pokémon em Kalos.",
+      "description": "Port para R36S.\n\nExplore a região de Kalos, capture e treine Pokémon, enfrente ginásios e derrote a Equipe Flare nesta aventura de RPG por turnos.\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "rpg",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 1449865096,
+      "size_label": "1.4 GB",
+      "download_url": "https://archive.org/download/pokemon-y_202611/Pokemon%20Y.zip",
+      "cover": "https://archive.org/download/pokemon-y_202611/pokemon-y-cover.png",
+      "author": "Créditos aos autores originais",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-14"
+    },
+    {
+      "id": "god-of-war-collection",
+      "name": "God of War Collection",
+      "short": "Ação brutal de Kratos contra os deuses gregos.",
+      "description": "Port para R36S.\n\nKratos enfrenta deuses e monstros da mitologia grega com as Lâminas do Caos, reunindo os dois primeiros jogos da série em um só pacote.\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "acao",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 3142421961,
+      "size_label": "2.9 GB",
+      "download_url": "https://archive.org/download/god-of-war-collection-cover/God%20of%20War%20Collection.zip",
+      "cover": "https://archive.org/download/god-of-war-collection-cover/god-of-war-collection-cover.png",
+      "author": "Créditos aos autores originais",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-14"
     }
   ]
 }
