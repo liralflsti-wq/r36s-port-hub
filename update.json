@@ -3,8 +3,8 @@
   "version_label": "0.5.1 BETA",
   "date": "2026-11-13",
   "url": "https://github.com/liralflsti-wq/r36s-port-hub/releases/latest/download/R36S-PORT-HUB-update.zip",
-  "size": 11328556,
-  "sha256": "9d4e7d31617b785874073ddfcf1cee9fcf169fb2c8027bf54360151b8c596bab",
+  "size": 11328397,
+  "sha256": "8c26ab54e887d52fc90c7ce9d426a951b980fe2cb3b0bb4a7f8957bc0c94d701",
   "min_version": "0.4",
-  "notes": "Neon Grid em painel verde (Guia Rápido, Continuar jogo e grade de capas) e Tema Padrão de volta como tema inicial."
+  "notes": "Neon Grid em painel verde (Guia Rápido, Continuar jogo e grade de capas) e Tema Padrão de volta como tema inicial.\n* Neon Grid Edition com painel verde: novo fundo e tela inicial em painel (layout xdash).\n* Guia Rápido no painel do Neon Grid: capas dos últimos ports abertos/instalados e atalhos para Meus Ports, Favoritos e Downloads.\n* Continuar jogo: o cartão de destaque retoma o último port aberto ou mostra o EM DESTAQUE do catálogo.\n* Listas do Neon Grid em grade de capas (6 colunas), com o port escolhido em destaque (capa, nome, categoria, tamanho, estado e descrição curta).\n* Navegação da grade: esquerda/direita andam uma capa, cima/baixo uma fileira; A abre, X detalhes, Y pesquisa e L1/R1 trocam o destaque.\n* Tema Padrão volta a ser o tema da primeira abertura e a reserva quando um tema falha.\n* (corrigido) Restaurar aparência original agora volta ao Tema Padrão (antes voltava ao Pastel Pop Edition).\n* (corrigido) Textos novos traduzidos em português, inglês e russo.\n* (corrigido) Ajustes visuais do Neon Grid: foco com brilho verde e novo fundo do painel."
 }
