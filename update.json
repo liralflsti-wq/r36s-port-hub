@@ -1,10 +1,10 @@
 {
-  "version": "0.5.0",
-  "version_label": "0.5.0 BETA",
-  "date": "2026-11-10",
+  "version": "0.5.1",
+  "version_label": "0.5.1 BETA",
+  "date": "2026-11-13",
   "url": "https://github.com/liralflsti-wq/r36s-port-hub/releases/latest/download/R36S-PORT-HUB-update.zip",
-  "size": 11326040,
-  "sha256": "f7e0c89782c5a9176b1af82b84cf010eee7e725843626996ffadd77e55721576",
+  "size": 11328556,
+  "sha256": "9d4e7d31617b785874073ddfcf1cee9fcf169fb2c8027bf54360151b8c596bab",
   "min_version": "0.4",
-  "notes": "Repaginada visual: Pastel Pop Edition (carrossel, vitrine de capas e Biblioteca em prateleiras), Wii Blue Edition e Neon Grid Edition, ícones novos.\n* Novo tema Pastel Pop Edition (padrão): visual claro e arredondado no estilo 3DS/Wii U, com tela inicial em carrossel, cartões com bordas coloridas e barras em pílula.\n* Pastel Pop: listas de jogos, Meus Ports, Favoritos e Biblioteca em vitrine de capas (capa grande, fundo esmaecido e painel de detalhes).\n* Pastel Pop: Biblioteca de jogos em prateleiras — consoles em cima e jogos embaixo, com capas; cima/baixo trocam de fileira.\n* Biblioteca: ícones de console próprios do hub, desenhados para o projeto (sem logotipos).\n* Novo tema Wii Blue Edition: fundo azul profundo, cartões brancos arredondados, ícones azuis e seleção com halo azul, inspirado no menu de canais do Wii.\n* NEON GRID virou Neon Grid Edition: paleta nova, cartões escuros com contorno neon pulsante e cantos de mira.\n* Tela inicial em canais nos dois temas: Central de Conteúdo (com o destaque), Biblioteca, Categorias, Meus Ports, Favoritos, Downloads, Configurações, Sobre e Sair, com resumos reais e animação de entrada.\n* Nova família de ícones, igual em todo o app e pintada com a cor de cada tema.\n* (corrigido) Central de Conteúdo, Categorias e Configurações com os cartões novos; página do port com capa em destaque e ações Instalar, Iniciar, Remover e Favoritar nos dois temas.\n* (corrigido) Informações do Console: bateria, rede/IP e versão do PORT HUB.\n* (corrigido) Aparência: atalho para os Temas do EmulationStation; Restaurar aparência volta ao Pastel Pop Edition. O Tema Padrão continua disponível.\n* (corrigido) Armazenamento: nova opção Baixar todas as capas do catálogo, de uma vez e em segundo plano, para ver as capas mesmo sem internet."
+  "notes": "Neon Grid em painel verde (Guia Rápido, Continuar jogo e grade de capas) e Tema Padrão de volta como tema inicial."
 }
