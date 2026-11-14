@@ -739,6 +739,13 @@ function App.launch_port(p)
       return
     end
     U.log("iniciar port:", p.id, script)
+    -- ultimos ports abertos pelo hub (Guia Rapido do Neon Grid): mais recente primeiro
+    local Prefs = require("core.prefs")
+    local list = { tostring(p.id) }
+    for id in (Prefs.get("recent_ports") or ""):gmatch("[^,]+") do
+      if id ~= tostring(p.id) and #list < 8 then list[#list + 1] = id end
+    end
+    Prefs.set("recent_ports", table.concat(list, ","))
     App.quit(true)
   end
   local body = string.format(L("O R36S PORT HUB vai fechar e %s vai abrir.\nAo sair do jogo, o hub abre de novo.\n\nScript: %s"), p.name, script)

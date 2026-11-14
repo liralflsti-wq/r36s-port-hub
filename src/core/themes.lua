@@ -13,10 +13,10 @@ local U = require("lib.util")
 local json = require("lib.json")
 local T = require("ui.theme")
 
-local M = { list = {}, current = "wiiblue", DEFAULT = "default" }
--- tema da primeira abertura (sem escolha salva): Pastel Pop Edition (0.5.0).
--- O Tema Padrao continua sendo a reserva quando um tema falha.
-M.FIRST = "pastel"
+local M = { list = {}, current = "default", DEFAULT = "default" }
+-- tema da primeira abertura (sem escolha salva): o Tema Padrao (original do hub).
+-- Ele tambem e a reserva quando um tema falha.
+M.FIRST = "default"
 -- ids antigos -> ids atuais (quem usava o tema antigo continua com ele, ja renomeado)
 M.ALIASES = { xbox = "neongrid" }
 local function resolve(id) return M.ALIASES[id] or id end
@@ -51,12 +51,14 @@ local function load_def(dir, builtin)
     if c then th.buttons[k] = c end
   end
   local st = type(d.style) == "table" and d.style or {}
-  local BGS = { modern = true, neongrid = true, wii = true, pastel = true }
+  local BGS = { modern = true, neongrid = true, wii = true, pastel = true, xdash = true }
   th.style.background = BGS[st.background] and st.background or "retro"
   -- layout da tela inicial: "channels" (grade de canais: Wii Blue e NEON GRID),
   -- "dashboard" (painel NEON GRID antigo) ou o classico (lista)
-  local LAYS = { dashboard = true, channels = true, carousel = true }
+  local LAYS = { dashboard = true, channels = true, carousel = true, xdash = true }
   th.style.layout = LAYS[st.layout or ""] and st.layout or nil
+  -- listas de ports: "grid" = grade de capas com o port escolhido em destaque (Neon Grid)
+  th.style.list = (st.list == "grid") and "grid" or nil
   -- barras do topo e do rodape: "pill" = pilulas brancas flutuantes (Pastel Pop)
   th.style.chrome = (st.chrome == "pill") and "pill" or nil
   -- cartoes (canais, areas, categorias, cartoes de configuracao): cores proprias
@@ -69,7 +71,7 @@ local function load_def(dir, builtin)
   -- foco (cartao selecionado): cor e efeito ("soft" = halo suave e leve
   -- aumento; "neon" = contorno luminoso e cantos de mira)
   th.style.focus = T.parse_hex(st.focus) or th.colors.accent
-  local EFX = { neon = true, soft = true, pop = true }
+  local EFX = { neon = true, soft = true, pop = true, glow = true }
   th.style.effect = EFX[st.effect or ""] and st.effect or nil
   th.style.round = U.clamp(tonumber(st.round) or 1, 0, 1.5)
   th.style.glow = T.parse_hex(st.glow) or th.colors.accent

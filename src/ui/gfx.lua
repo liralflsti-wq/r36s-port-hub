@@ -415,6 +415,33 @@ end
 --- Fundo Wii Blue: azul profundo em degrade, luz suave no alto, faixas
 --- horizontais bem discretas (como o menu de canais) e um arco claro na base.
 --- Desenhado uma vez num canvas (custo zero por quadro).
+--- Fundo do painel verde (Neon Grid Edition): quase preto esverdeado, luz verde
+--- no alto a esquerda e faixas diagonais de luz bem discretas embaixo a direita.
+local function background_xdash(cv)
+  local top, bot = T.c.bg3 or T.c.bg1, T.c.bg0
+  for i = 0, T.H - 1, 4 do
+    local k = (i / T.H) ^ 0.8
+    lg.setColor(top[1] + (bot[1] - top[1]) * k, top[2] + (bot[2] - top[2]) * k, top[3] + (bot[3] - top[3]) * k, 1)
+    lg.rectangle("fill", 0, i, T.W, 4)
+  end
+  local g = T.style.glow or T.c.accent
+  for i = 24, 1, -1 do
+    lg.setColor(g[1], g[2], g[3], 0.012)
+    lg.ellipse("fill", 90, 40, i * 16, i * 10)
+  end
+  -- faixas diagonais de luz (canto inferior direito)
+  for j = 0, 5 do
+    lg.setColor(g[1], g[2], g[3], 0.018 + 0.006 * (j % 2))
+    local x0 = 330 + j * 46
+    lg.polygon("fill", x0, T.H, x0 + 26, T.H, x0 + 26 + 300, T.H - 260, x0 + 300, T.H - 260)
+  end
+  -- vinheta nas bordas
+  for i = 0, 14 do
+    lg.setColor(0, 0, 0, 0.022)
+    lg.rectangle("line", i, i, T.W - 2 * i, T.H - 2 * i)
+  end
+end
+
 local function background_wii(cv)
   local top, bot = T.c.bg1, T.c.bg0
   for i = 0, T.H - 1, 4 do
@@ -492,6 +519,12 @@ function G.build_background()
   end
   if T.style.background == "wii" then
     background_wii(cv)
+    lg.setCanvas()
+    G.bg = cv
+    return
+  end
+  if T.style.background == "xdash" then
+    background_xdash(cv)
     lg.setCanvas()
     G.bg = cv
     return
@@ -657,10 +690,13 @@ function G.card(x, y, w, h, on, k, r, tint)
     for i = 4, 1, -1 do G.frame(x - i * 1.5, y - i * 1.5, w + i * 3, h + i * 3, fc, r + i, 2, 0.10 * k) end
   elseif k > 0 and st.effect == "neon" then
     for i = 3, 1, -1 do G.frame(x - i * 2, y - i * 2, w + i * 4, h + i * 4, fc, r + i * 2, 2, 0.09 * k) end
+  elseif k > 0 and st.effect == "glow" then
+    -- Neon Grid (painel verde): brilho largo e suave em volta do cartao
+    for i = 6, 1, -1 do G.frame(x - i * 1.5, y - i * 1.5, w + i * 3, h + i * 3, fc, r + i * 1.5, 2, 0.06 * k) end
   end
   if cd then
     G.rect(x, y, w, h, cd.fill, r)
-    if on and st.effect == "neon" then G.rect(x, y, w, h, fc, r, 0.07 * k) end
+    if on and (st.effect == "neon" or st.effect == "glow") then G.rect(x, y, w, h, fc, r, (st.effect == "glow" and 0.05 or 0.07) * k) end
     G.frame(x, y, w, h, cd.line or T.c.line, r, 1)
   else
     G.rect(x, y, w, h, on and T.c.bg2 or T.c.bg1, r)

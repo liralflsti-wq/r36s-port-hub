@@ -10,6 +10,7 @@ local Covers = require("core.covers")
 local Manifest = require("core.manifest")
 local Cats = require("core.categories")
 local PortRow = require("ui.portrow")
+local CG = require("ui.covergrid")
 local Favorites = require("core.favorites")
 local Tools = require("core.tools")
 local Icons = require("ui.icons")
@@ -277,11 +278,51 @@ function S:draw_showcase()
   })
 end
 
+-- Neon Grid: grade de capas (ui/covergrid.lua) com o port escolhido em destaque
+function S:draw_grid()
+  local items = self.items
+  local function cover(i, x, y, w, h)
+    local p = items[i]
+    if p.builtin then
+      G.rect(x, y, w, h, T.c.bg2, 4)
+      local isz = math.min(w, h) * 0.5
+      Icons.draw(p.icon, x + (w - isz) / 2, y + (h - isz) / 2, T.c.green, isz / 24)
+    else
+      G.cover(Covers.get(p), p, x, y, w, h, Covers.is_loading(p), App.t)
+    end
+  end
+  local p = items[self.sel]
+  local pills, tags = {}, {}
+  pills[#pills + 1] = { PortRow.subtitle(p):match("^(.-)  •") or p.category, T.c.accent2 }
+  if not p.builtin then
+    if p.size_label and p.size_label ~= "?" then pills[#pills + 1] = { p.size_label, T.c.line } end
+    if (p.version or "") ~= "" then pills[#pills + 1] = { "v" .. p.version, T.c.line } end
+    local b = PortRow.BADGE[App.status(p)]
+    if b then tags[#tags + 1] = { b[1], b[2] } end
+    if Favorites.is(p) then tags[#tags + 1] = { L("FAVORITO"), T.c.yellow } end
+  else
+    tags[#tags + 1] = { L("INTEGRADO"), T.c.green }
+  end
+  local short = p.builtin and (p.short or "") or Catalog.text(p, "short")
+  CG.draw(self, {
+    top = 82, n = #items, sel = self.sel, draw_cover = cover,
+    name = p.name, pills = pills, tags = tags, desc = short ~= "" and short or I18N.tr(L("Sem descrição.")),
+    badge = function(i)
+      local q = items[i]
+      if q.builtin then return nil end
+      local st = App.status(q)
+      return st == "installed" and T.c.green or (st == "update" and T.c.yellow or nil)
+    end,
+  })
+end
+
 function S:draw()
   local right = string.format(L("%d de %d"), #self.items > 0 and self.sel or 0, #self.items)
   G.header(self:title(), right)
   self:draw_tabs()
-  if CV.active() and #self.items > 0 then
+  if CG.active() and #self.items > 0 then
+    self:draw_grid()
+  elseif CV.active() and #self.items > 0 then
     self:draw_showcase()
   else
     self:draw_list()
@@ -307,6 +348,16 @@ end
 
 function S:action(act)
   local n = #self.items
+  if CG.active() and n > 0 and (act == "up" or act == "down" or act == "left" or act == "right") then
+    -- grade de capas: esquerda/direita andam 1, cima/baixo uma fileira
+    local c = CG.COLS
+    if act == "left" then self.sel = math.max(1, self.sel - 1)
+    elseif act == "right" then self.sel = math.min(n, self.sel + 1)
+    elseif act == "up" then if self.sel > c then self.sel = self.sel - c end
+    else self.sel = math.min(n, self.sel + c) end
+    self:clamp()
+    return
+  end
   if act == "up" and n > 0 then self.sel = (self.sel - 2) % n + 1; self:clamp()
   elseif act == "down" and n > 0 then self.sel = self.sel % n + 1; self:clamp()
   elseif act == "right" and n > 0 then self.sel = math.min(n, self.sel + VISIBLE); self:clamp()

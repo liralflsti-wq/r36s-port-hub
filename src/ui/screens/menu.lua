@@ -16,7 +16,7 @@ local S = {}
 -- Layouts alternativos da tela inicial (carregados so quando o tema usa):
 --   "channels"  -> ui/channels.lua  (grade de canais: Wii Blue e Neon Grid)
 --   "dashboard" -> ui/neon_dash.lua (painel NEON GRID antigo)
-local LAYOUTS = { channels = "ui.channels", dashboard = "ui.neon_dash", carousel = "ui.carousel" }
+local LAYOUTS = { channels = "ui.channels", dashboard = "ui.neon_dash", carousel = "ui.carousel", xdash = "ui.xdash" }
 local function dash()
   local mod = LAYOUTS[T.style.layout or ""]
   if not mod then return nil end
@@ -49,6 +49,7 @@ local SHINE = 0.7        -- brilho que passa na capa ao chegar
 
 function S:enter()
   self.ch_t = 0          -- animacao de entrada dos canais (layout "channels")
+  self.xd_recent, self.xd_feat = nil, nil   -- painel verde (Neon Grid): relê os recentes
   self.sel = self.sel or 1
   self.feat_i = self.feat_i or 1
   self.feat_t = 0

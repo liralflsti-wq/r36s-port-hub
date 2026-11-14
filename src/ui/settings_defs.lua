@@ -117,7 +117,7 @@ local appearance = {
       get = function() return App.anim end,
       set = function(v) App.anim = v; Prefs.set("anim", v and "1" or "0") end },
     { kind = "action", label = L("Restaurar aparência original"),
-      desc = L("Volta ao tema Pastel Pop Edition, ao tamanho de texto padrão e liga as animações. Brilho e idioma não mudam."),
+      desc = L("Volta ao Tema Padrão, ao tamanho de texto padrão e liga as animações. Brilho e idioma não mudam."),
       on_a = function()
         App.show_dialog({ title = L("Restaurar aparência?"), kind = "warn",
           body = L("O hub volta ao tema Pastel Pop Edition, com o tamanho de texto padrão e as animações ligadas."),
