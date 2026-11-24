@@ -1,0 +1,26 @@
+# Publica o codigo da 0.5.5 BETA no main em 30/11/2026 as 12:00 (Brasilia):
+# o ramo release-0.5.5 ja contem o codigo novo (e remove este arquivo), entao
+# basta avancar o main ate ele e apagar o ramo. Se rodar de novo, nao faz nada.
+name: Publicar codigo 0.5.5 BETA
+on:
+  schedule:
+    - cron: "0 15 30 11 *"   # 15:00 UTC = 12:00 em Brasilia
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Avancar o main para o ramo release-0.5.5
+        run: |
+          hoje=$(TZ=America/Sao_Paulo date +%Y%m%d)
+          if [ "$hoje" -lt 20261130 ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "Ainda nao e dia 30/11/2026."; exit 0; fi
+          git clone "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" repo
+          cd repo
+          if ! git ls-remote --exit-code --heads origin release-0.5.5 >/dev/null; then
+            echo "Ramo release-0.5.5 nao existe (ja publicado?)."; exit 0; fi
+          git fetch origin release-0.5.5
+          git push origin FETCH_HEAD:refs/heads/main
+          git push origin --delete release-0.5.5
