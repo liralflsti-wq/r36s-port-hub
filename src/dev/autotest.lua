@@ -34,6 +34,37 @@ function A.update(dt)
     if not f then return end
     f:close()
     os.remove(arg)
+  elseif cmd == "achvdemo" then
+    -- cartas de exemplo (so na memoria) para ver as 5 raridades
+    local Ach = require("core.achievements")
+    for _, r in ipairs({ "uncommon", "epic", "legendary", "unique" }) do
+      local id = "demo_" .. r
+      if not Ach.BY_ID[id] then
+        Ach.DEFS[#Ach.DEFS + 1] = { id = id, name = "Exemplo " .. r, desc = "Carta de exemplo.", hint = "Exemplo.",
+          card = "assets/achievements/first_install.png", rarity = r }
+      end
+    end
+    Ach.index()
+    for _, d in ipairs(Ach.DEFS) do if d.id:match("^demo_") then Ach.unlock(d.id) end end
+  elseif cmd == "achvall" then
+    local Ach = require("core.achievements")
+    for _, d in ipairs(Ach.DEFS) do if not d.id:match("^demo_") then Ach.unlock(d.id) end end
+  elseif cmd == "asst" then
+    -- asst <topico>: abre o assistente na resposta (brief, news, errors, todo, today, console, changes, tip)
+    App.push("assistant", { topic = (arg and arg ~= "") and arg or "brief" })
+  elseif cmd == "asstset" then
+    local k, v = arg:match("(%w+)=(%w+)")
+    if k then require("core.assistant").set(k, v) end
+  elseif cmd == "lua" then
+    -- roda um trecho de Lua (so no autoteste): lua require("core.profile").set_birthday(1, 1)
+    local fn = load(arg)
+    if fn then local ok, e = pcall(fn); if not ok then print("[autotest] lua erro: " .. tostring(e)) end end
+  elseif cmd == "achvreset" then
+    require("core.achievements").reset()
+  elseif cmd == "achv" then
+    -- simula o fim de uma instalacao: janela "Port instalado!" + conquista (so na 1a vez)
+    require("core.achievements").unlock((arg and arg ~= "") and arg or "first_install")
+    App.show_dialog({ title = "Port instalado!", kind = "ok", body = "Daytona USA Arcade foi instalado em /roms/ports.", buttons = { { label = "OK" } } })
   elseif cmd == "touch" then
     local f = io.open(arg, "w")
     if f then f:write("1"); f:close() end
@@ -93,6 +124,22 @@ function A.update(dt)
     os.exit(0)
   elseif cmd == "crash" then
     error("erro simulado pelo teste automatico")
+  elseif cmd == "launchdialog" then
+    -- mostra o dialogo de Iniciar de um port falso (ex.: launchdialog games | launchdialog tools)
+    local real = A.app.port_script
+    A.app.port_script = function() return "Teste.sh" end
+    A.app.launch_port({ id = "teste", name = "Sonic Mania", section = arg ~= "" and arg or "games" })
+    A.app.port_script = real
+  elseif cmd == "padhold" then
+    -- segura um botao do controle (ex.: padhold b), como se estivesse apertado
+    require("core.input").gamepadpressed(nil, arg)
+  elseif cmd == "fontlevel" then
+    -- tamanho da fonte (ex.: fontlevel xlarge)
+    require("ui.theme").set_font_level(arg)
+  elseif cmd == "settext" then
+    -- preenche o teclado na tela aberto (ex.: settext minhasenha)
+    local cur = A.app.current()
+    if cur and cur.name == "textinput" then cur.value = arg; cur.cursor = #arg end
   elseif cmd == "push" then
     local name, path = tostring(arg):match("^(%S+)%s+(.+)$")
     if name then A.app.push(name, { path = path }) else A.app.push(arg) end

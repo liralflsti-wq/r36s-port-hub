@@ -12,9 +12,8 @@ local I = { lang = "pt-BR", dicts = {}, rev = {}, rev_up = {}, keys = {}, built 
 I.LANGS = {
   { id = "pt-BR", name = "Português (Brasil)", short = "PORTUGUÊS (BRASIL)", label = "Português", flag = "br" },
   { id = "en", name = "English", short = "ENGLISH", label = "English", flag = "us" },
-  { id = "ru", name = "Русский", short = "РУССКИЙ", label = "Русский", flag = "ru" },
 }
-local VALID = { ["pt-BR"] = true, en = true, ru = true }
+local VALID = { ["pt-BR"] = true, en = true }
 
 local function load_dict(lang)
   if lang == "pt-BR" then return {} end
@@ -27,7 +26,11 @@ end
 
 function I.valid(lang) return VALID[lang] == true end
 
+-- quem usava o russo (removido na 0.5.5) passa para o ingles
+function I.migrate(lang) if lang == "ru" then return "en" end return lang end
+
 function I.set(lang)
+  lang = I.migrate(lang)
   if not VALID[lang] then lang = "pt-BR" end
   I.lang = lang
   load_dict(lang)

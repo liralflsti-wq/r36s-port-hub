@@ -4,7 +4,7 @@
 --  analogicos (posicao, alcance maximo e valores), os dados brutos do SDL
 --  (eixos e botoes numerados) e quantos botoes ja foram testados.
 --  Saidas (SELECT + START nao e usado: no R36S essa combinacao fecha o app):
---    FN: voltar
+--    B segurado por 3 s: voltar (FN e um toque em B contam como teste)
 --    L1 + R1 segurados (1 s): Teste completo (R36S Analog Tester, com relatorio)
 --  So le o controle; nao muda nada no sistema.
 -- =============================================================================
@@ -38,6 +38,7 @@ local KEYS = {
 }
 
 local HOLD = 1.0
+local EXIT_HOLD = 3.0   -- segurar B para sair
 
 function S:enter(p)
   self.from = (p and p.from) or "settings"
@@ -99,6 +100,12 @@ function S:update(dt)
   end
   self.down, self.sticks, self.raw = down, sticks, raw
   for id in pairs(down) do self.tested[id] = true end
+  -- conquista "Dedos de aco": todos os botoes testados
+  if not self.achv_done then
+    local all = true
+    for _, b in ipairs(BUTTONS) do if not self.tested[b.id] then all = false; break end end
+    if all then self.achv_done = true; pcall(function() require("core.achievements").unlock("padtest") end) end
+  end
   for k = 1, 2 do
     local x, y = sticks[k][1], sticks[k][2]
     local r = math.sqrt(x * x + y * y)
@@ -109,15 +116,14 @@ function S:update(dt)
       if r > (self.trail[k][a] or 0) then self.trail[k][a] = math.min(1.2, r) end
     end
   end
-  -- FN volta (so depois de soltar, se ja estava apertado ao abrir a tela)
-  if self.fn_prev == nil then self.fn_prev = down.guide and true or false end
-  if down.guide and not self.fn_prev then
-    self.fn_prev = true
+  -- B segurado por 3 s volta (um toque em B conta so como teste)
+  if down.b then self.hold.exit = self.hold.exit + dt else self.hold.exit = 0 end
+  if self.hold.exit >= EXIT_HOLD then
+    self.hold.exit = -99
     Input.reset()
     App.pop()
     return
   end
-  self.fn_prev = down.guide and true or false
   -- combinacao segurada
   if down.leftshoulder and down.rightshoulder then self.hold.full = self.hold.full + dt else self.hold.full = 0 end
   if self.hold.full >= HOLD then
@@ -309,28 +315,24 @@ function S:draw()
   -- progresso e saidas
   local x, y, w, h = 12, 358, 616, 80
   G.panel(x, y, w, h, { bg = T.c.bg1 })
-  -- FN e o botao de voltar: fica fora da contagem
   local n, tot = 0, 0
   for _, b in ipairs(BUTTONS) do
-    if b.id ~= "guide" then
-      tot = tot + 1
-      if self.tested[b.id] then n = n + 1 end
-    end
+    tot = tot + 1
+    if self.tested[b.id] then n = n + 1 end
   end
   G.text(T.f.bodyb, string.format(I18N.tr(L("Botões testados: %d de %d")), n, tot), x + 14, y + 10, n == tot and T.c.green or T.c.text)
   G.rect(x + 14, y + 34, 280, 8, T.c.bg3, 4)
   G.rect(x + 14, y + 34, 280 * n / tot, 8, n == tot and T.c.green or T.c.accent, 4)
   local miss = {}
-  for _, b in ipairs(BUTTONS) do if b.id ~= "guide" and not self.tested[b.id] then miss[#miss + 1] = b.label end end
+  for _, b in ipairs(BUTTONS) do if not self.tested[b.id] then miss[#miss + 1] = b.label end end
   G.text_fit(T.f.small, #miss == 0 and L("Todos os botões responderam.") or (L("Falta: ") .. table.concat(miss, " ")), x + 14, y + 50, 290, T.c.dim)
   -- combinacoes
-  local function hold_bar(label, t, yy)
+  local function hold_bar(label, t, yy, max)
     G.text_fit(T.f.small, label, x + 320, yy, 210, T.c.text)
     G.rect(x + 536, yy + 5, 66, 6, T.c.bg3, 3)
-    if t > 0 then G.rect(x + 536, yy + 5, 66 * math.min(1, t / HOLD), 6, T.c.yellow, 3) end
+    if t > 0 then G.rect(x + 536, yy + 5, 66 * math.min(1, t / (max or HOLD)), 6, T.c.yellow, 3) end
   end
-  local bw = G.button_icon("FN", x + 320, y + 15)
-  G.text_fit(T.f.small, L("Aperte FN: voltar"), x + 326 + bw, y + 14, 270 - bw, T.c.text)
+  hold_bar(L("Segure B (3 s): voltar"), self.hold.exit, y + 14, EXIT_HOLD)
   hold_bar(L("Segure L1 + R1: teste completo"), self.hold.full, y + 40)
 end
 

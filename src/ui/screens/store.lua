@@ -31,6 +31,7 @@ local BADGE = {
 --   Meus Ports (params.mine = true): abas Jogos | Utilitarios & Ferramentas (so instalados)
 -- As duas areas nunca aparecem na mesma listagem.
 function S:enter(params)
+  pcall(function() require("core.achievements").unlock("explorer") end)   -- conquista "Explorador"
   self.mine = params.mine and true or false
   self.favs = params.favs and true or false
   self.section = params.section or "games"

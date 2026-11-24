@@ -130,11 +130,28 @@ local function sys_title(it)
   return it.sys.fullname
 end
 
+-- usados tambem pela grade da Biblioteca (Neon Grid)
+SH.sys_icon, SH.sys_color, SH.sys_title, SH.user_icon = sys_icon, sys_color, sys_title, user_icon
+
+--- so os icones de console do usuario (um por vez, os mais perto do escolhido)
+function SH.load_icons(self, dt)
+  sys_wait = sys_wait + dt
+  if sys_wait < 0.05 then return end
+  for d = 0, 12 do
+    for _, i in ipairs(d == 0 and { self.sel } or { self.sel + d, self.sel - d }) do
+      local it = self.items[i]
+      local k = it and sys_key(it)
+      if k and sys_imgs[k] == nil then sys_wait = 0; sys_imgs[k] = load_sys_icon(k); return end
+    end
+  end
+end
+
 --- jogos de um item da fileira de cima ({ sys, g } como na tela de jogos)
 function SH.games_for(it)
   local list = {}
   if it.sys then
     for _, g in ipairs(it.sys.games) do list[#list + 1] = { sys = it.sys, g = g } end
+    Lib.sort_games(list)
   elseif it.special == "favs" then
     for _, s in ipairs(Lib.systems) do
       for _, g in ipairs(s.games) do if Lib.is_fav(g) then list[#list + 1] = { sys = s, g = g } end end

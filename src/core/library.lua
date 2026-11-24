@@ -125,7 +125,7 @@ local function parse_gamelist(sys)
   return info
 end
 
-local function add_game(sys, rel, size, glist)
+local function add_game(sys, rel, size, glist, mtime)
   local base = rel:match("([^/]+)$") or rel
   if IGNORE[base:lower()] or base:sub(1, 1) == "." then return end
   local top = rel:match("^([^/]+)/")
@@ -134,7 +134,7 @@ local function add_game(sys, rel, size, glist)
   if not ext or not sys.exts[ext:lower()] then return end
   local gi = glist[rel] or {}
   local name = gi.name or base:gsub("%.[^%.]+$", "")
-  sys.games[#sys.games + 1] = { file = sys.path .. "/" .. rel, rel = rel, name = name, size = size,
+  sys.games[#sys.games + 1] = { file = sys.path .. "/" .. rel, rel = rel, name = name, size = size, mtime = mtime,
     image = gi.image, desc = gi.desc, developer = gi.developer, genre = gi.genre, players = gi.players,
     releasedate = gi.releasedate, system = sys.key }
 end
@@ -151,9 +151,9 @@ function Lib.scan(on_done)
     if not seen[s.path] then seen[s.path] = true; paths[#paths + 1] = U.shq(s.path) end
   end
   Lib.state = "scanning"
-  -- tamanho<TAB>caminho; so arquivos, sem seguir links de pastas
+  -- tamanho<TAB>data de modificacao<TAB>caminho; so arquivos, sem seguir links de pastas
   local cmd = "find " .. table.concat(paths, " ") .. " -maxdepth " .. MAX_DEPTH
-    .. " -type f -printf '%s\\t%p\\n' 2>/dev/null"
+    .. " -type f -printf '%s\\t%T@\\t%p\\n' 2>/dev/null"
   require("core.shjob").start({ cmd }, function(results)
     local out = results and results[1] and results[1].out or ""
     for _, s in ipairs(Lib.systems) do s.games = {} end
@@ -165,7 +165,8 @@ function Lib.scan(on_done)
     end
     local glists = {}
     for line in out:gmatch("[^\n]+") do
-      local size, file = line:match("^(%d+)\t(.+)$")
+      local size, mt, file = line:match("^(%d+)\t([%d%.]+)\t(.+)$")
+      if not file then size, file = line:match("^(%d+)\t(.+)$") end
       if file then
         -- pasta do sistema = maior prefixo conhecido
         local dir = file
@@ -178,7 +179,7 @@ function Lib.scan(on_done)
         if list then
           for _, s in ipairs(list) do
             glists[s.path] = glists[s.path] or parse_gamelist(s)
-            add_game(s, rel, tonumber(size), glists[s.path])
+            add_game(s, rel, tonumber(size), glists[s.path], tonumber(mt))
           end
         end
       end
@@ -308,6 +309,26 @@ function Lib.launch(sys, game)
   push_recent(sys, game)
   U.log("biblioteca: abrindo", sys.name, game.rel, tostring(emu), tostring(core))
   return true
+end
+
+--- ordem dos jogos de um sistema ("name" = A-Z, "recent" = adicionados por ultimo)
+function Lib.sort_mode()
+  local m = require("core.prefs").get("lib_sort")
+  return (m == "name" or m == "recent") and m or "name"
+end
+function Lib.set_sort_mode(m) require("core.prefs").set("lib_sort", m) end
+--- ordena itens { sys, g } (data do arquivo no cartao; sem data vai para o fim)
+function Lib.sort_games(list, mode)
+  if (mode or Lib.sort_mode()) == "recent" then
+    table.sort(list, function(a, b)
+      local ma, mb = a.g.mtime or -1, b.g.mtime or -1
+      if ma ~= mb then return ma > mb end
+      return a.g.name:lower() < b.g.name:lower()
+    end)
+  else
+    table.sort(list, function(a, b) return a.g.name:lower() < b.g.name:lower() end)
+  end
+  return list
 end
 
 return Lib

@@ -267,6 +267,11 @@ function X.update()
   while m do
     if m.t == "done" then
       j.finished, j.ok, j.failed = true, (#(m.failed or {}) == 0), m.failed or {}
+      -- algo saiu da pasta ports: a lista do EmulationStation fica desatualizada
+      if rawget(_G, "App") then App.ports_changed = true end
+      -- conquista "Arrancou pela raiz": desinstalou um port
+      if rawget(_G, "App") and #(m.failed or {}) == 0 then pcall(function() require("core.achievements").unlock("uninstall") end) end
+      if rawget(_G, "App") and #(m.failed or {}) == 0 then pcall(function() require("core.assistant").event("uninstall", j.plan and j.plan.port and j.plan.port.name) end) end
       -- remove o registro do hub so se tudo foi apagado; atualiza a lista de instalados
       local p = j.plan.port
       -- desfaz a capa que o hub colocou no gamelist.xml (so o que ele criou)

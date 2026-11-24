@@ -69,6 +69,24 @@ local appearance = {
     { kind = "action", label = L("Temas do EmulationStation"), icon = "set_appearance",
       desc = L("Abre a Loja de Temas do EmulationStation (Ferramentas de sistema): temas compatíveis com o sistema do console, com prévia, tamanho de tela e compatibilidade."),
       on_a = function() App.push("esthemes", { from = "settings" }) end },
+    { kind = "value", label = L("Fonte do texto"), icon = "set_text",
+      desc = L("Esquerda/direita troca a fonte de todo o aplicativo (6 opções). A fonte nova é ajustada para caber nas telas. As letras pixeladas dos títulos e botões não mudam. A escolha fica salva."),
+      value = function()
+        for _, f in ipairs(T.FONT_FAMILIES) do
+          if f.id == T.font_family then return I18N.tr(f.label) end
+        end
+        return "?"
+      end,
+      nudge = function(dir, wrap)
+        local cur = 1
+        for i, f in ipairs(T.FONT_FAMILIES) do if f.id == T.font_family then cur = i end end
+        local n = #T.FONT_FAMILIES
+        local nxt = cur + dir
+        if wrap then nxt = (nxt - 1) % n + 1 end
+        if nxt < 1 or nxt > n then return end
+        App.set_font_family(T.FONT_FAMILIES[nxt].id)
+      end,
+      on_a = function(scr) end },
     { kind = "value", label = L("Tamanho do texto"), icon = "set_text",
       desc = L("Esquerda/direita aumenta ou diminui o texto de todo o aplicativo. Se um texto não couber no espaço da tela, ele diminui sozinho até o tamanho padrão e, se ainda assim não couber, é encurtado com reticências. A escolha fica salva."),
       value = function()
@@ -341,7 +359,7 @@ local controls = {
   resume = function(scr) scr.rep_text = U.read_file(C.APP_DIR .. "/tools/r36s_analog_tester/relatorio_controles.txt") end,
   rows = {
     { kind = "action", label = L("Testar analógicos e botões"),
-      desc = L("Abre na hora o desenho do controle: cada botão acende quando apertado, os analógicos mostram posição, alcance e deriva. Aperte FN para voltar."),
+      desc = L("Abre na hora o desenho do controle: cada botão acende quando apertado, os analógicos mostram posição, alcance e deriva. Segure B por 3 segundos para voltar."),
       value = function() return L("ao vivo") end,
       on_a = function() App.push("padtest", { from = "settings" }) end },
     { kind = "action", label = L("Teste completo com relatório"),
@@ -428,6 +446,7 @@ local function do_backup(scr)
   if ok then
     scr.binfo = Backup.info()
     App.toast(string.format(L("Backup concluído: %d arquivo(s)."), res), "ok")
+    pcall(function() require("core.achievements").unlock("backup") end)   -- conquista "Guardia"
   else
     App.show_dialog({ title = L("Backup não realizado"), kind = "error", body = res })
   end
@@ -454,7 +473,7 @@ local function do_restore(scr)
       { label = L("RESTAURAR"), fn = function()
         local ok, done = Backup.restore()
         if ok then
-          App.apply_restored(done)
+          App.apply_restored(done); pcall(function() require("core.achievements").unlock("restore") end)
           if scr.rebuild then scr:rebuild() end
           App.toast(L("Backup restaurado."), "ok")
         else
@@ -535,7 +554,7 @@ local backup = {
                 buttons = { { label = L("IMPORTAR"), fn = function()
                   local ok, done = Backup.import(e.name)
                   if ok then
-                    App.apply_restored(done)
+                    App.apply_restored(done); pcall(function() require("core.achievements").unlock("restore") end)
                     if scr.rebuild then scr:rebuild() end
                     App.toast(L("Preferências importadas."), "ok")
                   else
@@ -689,10 +708,94 @@ local console = {
   end,
 }
 
+-- ---------------------------------------------------------------------------
+-- CONQUISTAS: nome do usuario, progresso, lista das conquistas e as cartas
+local Ach = require("core.achievements")
+local function achievements_category()
+  local rows = {
+    { kind = "action", label = L("Nome do perfil"), desc = L("O nome do seu perfil, mostrado no álbum de conquistas. A renomeia."),
+      value = function() return Ach.user_name() or I18N.tr(L("Sem nome")) end,
+      on_a = function() Ach.ask_name(false) end },
+    { kind = "action", label = L("Foto de perfil"),
+      desc = L("A escolhe o seu avatar. Ele aparece no seu perfil e no álbum de cartas."),
+      thumb = function() return require("core.profile").avatar_image() end,
+      value = function() return require("core.profile").avatar() and "" or I18N.tr(L("Sem foto")) end,
+      on_a = function() App.push("avatar_pick") end },
+    { kind = "action", label = L("Aniversário"),
+      desc = L("Dia e mês do seu aniversário. No dia, o hub comemora e libera uma carta especial."),
+      value = function() return require("core.profile").birthday_label() or I18N.tr(L("Não definido")) end,
+      on_a = function() App.push("birthday") end },
+    { kind = "action", label = L("Conquistas"),
+      desc = L("Abre o seu álbum de cartas. L1/R1 viram as páginas."),
+      value = function() local a, b = Ach.count(); return string.format(I18N.tr(L("%d de %d")), a, b) end,
+      on_a = function()
+        -- com uma temporada so, abre direto o album; com varias, a tela dos albuns
+        if #Ach.SEASONS > 1 then App.push("albums") else App.push("achievements", { season = Ach.SEASONS[#Ach.SEASONS].id }) end
+      end },
+    { kind = "action", label = L("Tempo de jogo"),
+      desc = L("Quanto tempo você jogou nos jogos e ports abertos pelo hub. A mostra o ranking."),
+      value = function()
+        local t = require("core.playtime").total()
+        return t > 0 and require("core.playtime").format(t) or I18N.tr(L("Nenhum jogo ainda"))
+      end,
+      on_a = function() require("core.playtime").open_list() end },
+    { kind = "action", label = L("Assistente"),
+      desc = L("Seu assistente: cumprimenta, avisa ports novos, explica erros e mostra o que falta fazer. L2 abre de qualquer tela."),
+      value = function() return require("core.assistant").name() end,
+      on_a = function() App.push("assistant") end },
+  }
+  -- configuracoes do assistente
+  local As = require("core.assistant")
+  local function cycle(list, key, dflt)
+    return function(dir, wrap)
+      local cur = 1
+      for i, v in ipairs(list) do if v == (As.get(key) or dflt) then cur = i end end
+      local nxt = cur + dir
+      if wrap then nxt = (nxt - 1) % #list + 1 end
+      if nxt < 1 or nxt > #list then return end
+      As.set(key, list[nxt])
+    end
+  end
+  local arows = {
+    { kind = "toggle", label = L("Mostrar assistente"),
+      desc = L("Liga ou desliga o assistente no canto da tela. L2 continua abrindo a tela dele."),
+      get = function() return As.enabled() end,
+      set = function(v) As.set("enabled", v) end },
+    { kind = "value", label = L("Tamanho do assistente"),
+      desc = L("Esquerda/direita escolhe o tamanho do assistente no canto da tela."),
+      value = function() return I18N.tr(As.SIZE_NAMES[As.get("size") or "medium"] or "?") end,
+      nudge = cycle(As.SIZES, "size", "medium"), on_a = function() end },
+    { kind = "value", label = L("Falas do assistente"),
+      desc = L("Com que frequência o assistente comenta o que acontece. Em silêncio, ele não mostra balões."),
+      value = function() return I18N.tr(As.TALK_NAMES[As.talk()] or "?") end,
+      nudge = cycle(As.TALK, "talk", "normal"), on_a = function() end },
+    { kind = "action", label = L("Nome do assistente"),
+      desc = L("A renomeia o assistente."),
+      value = function() return As.name() end,
+      on_a = function()
+        App.push("textinput", { title = L("Nome do assistente"), label = L("Como o assistente vai se chamar?"),
+          value = As.name(), mode = "full", max = 12,
+          validate = function(v) if require("lib.util").trim(v or "") == "" then return false, L("Digite pelo menos uma letra.") end return true end,
+          on_ok = function(v) As.set("name", require("lib.util").trim(v)); As.say(string.format(I18N.tr(L("Pode me chamar de %s!")), As.name()), "happy", 3) end })
+      end },
+  }
+  for _, r in ipairs(arows) do rows[#rows + 1] = r end
+  return {
+    id = "achievements", icon = "set_profile", color = "yellow",
+    name = L("Meu perfil"),
+    desc = L("Nome, foto, aniversário, álbum de cartas e o assistente."),
+    status = function()
+      local a, b = Ach.count()
+      return (Ach.user_name() or I18N.tr(L("Sem nome"))) .. "  •  " .. string.format(I18N.tr(L("%d de %d")), a, b)
+    end,
+    rows = rows,
+  }
+end
+
 -- notificacoes passaram para Preferencias (a tabela fica para referencia)
 local _ = notifications
 D.LIST = {
-  X.prefs_category(), appearance, audio,
+  X.prefs_category(), achievements_category(), appearance, audio,
   network, X.ftp_category(),
   X.catalog_category(), downloads, X.myports_category(),
   X.storage_category(), battery, controls, console,

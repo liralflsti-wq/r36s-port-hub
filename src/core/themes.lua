@@ -18,7 +18,7 @@ local M = { list = {}, current = "default", DEFAULT = "default" }
 -- Ele tambem e a reserva quando um tema falha.
 M.FIRST = "default"
 -- ids antigos -> ids atuais (quem usava o tema antigo continua com ele, ja renomeado)
-M.ALIASES = { xbox = "neongrid" }
+M.ALIASES = { xbox = "neongrid", wiiblue = "default", kaiju = "default", ninja = "default", showa = "default", cosmos = "default" }   -- temas removidos na 0.5.5: quem usava volta ao Padrao
 local function resolve(id) return M.ALIASES[id] or id end
 M.resolve = resolve
 local PREF = "theme.txt"
@@ -51,14 +51,17 @@ local function load_def(dir, builtin)
     if c then th.buttons[k] = c end
   end
   local st = type(d.style) == "table" and d.style or {}
-  local BGS = { modern = true, neongrid = true, wii = true, pastel = true, xdash = true }
+  local BGS = { modern = true, neongrid = true, wii = true, pastel = true, xdash = true, sky = true, blade = true }
   th.style.background = BGS[st.background] and st.background or "retro"
   -- layout da tela inicial: "channels" (grade de canais: Wii Blue e NEON GRID),
   -- "dashboard" (painel NEON GRID antigo) ou o classico (lista)
-  local LAYS = { dashboard = true, channels = true, carousel = true, xdash = true }
+  local LAYS = { dashboard = true, channels = true, carousel = true, xdash = true, sky = true, blade = true }
   th.style.layout = LAYS[st.layout or ""] and st.layout or nil
   -- listas de ports: "grid" = grade de capas com o port escolhido em destaque (Neon Grid)
-  th.style.list = (st.list == "grid") and "grid" or nil
+  -- "bars" = barras inclinadas com painel de detalhes (Sky Warriors)
+  -- "blades" = laminas de espada com painel de detalhes (Moonlight Blade)
+  local LISTS = { grid = true, bars = true, blades = true }
+  th.style.list = LISTS[st.list or ""] and st.list or nil
   -- barras do topo e do rodape: "pill" = pilulas brancas flutuantes (Pastel Pop)
   th.style.chrome = (st.chrome == "pill") and "pill" or nil
   -- cartoes (canais, areas, categorias, cartoes de configuracao): cores proprias
@@ -78,6 +81,10 @@ local function load_def(dir, builtin)
   th.style.scanlines = st.scanlines ~= false
   -- logo propria do tema (opcional): logo_header.png, logo_menu.png, logo_about.png
   if love.filesystem.getInfo(dir .. "/logo_menu.png") then th.style.logo_dir = dir end
+  -- icones proprios do tema (opcional): <tema>/icons/<icone>.png
+  if love.filesystem.getInfo(dir .. "/icons", "directory") then th.style.icon_dir = dir .. "/icons" end
+  -- trilha propria do tema (music/main.ogg, nav.ogg, download.ogg); o que faltar usa a do hub
+  if love.filesystem.getInfo(dir .. "/music", "directory") then th.style.music_dir = dir .. "/music" end
   if type(d.preview) == "string" and d.preview:match("^[%w_%-%.]+%.png$") then
     th.preview = dir .. "/" .. d.preview
   end
@@ -97,8 +104,8 @@ function M.scan()
       U.log("tema ignorado:", dir, err)
     end
   end
-  -- inclusos: Pastel Pop, Wii Blue, Neon Grid e Padrao primeiro (nessa ordem), depois os outros
-  local FIXED = { "pastel", "wiiblue", "neongrid", "default" }
+  -- inclusos: Pastel Pop, Neon Grid e Padrao primeiro (nessa ordem), depois os outros
+  local FIXED = { "pastel", "neongrid", "skywarriors", "moonblade", "default" }
   local fixed = {}
   for _, n in ipairs(FIXED) do
     fixed[n] = true
@@ -120,8 +127,13 @@ function M.apply(id, save)
   if not th then return false, L("tema não encontrado") end
   T.apply_palette(th.colors, th.buttons, th.style)
   require("ui.gfx").build_background()
+  local changed = M.current ~= id
   M.current = id
-  if save then pcall(love.filesystem.write, PREF, id) end
+  if save then
+    pcall(love.filesystem.write, PREF, id)
+    -- conquista "Repaginado": o usuario trocou de tema
+    if changed and rawget(_G, "App") then pcall(function() require("core.achievements").unlock("theme_change") end) end
+  end
   return true
 end
 

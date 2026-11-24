@@ -1,6 +1,7 @@
 #!/bin/sh
 # Gera r36sporthub/game.love e o pacote final para copiar em /roms/ports
-# Uso: tools/build.sh [--dev]   (--dev inclui o roteiro de testes automaticos)
+# Uso: tools/build.sh [--dev|--admin]   (--dev inclui o roteiro de testes automaticos;
+#      --admin inclui so dev/admin.lua: pacote de teste com tudo liberado)
 set -e
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 OUT="$ROOT/build"
@@ -11,6 +12,8 @@ cd "$ROOT/src"
 if [ "$1" = "--dev" ]; then EXCL=""; else EXCL="dev/*"; fi
 rm -f "$OUT/ports/r36sporthub/game.love"
 zip -q -9 -n .ogg -r "$OUT/ports/r36sporthub/game.love" . -x "$EXCL"
+# --admin: pacote de TESTE do administrador (so dev/admin.lua: libera tudo)
+if [ "$1" = "--admin" ]; then zip -q -9 "$OUT/ports/r36sporthub/game.love" dev/admin.lua; fi
 chmod +x "$OUT/ports/R36S PORT HUB.sh" "$OUT/ports/r36sporthub/bin/fetch.sh" "$OUT/ports/r36sporthub/bin/es_theme_apply.sh" "$OUT/ports/r36sporthub/tools/R36S_Analog_Tester.sh"
 # manifesto (versao + SHA-256 de cada arquivo): o pacote completo tambem pode
 # ser instalado pela Atualizacao local do proprio hub

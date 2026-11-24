@@ -75,9 +75,9 @@ local function normalize_port(raw, idx, cat_names)
   if p.short == "" then
     p.short = p.description:match("^([^\n]+)") or ""
   end
-  -- textos opcionais em outros idiomas (description_en, short_ru...)
+  -- textos opcionais em ingles (description_en, short_en)
   p.i18n = {}
-  for _, lang in ipairs({ "en", "ru" }) do
+  for _, lang in ipairs({ "en" }) do
     local d, sh = str(raw["description_" .. lang]), str(raw["short_" .. lang])
     if d ~= "" or sh ~= "" then
       p.i18n[lang] = { description = d, short = sh ~= "" and sh or (d:match("^([^\n]+)") or "") }

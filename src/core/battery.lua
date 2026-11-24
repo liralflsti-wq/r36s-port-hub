@@ -65,6 +65,11 @@ function B.get()
     local ok, r = pcall(B.read_now)
     B.info = ok and r or { ok = false }
     B.t = now
+    -- conquista "No osso": bateria em 10% ou menos, fora do carregador
+    local inf = B.info
+    if inf.ok and inf.pct and inf.pct <= 10 and not inf.charging and rawget(_G, "App") then
+      pcall(function() require("core.achievements").unlock("low_battery") end)
+    end
   end
   return B.info
 end

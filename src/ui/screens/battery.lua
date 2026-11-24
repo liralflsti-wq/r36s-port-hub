@@ -56,10 +56,6 @@ local function fmt_time(secs)
   local h = math.floor(secs / 3600)
   local m = math.floor((secs % 3600) / 60 + 0.5)
   if m == 60 then h, m = h + 1, 0 end
-  if I18N.lang == "ru" then
-    if h > 0 then return string.format("%d ч %02d мин", h, m) end
-    return string.format("%d мин", m)
-  end
   if h > 0 then return string.format("%dh%02dmin", h, m) end
   return string.format("%dmin", m)
 end

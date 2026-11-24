@@ -8,7 +8,8 @@ local I18N = require("lib.i18n")
 local Prefs = require("core.prefs")
 local Clock = require("core.clock")
 do
-  local saved = Prefs.get("language")
+  local saved = I18N.migrate(Prefs.get("language"))
+  if saved ~= Prefs.get("language") then Prefs.set("language", saved) end
   I18N.set(I18N.valid(saved) and saved or "pt-BR")   -- sem preferencia: portugues (seguranca)
 end
 local L = I18N.L
@@ -49,7 +50,7 @@ local App = {
 }
 _G.App = App
 
-local SCREEN_NAMES = { "disclaimer", "menu", "store", "categories", "details", "about", "settings", "files", "sections", "search", "downloads", "news", "console", "ftp", "ftp_activity", "ftp_help", "textinput", "sdanalyzer", "integrity", "netdiag", "update", "themes", "sdcheck", "esthemes", "splash", "language", "settings_cat", "tester", "consoleid", "wifi", "wifi_connect", "r36control", "sdmaint", "sdmaint_run", "compat", "datetime", "tzpicker", "datetime_edit", "pmmanager", "streamrec", "recordings", "updmgr", "upd_local", "upd_pkg", "upd_history", "upd_backups", "upd_notes", "bios", "bios_list", "bios_pkg", "bios_hist", "folderpick", "battery", "infolist", "library", "library_games", "textview", "padtest", "pendports" }
+local SCREEN_NAMES = { "disclaimer", "menu", "store", "categories", "details", "about", "settings", "files", "sections", "search", "downloads", "news", "console", "ftp", "ftp_activity", "ftp_help", "textinput", "sdanalyzer", "integrity", "netdiag", "update", "themes", "sdcheck", "esthemes", "splash", "language", "settings_cat", "tester", "consoleid", "wifi", "wifi_connect", "r36control", "sdmaint", "sdmaint_run", "compat", "datetime", "tzpicker", "datetime_edit", "pmmanager", "streamrec", "recordings", "updmgr", "upd_local", "upd_pkg", "upd_history", "upd_backups", "upd_notes", "bios", "bios_list", "bios_pkg", "bios_hist", "folderpick", "battery", "infolist", "library", "library_games", "textview", "padtest", "pendports", "achievements", "albums", "assistant", "avatar_pick", "birthday", "playtime" }
 
 ---------------------------------------------------------------------------
 -- Navegacao
@@ -62,6 +63,9 @@ function App.push(name, params)
   App.stack[#App.stack + 1] = inst
   if inst.enter then inst:enter(params or {}) end
   Input.reset()
+  -- o assistente comenta a tela (dados reais; com intervalo para nao virar spam)
+  -- o assistente comenta a tela (dados reais; com intervalo para nao virar spam)
+  if package.loaded["core.assistant"] then pcall(function() require("core.assistant.brain").on_screen(name, params) end) end
 end
 
 function App.pop()
@@ -71,6 +75,7 @@ function App.pop()
   local top = App.current()
   if top.resume then top:resume() end
   Input.reset()
+  if package.loaded["core.assistant"] then pcall(function() require("core.assistant.brain").on_screen(top.name, top) end) end
 end
 
 function App.reset_to(name, params)
@@ -116,6 +121,7 @@ App.eco = Prefs.get("eco") == "1"
 function App.show_dialog(d)
   -- falha mostrada ao usuario: tambem vai para o registro do dia (logs/)
   if d.kind == "error" then
+    pcall(function() require("core.assistant").event("error", I18N.tr(d.title or ""), I18N.tr(d.body or "")) end)
     pcall(function()
       require("core.errlog").problem(I18N.tr(d.title or ""), I18N.tr(d.body or ""))
     end)
@@ -398,7 +404,7 @@ function App.request_es_restart()
   -- o launcher verifica este arquivo depois que o app fecha
   os.execute("mkdir -p " .. U.shq(C.APP_DIR .. "/conf") .. " 2>/dev/null")
   U.write_file(C.APP_DIR .. "/conf/.restart_es", "1")
-  App.quit()
+  App.quit("es")
 end
 
 --- desligar/reiniciar o console: o app fecha normalmente (com as mesmas
@@ -428,7 +434,7 @@ function App.quit(force)
     return
   end
   -- downloads/instalacoes ativos ou na fila: o app nao consegue continuar depois de fechado
-  if not force and (Installer.busy() or Downloads.waiting_count() > 0) then
+  if (not force or force == "es") and (Installer.busy() or Downloads.waiting_count() > 0) then
     local a = Downloads.active()
     local w = Downloads.waiting_count()
     App.show_dialog({
@@ -454,6 +460,21 @@ function App.quit(force)
     })
     return
   end
+  -- ports instalados/removidos nesta sessao: oferece atualizar a lista do
+  -- EmulationStation ao sair (nao ao iniciar um jogo nem ao desligar)
+  if App.ports_changed and not pending and force ~= true and force ~= "es" and not C.OS_MODE then
+    App.show_dialog({
+      title = L("Atualizar a lista de jogos?"), kind = "info", list = true,
+      body = L("Você instalou ou removeu ports nesta sessão. Para eles aparecerem (ou sumirem) na lista de Ports do EmulationStation, a lista precisa ser atualizada."),
+      buttons = {
+        { label = L("ATUALIZAR E SAIR"), sub = L("Fecha o hub e reinicia o EmulationStation"), fn = function() App.request_es_restart() end },
+        { label = L("SÓ SAIR"), sub = L("A lista atualiza na próxima vez que o EmulationStation abrir"),
+          fn = function() App.ports_changed = false; App.quit(force) end },
+        { label = L("VOLTAR") },
+      },
+    })
+    return
+  end
   if pending then
     os.execute("mkdir -p " .. U.shq(C.APP_DIR .. "/conf") .. " 2>/dev/null")
     if not U.write_file(C.APP_DIR .. "/conf/.power", pending .. "\n") then
@@ -468,7 +489,8 @@ end
 --- Abre a Central de Downloads (START ou menu principal). Uma so tela.
 function App.open_downloads(from_start)
   local cur = App.current()
-  if not cur or cur.name == "disclaimer" or cur.name == "splash" or (cur.name == "language" and cur.first) then return end      -- abertura/idioma/aviso vem primeiro
+  if not cur or cur.name == "disclaimer" or cur.name == "splash" or (cur.name == "language" and cur.first)
+    or (cur.name == "birthday" and cur.p and cur.p.first) then return end      -- abertura/idioma/perfil/aviso vem primeiro
   -- janelas que pedem uma resposta (dialogos, confirmacoes, exclusao, runtimes)
   if App.dialog or Uninstall.job or Runtimes.job then
     if from_start then App.toast(L("Responda a mensagem na tela antes de abrir os downloads."), "info") end
@@ -547,6 +569,18 @@ local function on_action(act)
     return
   end
   Sfx.on_action(act)
+  App.last_input = App.t   -- o assistente cochila quando o console fica parado
+  -- Sky Warriors: brilho de "carregar poder" ao apertar A numa lista de barras
+  if not App.dialog then require("ui.skyfx").on_action(act) end
+  -- L2: chama o assistente de qualquer tela (fecha se ja estiver nele)
+  if act == "l2" and not App.dialog then
+    local cur = App.current()
+    if cur and cur.name ~= "textinput" and cur.name ~= "splash" and cur.name ~= "disclaimer" and cur.name ~= "padtest"
+        and cur.name ~= "tester" and cur.name ~= "assistant" then
+      App.push("assistant")
+      return
+    end
+  end
   -- START: abre a Central de Downloads em Segundo Plano (unica funcao).
   -- Nao cancela, nao reinicia e nao interrompe nada; nunca duplica a central.
   if act == "start" then
@@ -738,6 +772,10 @@ function App.launch_game(sys, game)
   local function go()
     local ok, err = require("core.library").launch(sys, game)
     if not ok then App.toast(err, "error"); return end
+    -- conquista "Hora de jogar" (comemoracao na proxima abertura: o hub fecha agora)
+    pcall(function() require("core.achievements").unlock_later("library_play") end)
+    pcall(function() require("core.playtime").start("game:" .. tostring(game and game.file), game and game.name, "game") end)
+    pcall(function() require("core.assistant").event("play", game and game.name) end)   -- diario do assistente
     App.quit(true)
   end
   if Ftp.running() then
@@ -772,6 +810,7 @@ function App.launch_port(p)
       if id ~= tostring(p.id) and #list < 8 then list[#list + 1] = id end
     end
     Prefs.set("recent_ports", table.concat(list, ","))
+    pcall(function() require("core.playtime").start("port:" .. tostring(p.id), p.name, "port") end)
     App.quit(true)
   end
   local body = string.format(L("O R36S PORT HUB vai fechar e %s vai abrir.\nAo sair do jogo, o hub abre de novo.\n\nScript: %s"), p.name, script)
@@ -822,9 +861,13 @@ function App.after_boot()
   end
 end
 
---- depois de escolher o idioma no primeiro acesso
+--- depois de escolher o idioma no primeiro acesso: nome do perfil, aniversario
+--- e so entao o aviso importante
 function App.after_language()
-  App.reset_to("disclaimer", { from_language = true })
+  local Ach = require("core.achievements")
+  local function to_disclaimer() App.reset_to("disclaimer", { from_language = true }) end
+  local function ask_birthday() App.push("birthday", { first = true, done = to_disclaimer }) end
+  Ach.ask_name(true, ask_birthday)
 end
 
 --- o usuario confirmou a leitura do aviso
@@ -834,6 +877,19 @@ function App.disclaimer_accepted()
   -- Configuracoes > Preferencias > Tela ao abrir
   pcall(function() require("ui.settings_extra").open_start_screen() end)
   App.flush_boot_toasts()
+  -- primeira abertura (ou nome ainda nao informado): pergunta o nome do usuario
+  local Ach = require("core.achievements")
+  pcall(Ach.show_pending)   -- conquistas liberadas quando o hub estava fechando
+  pcall(Ach.track_day)      -- conquista "Fa numero 1" (7 dias diferentes)
+  -- pacote de teste do administrador (dev/admin.lua so existe no build --admin)
+  pcall(function()
+    local okA, Adm = pcall(require, "dev.admin")
+    if okA and type(Adm) == "table" and Adm.run then Adm.run() end
+  end)
+  pcall(function() App.play_session = require("core.playtime").finish() end)   -- tempo do jogo que acabou de fechar
+  pcall(function() require("core.assistant").on_boot() end)   -- assistente cumprimenta e da o resumo
+  pcall(Ach.check_birthday)  -- carta "Feliz aniversário" (no dia do aniversario do perfil)
+  if not Ach.user_name() then Ach.ask_name(true) end
 end
 
 function App.flush_boot_toasts()
@@ -842,6 +898,9 @@ function App.flush_boot_toasts()
   for _, m in ipairs(t or {}) do App.toast(m[1], m[2]) end
   -- primeira abertura depois de uma atualizacao: o que mudou e o que foi corrigido
   local notes = UpdMgr.boot_notes
+  -- conquista "Atualizado": primeira abertura depois de atualizar o hub
+  if notes then pcall(function() require("core.achievements").unlock("hub_update") end) end
+  if notes then pcall(function() require("core.assistant").event("update") end) end
   if notes then
     UpdMgr.boot_notes = nil
     notes.first = true
@@ -903,10 +962,24 @@ function App.set_font_level(id)
   end
 end
 
+function App.set_font_family(id)
+  if not T.valid_font_family(id) then return end
+  T.set_font_family(id)
+  Prefs.set("font_family", id)
+  for _, s in ipairs(App.stack) do
+    if s.on_font then pcall(s.on_font, s)
+    elseif s.on_language then pcall(s.on_language, s)
+    elseif s.layout then pcall(s.layout, s) end
+  end
+end
+
 function App.set_language(id)
   if not I18N.valid(id) then return end
+  local had = I18N.valid(Prefs.get("language")) and Prefs.get("language") ~= id
   I18N.set(id)
   Prefs.set("language", id)
+  -- conquista "Poliglota": trocou de idioma (a primeira escolha nao conta)
+  if had then pcall(function() require("core.achievements").unlock("language") end) end
   -- nomes ja montados (categorias do catalogo, ferramentas integradas) passam
   -- para o novo idioma; nomes de jogos nao sao tocados
   local function reloc(list, fields)
@@ -933,6 +1006,9 @@ end
 function love.update(dt)
   dt = math.min(dt, 0.1)
   App.t = App.t + dt
+  App.dt = dt
+  local Asst = package.loaded["core.assistant"]
+  if Asst then Asst.update(dt) end
   Clock.tick()   -- diferenca para UTC do sistema (fuso/horario de verao), a cada 10 min
   Input.update(dt)
   Fetcher.update()
@@ -1036,8 +1112,12 @@ local function draw_scene()
   if Installer.job then T.with_base_fonts(Overlay.draw_install, App, Installer.job) end
   if Runtimes.job then T.with_base_fonts(Overlay.draw_runtimes, App, Runtimes.job) end
   if Uninstall.job then T.with_base_fonts(Overlay.draw_uninstall, App, Uninstall.job) end
+  -- assistente no canto da tela
+  pcall(function() require("ui.assistant").draw_corner() end)
   if App.dialog then Overlay.draw_dialog(App, App.dialog) end
   if App.toast_msg and not App.capturing then Overlay.draw_toast(App, App.toast_msg) end
+  require("ui.achv_popup").draw()
+  require("ui.skyfx").draw_front()
 end
 
 --- indicadores de transmissao/gravacao: desenhados so na tela do console

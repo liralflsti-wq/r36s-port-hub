@@ -43,7 +43,7 @@ Testou em outro aparelho? Avise no grupo do Telegram ou no canal Lag do Lira que
 ## Telas
 
 - **Abertura**: splash com logo, slogan, tag BETA e barra de carregamento real
-  - No primeiro acesso, vêm depois **SELECT LANGUAGE** (Português, English, Русский) e o **Aviso importante** no idioma escolhido. **A** confirma.
+  - No primeiro acesso, vêm depois **SELECT LANGUAGE** (Português, English) e o **Aviso importante** no idioma escolhido. **A** confirma.
   - Nos acessos seguintes, a splash leva ao **Aviso importante** (sempre aparece ao abrir) e depois ao menu.
 - **Menu principal**: Central de Conteúdo (antiga Loja de Ports), Categorias, Meus Ports, Configurações, Sobre o Projeto, Sair (com opção de reiniciar o EmulationStation)
   - **EM DESTAQUE** (caixa à direita): vitrine com os jogos e utilitários marcados com `"featured": true` no catálogo, na ordem do catálogo (ou de `featured_order`). Cada item mostra capa, nome, etiqueta JOGO/UTILITÁRIO, categoria e tamanho, e o contador (ex.: 2/4). A troca é automática a cada 5 s, com deslizamento suave, um brilho discreto na capa e indicadores que mostram o tempo até o próximo. **L1/R1** (indicados na parte de baixo da caixa) trocam manualmente e pausam a rotação por alguns segundos; o direcional e os analógicos não mexem no destaque. Com as animações desligadas ou no modo econômico, não há rotação automática e a troca manual é instantânea. Funciona offline com o catálogo e as capas em cache.
@@ -185,7 +185,7 @@ O relatório fica em `r36sporthub/tools/r36s_analog_tester/relatorio_controles.t
 
 ## Idiomas
 
-O app inteiro funciona em **Português (Brasil)**, **English** e **Русский**.
+O app inteiro funciona em **Português (Brasil)** e **English**.
 
 - No primeiro acesso, o idioma é escolhido na tela SELECT LANGUAGE.
 - Para trocar depois, use **Configurações → Aparência e personalização → Idioma**. A mudança vale na hora, sem reiniciar o app.
@@ -639,7 +639,7 @@ src/                          → código-fonte do app (Lua / LÖVE 11.5)
   threads/wifi_thread.lua     → pedidos ao NetworkManager (nmcli) sem travar a tela
   ui/     theme, gfx, overlay, screens/ (splash, language, disclaimer, menu, store, categories, details, settings, about…)
   lib/    json, util, i18n
-  i18n/   en.lua, ru.lua           → traduções (a chave é o texto em português)
+  i18n/   en.lua                   → tradução em inglês (a chave é o texto em português)
   catalog/catalog.json        → catálogo de exemplo embutido
   dev/                        → testes automáticos (fora do pacote final)
 docs/   ANALISE_KMP.md, CATALOGO.md, catalog.example.json

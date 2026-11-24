@@ -1,0 +1,55 @@
+{
+  "id": "skywarriors",
+  "name": "Sky Warriors Edition",
+  "description": "Clima de menu de jogo de luta de anime: céu azul com nuvens, mar no horizonte, ornamentos dourados, opções em barras inclinadas azul-turquesa e seleção laranja com aura de energia.",
+  "version": "1.0",
+  "author": "R36S PORT HUB",
+  "preview": "preview.png",
+  "colors": {
+    "bg0": "#0a2350",
+    "bg1": "#123d7a",
+    "bg2": "#1d5aa8",
+    "bg3": "#0f3166",
+    "line": "#3a78c4",
+    "text": "#ffffff",
+    "dim": "#d8e8ff",
+    "faint": "#93b6e2",
+    "accent": "#ff9a1f",
+    "accent2": "#36d3ea",
+    "yellow": "#ffd23f",
+    "green": "#4be38a",
+    "red": "#ff4d6a",
+    "orange": "#ff9a1f",
+    "black": "#000000",
+    "shadow": "#00102a80"
+  },
+  "buttons": {
+    "a": "#ff9a1f",
+    "b": "#ff4d6a",
+    "x": "#36d3ea",
+    "y": "#ffd23f",
+    "l1": "#9fc3ee",
+    "r1": "#9fc3ee",
+    "start": "#9fc3ee",
+    "select": "#9fc3ee",
+    "dpad": "#9fc3ee"
+  },
+  "style": {
+    "background": "sky",
+    "layout": "sky",
+    "list": "bars",
+    "round": 0.8,
+    "glow": "#ffd23f",
+    "scanlines": false,
+    "focus": "#ffb02e",
+    "effect": "glow",
+    "card": {
+      "fill": "#123d7a",
+      "line": "#3a78c4",
+      "text": "#ffffff",
+      "dim": "#d8e8ff",
+      "faint": "#93b6e2",
+      "icon": "#ffffff"
+    }
+  }
+}

@@ -3,10 +3,11 @@
 #  R36S PORT HUB - publicacao no GitHub com LINKS FIXOS
 #
 #  Dois repositorios (desde a 0.5.3):
-#    SLUG      (PRIVADO) -> codigo-fonte do hub
+#    SLUG      (PUBLICO) -> codigo-fonte do hub (licenca propria, veja LICENSE)
 #    CAT_SLUG  (PUBLICO) -> o que o console baixa: ports.json, temas.json,
 #                           update.json e as Releases com os pacotes .zip
-#  O codigo-fonte NAO e mais publicado em lugar publico.
+#  O codigo-fonte fica aberto para leitura no repositorio do hub; o que o
+#  console baixa continua vindo so do repositorio de catalogo.
 #
 #  Os links nao mudam nunca. A cada publicacao o arquivo por tras deles e
 #  substituido (todos no repositorio PUBLICO de catalogo):
@@ -35,7 +36,7 @@
 # =============================================================================
 set -euo pipefail
 
-SLUG="${R36S_SLUG:-liralflsti-wq/r36s-port-hub}"               # codigo (PRIVADO)
+SLUG="${R36S_SLUG:-liralflsti-wq/r36s-port-hub}"               # codigo (PUBLICO)
 CAT_SLUG="${R36S_CAT_SLUG:-liralflsti-wq/r36s-port-hub-catalogo}" # catalogo + releases (PUBLICO)
 REL_SLUG="$CAT_SLUG"                                              # onde ficam as Releases
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -108,7 +109,7 @@ show_links() {
   echo   "  temas   : https://raw.githubusercontent.com/$CAT_SLUG/main/temas.json"
   echo   "  metadata: https://raw.githubusercontent.com/$CAT_SLUG/main/update.json"
   echo   "  pagina  : https://github.com/$CAT_SLUG"
-  echo   "  codigo  : https://github.com/$SLUG (privado)"
+  echo   "  codigo  : https://github.com/$SLUG (publico, licenca propria)"
   echo
 }
 

@@ -57,6 +57,7 @@ function S:update_speed()
     elseif m.t == "done" then
       sp.running = false
       if sp.download then
+        pcall(function() require("core.achievements").unlock("speedtest") end)   -- conquista "Velocista"
         Prefs.set("speed_last", string.format("%d|%d|%d|%d", math.floor(sp.download.v),
           (sp.upload and sp.upload.v) and math.floor(sp.upload.v) or -1, math.floor(sp.latency and sp.latency.v or -1), os.time()))
         App.toast(L("Velocidade: download ") .. mbps(sp.download.v)

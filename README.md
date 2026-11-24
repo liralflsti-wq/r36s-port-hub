@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/vers%C3%A3o-0.5.4%20BETA-ff4f8b?style=for-the-badge" alt="Versão 0.5.4 BETA">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-0.5.5%20BETA-ff4f8b?style=for-the-badge" alt="Versão 0.5.5 BETA">
   <img src="https://img.shields.io/badge/console-R36S-38d6ff?style=for-the-badge" alt="R36S">
   <img src="https://img.shields.io/badge/sistema-dArkOSRE%20%7C%20dArkOS%20%7C%20ArkOS-ffd447?style=for-the-badge" alt="dArkOSRE, dArkOS, ArkOS">
   <img src="https://img.shields.io/badge/L%C3%96VE-11.5-e74a99?style=for-the-badge" alt="LÖVE 11.5">
@@ -29,7 +29,7 @@ Ele roda direto no console, com os botões físicos, em uma interface retrô fei
 
 O catálogo de jogos e ferramentas fica online, então novos ports aparecem no hub sem precisar de uma versão nova do aplicativo.
 
-Feito para o **dArkOSRE** (também funciona no dArkOS e no ArkOS), em **LÖVE 11.5**, com tradução para português, inglês e russo. Desenvolvido por **LagdoLira** ([YouTube](https://www.youtube.com/@LagdoLira)).
+Feito para o **dArkOSRE** (também funciona no dArkOS e no ArkOS), em **LÖVE 11.5**, com tradução para português e inglês. Desenvolvido por **LagdoLira** ([YouTube](https://www.youtube.com/@LagdoLira)).
 
 ---
 
@@ -106,7 +106,7 @@ echo "https://raw.githubusercontent.com/liralflsti-wq/r36s-port-hub-catalogo/mai
 | ⏰ | **Data e hora** | Fuso horário, sincronização pela internet e ajuste manual. |
 | 💡 | **R36 Control** | LED de bateria, gama, saída de áudio e volume ao ligar (mesmos ajustes do dArkOSRE). |
 | 🧯 | **Registro de erros** | Erros e falhas ficam salvos em `r36sporthub/logs/`, sem senhas. |
-| 🌐 | **Três idiomas** | Português do Brasil, English e Русский. |
+| 🌐 | **Dois idiomas** | Português do Brasil e English. |
 | 🔠 | **Tamanho do texto** | Pequeno, Padrão, Grande ou Muito grande; o texto que não cabe se ajusta sozinho. |
 
 ---
@@ -195,7 +195,7 @@ Gerar o pacote: `tools/build.sh` → `build/R36S-PORT-HUB-BETA.zip`.
 
 Copyright (C) 2026 Lag do Lira (@lagdolira / liralflsti-wq). Todos os direitos reservados.
 
-A partir da versão **0.5.3 BETA**, o R36S PORT HUB usa uma **licença própria** (veja [LICENSE](LICENSE)): o uso no console é livre e gratuito, inclusive para mostrar o hub em vídeos e transmissões. Copiar, modificar, redistribuir fora dos links oficiais, reaproveitar o código em outro projeto ou vender precisa de autorização do autor. Versões anteriores continuam sob a licença com que foram publicadas.
+O código fica aberto para leitura neste repositório, mas, a partir da versão **0.5.3 BETA**, o R36S PORT HUB usa uma **licença própria** (veja [LICENSE](LICENSE)): o uso no console é livre e gratuito, inclusive para mostrar o hub em vídeos e transmissões. Copiar, modificar, redistribuir fora dos links oficiais, reaproveitar o código em outro projeto ou vender precisa de autorização do autor. Versões anteriores continuam sob a licença com que foram publicadas.
 
 ### Nome e marca
 

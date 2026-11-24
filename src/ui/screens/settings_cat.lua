@@ -131,6 +131,17 @@ function S:draw()
     elseif r.kind == "action" then
       chevron(xr - 6, cy + 6, on and ccol or T.c.faint)
       left = xr - 16
+      local th = r.thumb and r.thumb(self)
+      if th then
+        local sz = 30
+        local k = sz / math.max(th:getWidth(), th:getHeight())
+        G.clip(left - 4 - sz, y + (ROW_H - sz) / 2, sz, sz)
+        lg.setColor(1, 1, 1, 1)
+        lg.draw(th, left - 4 - sz + (sz - th:getWidth() * k) / 2, y + (ROW_H - sz) / 2 + (sz - th:getHeight() * k) / 2, 0, k, k)
+        G.unclip()
+        G.frame(left - 4 - sz, y + (ROW_H - sz) / 2, sz, sz, on and ccol or T.c.line, 6, 1)
+        left = left - 8 - sz
+      end
       local v = r.value and txt(r.value, self)
       if v and v ~= "" then
         local maxw = 220

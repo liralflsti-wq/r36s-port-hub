@@ -64,6 +64,8 @@ function S:search(keep)
   end
   self.results = {}
   for _, r in ipairs(res) do self.results[#self.results + 1] = r.p end
+  -- conquista "Detetive": primeira pesquisa que encontrou algum resultado
+  if #self.results > 0 then pcall(function() require("core.achievements").unlock("search") end) end
   if not keep then self.sel, self.scroll = 1, 0 end
   self:clamp()
 end

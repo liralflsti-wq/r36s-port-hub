@@ -354,11 +354,14 @@ function F.update()
         x.speed = 0
         if x.op == "recv" and m.result == "done" then x.total = m.done end
         x.status = m.result == "done" and "CONCLUÍDO" or (m.result == "cancelled" and "CANCELADO" or "ERRO")
+        if m.result == "done" then pcall(function() require("core.assistant").event("ftp", x.name or x.file or x.path) end) end
         x.reason = m.reason
         hist_add(x)
         -- Configuracoes > Servidor FTP > avisos (ligados por padrao)
         local P = require("core.prefs")
         if m.result == "done" then
+          -- conquista "Mestre do FTP": primeiro arquivo enviado ou recebido
+          if rawget(_G, "App") then pcall(function() require("core.achievements").unlock("ftp_transfer") end) end
           if P.get("ftp_notif_done") ~= "0" then notify((x.op == "recv" and L("Recebido: ") or L("Enviado: ")) .. x.name, "ok") end
         elseif P.get("ftp_notif_fail") ~= "0" then
           if m.result == "cancelled" then

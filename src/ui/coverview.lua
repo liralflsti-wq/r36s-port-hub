@@ -91,7 +91,15 @@ function CV.draw(st, o)
   -- meio: nome grande + pilulas + selos
   local mx, mw = 180, 172
   local y = top + 22
-  local nf, nl, nlh = G.fit_lines(T.f.h1, o.name or "", mw, 3 * T.base_font(T.f.h1):getHeight())
+  -- fonte do nome: a maior em que a palavra mais longa cabe inteira (sem cortar no meio)
+  local nfont = T.f.h1
+  local longest = ""
+  for wd in I18N.tr(o.name or ""):gmatch("%S+") do if #wd > #longest then longest = wd end end
+  for _, f in ipairs({ T.f.h1, T.f.h2, T.f.bodyb }) do
+    nfont = f
+    if select(1, G.fit(f, longest, mw)):getWidth(longest) <= mw then break end
+  end
+  local nf, nl, nlh = G.fit_lines(nfont, o.name or "", mw, 3 * T.base_font(T.f.h1):getHeight())
   for _, l in ipairs(nl) do G.text(nf, l, mx, y, T.c.text); y = y + nlh end
   y = y + 8
   for _, p in ipairs(o.pills or {}) do

@@ -158,6 +158,8 @@ function I.update()
       end
       Manifest.rescan(true)
       j.finished, j.result, j.entries, j.deleted = true, "done", m.entries, m.deleted
+      -- port novo na pasta ports: a lista do EmulationStation fica desatualizada
+      if (j.opts.mode or "port") == "port" and rawget(_G, "App") then App.ports_changed = true end
     elseif m.t == "error" then
       j.finished, j.result = true, "error"
       j.error = I.error_text(m.code, m.detail)

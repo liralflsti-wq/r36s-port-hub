@@ -16,7 +16,7 @@ local S = {}
 -- Layouts alternativos da tela inicial (carregados so quando o tema usa):
 --   "channels"  -> ui/channels.lua  (grade de canais: Wii Blue e Neon Grid)
 --   "dashboard" -> ui/neon_dash.lua (painel NEON GRID antigo)
-local LAYOUTS = { channels = "ui.channels", dashboard = "ui.neon_dash", carousel = "ui.carousel", xdash = "ui.xdash" }
+local LAYOUTS = { channels = "ui.channels", dashboard = "ui.neon_dash", carousel = "ui.carousel", xdash = "ui.xdash", sky = "ui.skymenu", blade = "ui.blademenu" }
 local function dash()
   local mod = LAYOUTS[T.style.layout or ""]
   if not mod then return nil end
@@ -508,13 +508,17 @@ local function exit_dialog()
     })
     return
   end
+  pcall(function() require("core.assistant").event("goodbye") end)
   App.show_dialog({
     title = L("Sair do R36S PORT HUB"),
     kind = "info",
     list = true,
     body = L("O que você quer fazer?"),
     buttons = {
-      { label = L("Sair"), sub = L("Fechar o R36S PORT HUB e voltar ao EmulationStation"), fn = App.quit },
+      { label = L("Sair"), sub = L("Fechar o R36S PORT HUB e voltar ao EmulationStation"), fn = function()
+        pcall(function() require("core.achievements").unlock_later("goodbye") end)   -- conquista "Ate logo"
+        App.quit()
+      end },
       { label = L("Reiniciar lista"), sub = L("Use se instalou ports nesta sessão: reinicia o EmulationStation"), fn = App.request_es_restart },
       { label = L("Reiniciar console"), sub = L("Fecha o hub e reinicia o R36S"), danger = true, fn = function() power_confirm("reboot") end },
       { label = L("Desligar console"), sub = L("Fecha o hub e desliga o R36S"), danger = true, fn = function() power_confirm("poweroff") end },

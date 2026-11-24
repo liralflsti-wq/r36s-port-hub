@@ -205,6 +205,7 @@ while true; do
     if [ -n "$GAME_CMD" ]; then
       echo "[launcher] Abrindo jogo ($GAME_SYS): $GAME_CMD"
       sync
+      PLAY_T0=$(date +%s)   # tempo de jogo: o app soma na volta
       (
         cd "${HOME:-/home/ark}" 2>/dev/null || cd /
         unset PORTHUB_DIR PORTHUB_PORTS_DIR PORTHUB_PM_DIR PORTHUB_XDG_ORIG PORTHUB_RETURN
@@ -214,6 +215,7 @@ while true; do
         bash -c "$GAME_CMD"
       )
       echo "[launcher] Jogo encerrado (codigo $?); voltando ao R36S PORT HUB"
+      echo "$PLAY_T0 $(date +%s)" > "$CONFDIR/.play_time" 2>/dev/null
       export PORTHUB_RETURN="game|$GAME_SYS"
     fi
     continue
@@ -236,6 +238,7 @@ while true; do
     if [ -n "$PORT_SH" ] && [ -f "$PORTS_ROOT/$PORT_SH" ]; then
       echo "[launcher] Iniciando port: $PORT_SH"
       sync
+      PLAY_T0=$(date +%s)   # tempo de jogo: o app soma na volta
       (
         cd "$PORTS_ROOT" || exit 1
         unset PORTHUB_DIR PORTHUB_PORTS_DIR PORTHUB_PM_DIR PORTHUB_XDG_ORIG PORTHUB_RETURN
@@ -245,6 +248,7 @@ while true; do
         bash "./$PORT_SH"
       )
       echo "[launcher] Port encerrado (codigo $?); voltando ao R36S PORT HUB"
+      echo "$PLAY_T0 $(date +%s)" > "$CONFDIR/.play_time" 2>/dev/null
       export PORTHUB_RETURN="port|$PORT_ID"
     else
       echo "[launcher] Pedido de port ignorado (script invalido): $PORT_REQ"

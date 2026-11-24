@@ -359,6 +359,7 @@ function S:update(dt)
     if m.t == "progress" then self.prog = m
     elseif m.t == "done" then
       self.state = "done"
+      pcall(function() require("core.achievements").unlock("sd_maint") end)   -- conquista "Mecanico"
       os.remove(self.pidfile or "")
       local job = self.p.job
       if m.op == "fsck" then

@@ -77,10 +77,32 @@ local BOLD = "assets/fonts/ChakraPetch-SemiBold.ttf"
 local CYR = "assets/fonts/Inter-Regular-Cyrillic.otf"
 local CYRB = "assets/fonts/Inter-SemiBold-Cyrillic.otf"
 
--- arquivo, tamanho padrao, arquivo do cirilico (Inter) e diferenca de tamanho do cirilico
+-- Fonte do texto (Configuracoes > Aparencia > Fonte do texto). As pixeladas
+-- nao mudam. Licencas em port/r36sporthub/licenses (OFL; Ubuntu: UFL).
+local FD = "assets/fonts/"
+T.FONT_FAMILIES = {
+  { id = "chakra", label = "Chakra Petch (padrão)", reg = REG, bold = BOLD },
+  { id = "atkinson", label = "Atkinson (mais legível)", reg = FD .. "AtkinsonHyperlegible-Regular.ttf", bold = FD .. "AtkinsonHyperlegible-Bold.ttf" },
+  { id = "barlow", label = "Barlow (moderna)", reg = FD .. "Barlow-Regular.ttf", bold = FD .. "Barlow-SemiBold.ttf" },
+  { id = "titillium", label = "Titillium (tecnológica)", reg = FD .. "TitilliumWeb-Regular.ttf", bold = FD .. "TitilliumWeb-SemiBold.ttf" },
+  { id = "kanit", label = "Kanit (gamer)", reg = FD .. "Kanit-Regular.ttf", bold = FD .. "Kanit-Medium.ttf" },
+  { id = "ubuntu", label = "Ubuntu (arredondada)", reg = FD .. "Ubuntu-Regular.ttf", bold = FD .. "Ubuntu-Medium.ttf" },
+}
+T.font_family = "chakra"
+local function family(id)
+  for _, f in ipairs(T.FONT_FAMILIES) do if f.id == id then return f end end
+  return T.FONT_FAMILIES[1]
+end
+function T.valid_font_family(id)
+  for _, f in ipairs(T.FONT_FAMILIES) do if f.id == id then return true end end
+  return false
+end
+
+-- tamanho padrao, peso (false = regular, true = negrito), arquivo do cirilico
+-- (Inter) e diferenca de tamanho do cirilico
 local TEXT_FONTS = {
-  small = { REG, 12, CYR, 0 }, body = { REG, 14, CYR, -1 }, bodyb = { BOLD, 14, CYRB, -1 },
-  h3 = { BOLD, 16, CYRB, -1 }, h2 = { BOLD, 20, CYRB, -1 }, h1 = { BOLD, 26, CYRB, -1 },
+  small = { false, 12, CYR, 0 }, body = { false, 14, CYR, -1 }, bodyb = { true, 14, CYRB, -1 },
+  h3 = { true, 16, CYRB, -1 }, h2 = { true, 20, CYRB, -1 }, h1 = { true, 26, CYRB, -1 },
 }
 T.BASE_SIZE = {}
 for k, v in pairs(TEXT_FONTS) do T.BASE_SIZE[k] = v[2] end
@@ -92,7 +114,7 @@ T.FONT_LEVELS = {
   { id = "large", delta = 2, label = "Grande" },
   { id = "xlarge", delta = 3, label = "Muito grande" },
 }
--- (rotulos traduzidos ao desenhar; as chaves estao em i18n/en.lua e ru.lua)
+-- (rotulos traduzidos ao desenhar; as chaves estao em i18n/en.lua)
 T.font_level = "normal"
 
 local CACHE = {}       -- "chave|tamanho" -> fonte
@@ -111,13 +133,35 @@ local function hook_i18n(font)
   end
 end
 
+-- fator para a fonte escolhida nunca ficar mais larga que a Chakra Petch (as
+-- telas foram desenhadas com ela): mede um texto de exemplo nas duas
+local FIT = {}
+local SAMPLE = "Configurações do R36S PORT HUB 0123456789"
+local function fit_factor(fam, bold)
+  local k = fam.id .. (bold and "b" or "r")
+  if FIT[k] then return FIT[k] end
+  local ok, a = pcall(love.graphics.newFont, bold and BOLD or REG, 20)
+  local ok2, b = pcall(love.graphics.newFont, bold and fam.bold or fam.reg, 20)
+  local f = 1
+  if ok and ok2 then
+    f = math.min(1, a:getWidth(SAMPLE) / b:getWidth(SAMPLE), a:getHeight() / b:getHeight() * 1.08)
+  end
+  FIT[k] = f
+  return f
+end
+
 --- fonte de texto `key` no tamanho `size` (criada uma vez e guardada)
 function T.text_font(key, size)
   local spec = TEXT_FONTS[key]
   if not spec then return T.f and T.f[key] end
-  local ck = key .. "|" .. size
+  local fam = family(T.font_family)
+  local ck = fam.id .. "|" .. key .. "|" .. size
   if CACHE[ck] then return CACHE[ck] end
-  local font = love.graphics.newFont(spec[1], size)
+  local path = spec[1] and fam.bold or fam.reg
+  local real = size
+  if fam.id ~= "chakra" then real = math.max(8, math.floor(size * fit_factor(fam, spec[1]) + 0.5)) end
+  local okf, font = pcall(love.graphics.newFont, path, real)
+  if not okf then font = love.graphics.newFont(spec[1] and BOLD or REG, size) end
   font:setFilter("linear", "linear")
   local ok, f2 = pcall(love.graphics.newFont, spec[3], size + spec[4])
   if ok and f2 then f2:setFilter("linear", "linear"); font:setFallbacks(f2) end
@@ -177,6 +221,13 @@ function T.with_base_fonts(fn, ...)
   if not ok then error(err, 0) end
 end
 
+--- Troca a fonte do texto (todas as telas usam T.f, entao vale na hora)
+function T.set_font_family(id)
+  if not T.valid_font_family(id) then id = "chakra" end
+  T.font_family = id
+  T.set_font_level(T.font_level)
+end
+
 function T.load()
   local function f(path, size)
     local font = love.graphics.newFont(path, size)
@@ -189,6 +240,8 @@ function T.load()
     pix24 = f(PIX, 24),
   }
   hook_i18n(T.f.pix8)
+  local fam = require("core.prefs").get("font_family")
+  T.font_family = T.valid_font_family(fam) and fam or "chakra"
   local lvl = require("core.prefs").get("font_size")
   T.set_font_level(T.valid_font_level(lvl) and lvl or "normal")
 end

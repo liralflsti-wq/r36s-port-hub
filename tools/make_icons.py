@@ -549,6 +549,31 @@ def _(i):  # console de fantasia / portatil quadrado
     i.dot(39, 44, 2.8); i.dot(44, 48, 2.8)
 
 
+@icon("set_trophy", "trophy")
+def _(i):  # trofeu (conquistas)
+    i.line((18, 10), (46, 10))
+    i.line((18, 10), (19, 26)); i.line((46, 10), (45, 26))
+    i.arc(32, 26, 13, 0, 180)
+    i.arc(14, 19, 7, 90, 270); i.arc(50, 19, 7, 270, 90)
+    i.line((32, 39), (32, 47))
+    i.rect(20, 47, 24, 9, 3)
+
+
+@icon("set_profile", "profile")
+def _(i):  # perfil: cabeca e ombros num cartao
+    i.circle(32, 23, 10)
+    i.arc(32, 58, 20, 200, 340)
+    i.rect(6, 6, 52, 52, 10)
+
+
+@icon("lock")
+def _(i):  # cadeado (conquista bloqueada)
+    i.rect(14, 28, 36, 28, 6)
+    i.arc(32, 28, 11, 180, 360)
+    i.line((21, 28), (21, 24)); i.line((43, 28), (43, 24))
+    i.dot(32, 41, 4); i.line((32, 42), (32, 49))
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     done = {}

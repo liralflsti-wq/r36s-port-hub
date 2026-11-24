@@ -1,7 +1,8 @@
 =====================================================================
  AVISO (0.5.3 BETA em diante)
  O projeto agora usa DOIS repositorios:
-   - liralflsti-wq/r36s-port-hub           PRIVADO: codigo-fonte
+   - liralflsti-wq/r36s-port-hub           PUBLICO: codigo-fonte (licenca
+                                           propria, veja LICENSE)
    - liralflsti-wq/r36s-port-hub-catalogo  PUBLICO: ports.json,
      temas.json, update.json e as Releases com os pacotes .zip
  Tudo o que o console baixa fica no repositorio PUBLICO de catalogo.

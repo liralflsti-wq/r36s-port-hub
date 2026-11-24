@@ -33,6 +33,8 @@ function F.toggle(p)
   if not F.loaded then F.load() end
   if F.ids[p.id] then F.ids[p.id] = nil else F.ids[p.id] = true end
   save()
+  -- conquista "Carta de amor": primeiro favorito
+  if F.ids[p.id] and rawget(_G, "App") then pcall(function() require("core.achievements").unlock("favorite") end) end
   return F.ids[p.id] == true
 end
 

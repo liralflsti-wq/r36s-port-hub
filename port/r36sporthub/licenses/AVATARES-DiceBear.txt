@@ -1,0 +1,7 @@
+Avatares online da tela "Foto de perfil" (R36S PORT HUB)
+Gerados pela API do DiceBear (https://www.dicebear.com), código MIT.
+Estilos usados e licenças dos desenhos:
+- Pixel Art e Pixel Art Neutral, por DiceBear: CC0 1.0
+- Lorelei, por Lisa Wischofsky: CC0 1.0
+- Bottts, por Pablo Stanley (remix): livre para uso pessoal e comercial
+As imagens só são baixadas para o cartão quando o usuário aplica uma como foto de perfil.

@@ -8,8 +8,8 @@ local L = require("lib.i18n").L
 local C = {}
 
 C.APP_NAME = L("R36S PORT HUB")
-C.VERSION = L("0.5.4 BETA")       -- texto exibido
-C.VERSION_NUM = "0.5.4"        -- numero usado para comparar com a atualizacao
+C.VERSION = L("0.5.5 BETA")       -- texto exibido
+C.VERSION_NUM = "0.5.5"        -- numero usado para comparar com a atualizacao
 -- R36 Hub OS: o hub e a interface principal do sistema (supervisor exporta R36HUBOS=1)
 C.OS_MODE = os.getenv("R36HUBOS") == "1"
 C.OS_NAME = "R36 Hub OS"
@@ -36,7 +36,7 @@ C.TAGLINE = L("Ports de jogos e utilit√°rios para o console R36S, criados por f√
 
 -- Endereco do catalogo online (JSON) com os ports de jogos e utilitarios.
 -- Catalogo oficial no repositorio PUBLICO de catalogo (r36s-port-hub-catalogo);
--- o codigo do hub fica em outro repositorio, privado. Link "raw". O ultimo baixado fica em
+-- o codigo do hub fica em outro repositorio (r36s-port-hub, publico). Link "raw". O ultimo baixado fica em
 -- cache para uso sem internet. Pode ser trocado por <pasta do app>/catalog_url.txt.
 C.CATALOG_URL = "https://raw.githubusercontent.com/liralflsti-wq/r36s-port-hub-catalogo/main/ports.json"
 

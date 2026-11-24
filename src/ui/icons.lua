@@ -376,8 +376,42 @@ local function image_for(id)
   return v or nil
 end
 
+-- icones proprios do tema (themes/<id>/icons/<icone>.png, coloridos): quando
+-- existem, substituem os simbolos do hub e sao desenhados sem tingir
+local THEME_IC = {}
+local function theme_icon(id)
+  local dir = require("ui.theme").style.icon_dir
+  if not dir then return nil end
+  local key = dir .. "/" .. tostring(id)
+  local v = THEME_IC[key]
+  if v == nil then
+    v = false
+    local path = key .. ".png"
+    if love.filesystem.getInfo(path) then
+      local ok, img = pcall(love.graphics.newImage, path, { mipmaps = true })
+      if ok and img then
+        img:setFilter("linear", "linear")
+        pcall(img.setMipmapFilter, img, "linear")
+        v = img
+      end
+    end
+    THEME_IC[key] = v
+  end
+  return v or nil
+end
+
 --- Desenha o icone `id` (24x24) com a cor `c`; scale opcional
 function I.draw(id, x, y, c, scale)
+  local ti = theme_icon(id)
+  if ti then
+    -- o icone do tema ja tem moldura: fica um pouco maior que o simbolo
+    local size = 24 * (scale or 1) * 1.25
+    local s = size / ti:getWidth()
+    local off = (size - 24 * (scale or 1)) / 2
+    lg.setColor(1, 1, 1, (type(c) == "table" and c[4]) or 1)
+    lg.draw(ti, x - off, y - off, 0, s, s)
+    return
+  end
   local li = line_for(id)
   if li then
     local size = 24 * (scale or 1)

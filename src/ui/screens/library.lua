@@ -9,6 +9,8 @@ local Lib = require("core.library")
 local Icons = require("ui.icons")
 local CV = require("ui.coverview")
 local SH = require("ui.shelf")
+local TV = require("ui.themeviews")
+local CG = require("ui.covergrid")
 
 local S = {}
 
@@ -80,7 +82,83 @@ function S:update(dt)
   if CV.active() and self.items[1] then
     if not self.games then self:load_games() end
     SH.update(self, dt or 0)
+  elseif (TV.mode() == "grid" or TV.mode() == "bars") and self.items[1] then
+    SH.load_icons(self, dt or 0)
   end
+end
+
+--- Sky Warriors: consoles em barras + painel do console escolhido
+function S:draw_bars()
+  local items = self.items
+  local it = items[self.sel]
+  TV.draw_bars(self, { top = 46, n = #items, sel = self.sel,
+    item = function(i)
+      local o = items[i]
+      local cnt = o.special and (o.count or 0) or #o.sys.games
+      return { icon = SH.sys_icon(o), color = SH.sys_color(o), label = SH.sys_title(o), right = tostring(cnt) }
+    end })
+  local rows, text = {}, ""
+  local count
+  if it.special then
+    count = it.count or 0
+    text = I18N.tr(it.special == "recent" and L("Últimos jogos abertos pelo hub") or L("Jogos marcados com SELECT"))
+  else
+    local s = it.sys
+    count = #s.games
+    if s.manufacturer and s.manufacturer ~= "" then rows[#rows + 1] = { L("Fabricante"), s.manufacturer } end
+    if s.release and s.release ~= "" and s.release ~= "unknown" then rows[#rows + 1] = { L("Lançamento"), s.release } end
+    local emu, core = Lib.choice(s, nil)
+    if emu then rows[#rows + 1] = { L("Emulador"), emu .. (core and (" / " .. core) or "") } end
+    local names = {}
+    for k = 1, math.min(8, #s.games) do names[#names + 1] = s.games[k].name end
+    text = table.concat(names, "\n") .. (#s.games > #names and "\n…" or "")
+  end
+  TV.draw_detail({ icon = SH.sys_icon(it), color = SH.sys_color(it), name = SH.sys_title(it),
+    pills = { { njogos(count), SH.sys_color(it) } }, rows = rows, text = text })
+end
+
+--- Neon Grid: console escolhido em destaque + grade de consoles
+function S:draw_grid()
+  local items = self.items
+  local it = items[self.sel]
+  local pills, desc = {}, ""
+  local count
+  if it.special then
+    count = it.count or 0
+    desc = I18N.tr(it.special == "recent" and L("Últimos jogos abertos pelo hub") or L("Jogos marcados com SELECT"))
+  else
+    local s = it.sys
+    count = #s.games
+    local parts = {}
+    if s.manufacturer and s.manufacturer ~= "" then parts[#parts + 1] = s.manufacturer end
+    if s.release and s.release ~= "" and s.release ~= "unknown" then parts[#parts + 1] = s.release end
+    if #parts > 0 then pills[#pills + 1] = { table.concat(parts, "  •  "), T.c.line } end
+    local emu, core = Lib.choice(s, nil)
+    if emu then desc = I18N.tr(L("Emulador padrão: ")) .. emu .. (core and (" / " .. core) or "") end
+    -- alguns jogos do sistema como amostra
+    local names = {}
+    for k = 1, math.min(4, #s.games) do names[#names + 1] = s.games[k].name end
+    if #names > 0 then desc = desc .. (desc ~= "" and "\n" or "") .. table.concat(names, "  •  ") .. (#s.games > #names and "  …" or "") end
+  end
+  table.insert(pills, 1, { njogos(count), SH.sys_color(it) })
+  CG.draw(self, {
+    top = 46, n = #items, sel = self.sel,
+    draw_cover = function(i, x, y, w, h)
+      local o = items[i]
+      local ui = SH.user_icon(o)
+      if ui then
+        G.rect(x, y, w, h, T.c.bg2, 4)
+        local sz = math.min(w, h) - 8
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.draw(ui, x + (w - sz) / 2, y + (h - sz) / 2 - (h > 100 and 10 or 0), 0, sz / ui:getWidth(), sz / ui:getHeight())
+        if h > 100 then TV.ctext(T.f.small, SH.sys_title(o), x + 4, y + h - 22, w - 8, T.c.text) end
+        G.rect(x, y + h - 4, w, 4, SH.sys_color(o), 0, 0.9)
+      else
+        TV.icon_cover(SH.sys_icon(o), SH.sys_color(o), (h > 100) and SH.sys_title(o) or nil)(i, x, y, w, h, i == self.sel)
+      end
+    end,
+    name = SH.sys_title(it), pills = pills, desc = desc,
+  })
 end
 
 function S:draw()
@@ -104,6 +182,7 @@ function S:draw()
       local it = self.items[self.sel]
       if it and it.sys and #it.sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador padrão") } end
       hs[#hs + 1] = { "y", L("Procurar de novo") }
+      hs[#hs + 1] = { "r2", Lib.sort_mode() == "name" and L("A-Z") or L("Adicionados") }
       hs[#hs + 1] = { "b", L("Voltar") }
     else
       local git = self.games and self.games[self.gsel]
@@ -111,8 +190,19 @@ function S:draw()
       if git and #git.sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador") } end
       if git then hs[#hs + 1] = { "select", Lib.is_fav(git.g) and L("Desfavoritar") or L("Favoritar") } end
       hs[#hs + 1] = { "y", L("Info") }
+      hs[#hs + 1] = { "r2", Lib.sort_mode() == "name" and L("A-Z") or L("Adicionados") }
       hs[#hs + 1] = { "b", L("Consoles") }
     end
+    G.hints(hs)
+    return
+  end
+  if (TV.mode() == "grid" or TV.mode() == "bars") and #self.items > 0 and Lib.total_games() > 0 then
+    if TV.mode() == "bars" then self:draw_bars() else self:draw_grid() end
+    local hs = { { "dpad", L("Navegar") }, { "a", L("Abrir") } }
+    local it = self.items[self.sel]
+    if it and it.sys and #it.sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador padrão") } end
+    hs[#hs + 1] = { "y", L("Procurar de novo") }
+    hs[#hs + 1] = { "b", L("Voltar") }
     G.hints(hs)
     return
   end
@@ -206,6 +296,15 @@ end
 
 -- prateleiras (Pastel Pop): cima = consoles, baixo = jogos
 function S:shelf_action(act)
+  if act == "r2" then
+    local nxt = Lib.sort_mode() == "name" and "recent" or "name"
+    Lib.set_sort_mode(nxt)
+    self.gsels = {}
+    self:load_games()
+    self.gsel = 1
+    App.toast(L("Ordem dos jogos: ") .. I18N.tr(nxt == "name" and L("A-Z") or L("Adicionados recentemente")), "info")
+    return
+  end
   local n = #self.items
   if (self.focus or "sys") == "sys" then
     if act == "b" then App.pop()
@@ -266,6 +365,10 @@ function S:action(act)
     return
   end
   if n == 0 then return end
+  if (TV.mode() == "grid" or TV.mode() == "bars") and Lib.total_games() > 0 then
+    local nx = (TV.mode() == "bars" and TV.bars_nav or TV.grid_nav)(self.sel, n, act)
+    if nx then self.sel = nx; return end
+  end
   if act == "left" then self.sel = math.max(1, self.sel - 1)
   elseif act == "right" then self.sel = math.min(n, self.sel + 1)
   elseif act == "up" then self.sel = math.max(1, self.sel - COLS)

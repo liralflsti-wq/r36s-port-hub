@@ -9,6 +9,8 @@ local Lib = require("core.library")
 local Icons = require("ui.icons")
 local lg = love.graphics
 local CV = require("ui.coverview")
+local CG = require("ui.covergrid")
+local TV = require("ui.themeviews")
 
 local S = {}
 
@@ -16,6 +18,11 @@ local LIST_X, LIST_Y, LIST_W = 12, 50, 330
 local ROW_H = 32
 local VIS = 12
 local PX, PY, PW, PH = 352, 50, 276, 396
+
+-- ordem dos jogos de um sistema (R2 alterna; fica salva): core/library.lua
+local SORT_LABEL = { name = L("A-Z"), recent = L("Adicionados") }
+local function sort_mode() return Lib.sort_mode() end
+local function sort_games(list, mode) return Lib.sort_games(list, mode) end
 
 function S:enter(p)
   self.p = p or {}
@@ -32,6 +39,7 @@ function S:rebuild()
   local p = self.p
   if p.system then
     for _, g in ipairs(p.system.games) do list[#list + 1] = { sys = p.system, g = g } end
+    sort_games(list, sort_mode())
     self.title = p.system.fullname
   elseif p.special == "favs" then
     for _, s in ipairs(Lib.systems) do
@@ -98,6 +106,8 @@ function S:draw()
     return
   end
   if CV.active() then self:draw_showcase(); return end
+  if TV.mode() == "bars" then self:draw_bars(); return end
+  if CG.active() then self:draw_grid(); return end
   if self.sel > self.top + VIS then self.top = self.sel - VIS end
   if self.sel <= self.top then self.top = self.sel - 1 end
   -- lista
@@ -148,6 +158,8 @@ function S:draw()
   if g.developer and g.developer ~= "" then info[#info + 1] = { L("Desenvolvedor"), g.developer } end
   if g.genre and g.genre ~= "" then info[#info + 1] = { L("Gênero"), g.genre } end
   if g.size then info[#info + 1] = { L("Tamanho"), U.format_bytes(g.size) } end
+  local pt = require("core.playtime").get("game:" .. tostring(g.file))
+  if pt then table.insert(info, 1, { L("Tempo de jogo"), require("core.playtime").format(pt.secs) }) end
   for _, kv in ipairs(info) do
     if ty > PY + PH - 34 then break end
     G.text(T.f.small, kv[1], PX + 12, ty, T.c.faint)
@@ -159,6 +171,7 @@ function S:draw()
   if #sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador") } end
   hs[#hs + 1] = { "select", Lib.is_fav(g) and L("Desfavoritar") or L("Favoritar") }
   hs[#hs + 1] = { "y", L("Info") }
+  if self.p.system then hs[#hs + 1] = { "r2", I18N.tr(SORT_LABEL[sort_mode()]) } end
   hs[#hs + 1] = { "b", L("Voltar") }
   G.hints(hs)
 end
@@ -199,6 +212,8 @@ function S:draw_showcase()
   if g.releasedate and g.releasedate:match("^%d%d%d%d") then rows[#rows + 1] = { L("Lançamento"), g.releasedate:sub(1, 4) } end
   if g.players and g.players ~= "" then rows[#rows + 1] = { L("Jogadores"), g.players } end
   if g.size then rows[#rows + 1] = { L("Tamanho"), U.format_bytes(g.size) } end
+  local pt = require("core.playtime").get("game:" .. tostring(g.file))
+  if pt then table.insert(rows, 1, { L("Tempo de jogo"), require("core.playtime").format(pt.secs) }) end
   local sections = { { title = L("Detalhes"), rows = rows } }
   sections[#sections + 1] = { title = L("Descrição"), text = (g.desc and g.desc ~= "") and g.desc or L("Sem descrição no gamelist.xml.") }
   local tags = {}
@@ -213,6 +228,93 @@ function S:draw_showcase()
   if #sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador") } end
   hs[#hs + 1] = { "select", Lib.is_fav(g) and L("Desfavoritar") or L("Favoritar") }
   hs[#hs + 1] = { "y", L("Info") }
+  if self.p.system then hs[#hs + 1] = { "r2", I18N.tr(SORT_LABEL[sort_mode()]) } end
+  hs[#hs + 1] = { "b", L("Voltar") }
+  G.hints(hs)
+end
+
+-- Sky Warriors: jogos em barras + painel com a capa do escolhido
+function S:draw_bars()
+  local list = self.list
+  local it = list[self.sel]
+  local g, sys = it.g, it.sys
+  TV.draw_bars(self, { top = 46, n = #list, sel = self.sel, w = 300,
+    item = function(i)
+      local o = list[i]
+      return { icon = Lib.is_fav(o.g) and "set_favorites" or "games", color = T.c.accent2,
+        label = o.g.name, right = self.p.system and "" or (o.sys.name or "") }
+    end })
+  -- painel: capa no alto + informacoes
+  local x, y, w, h = 330, 54, T.W - 330 - 12, T.H - 54 - 48
+  local emu, core = Lib.choice(sys, g)
+  local rows = { { L("Sistema"), sys.fullname }, { L("Emulador"), emu and (emu .. (core and (" / " .. core) or "")) or L("comando do sistema") } }
+  if g.size then rows[#rows + 1] = { L("Tamanho"), U.format_bytes(g.size) } end
+  if T.style.list == "blades" then
+    TV.draw_detail({ icon = "games", name = g.name, pills = Lib.is_fav(g) and { { L("FAVORITO") } } or {}, rows = rows,
+      text = (g.desc and g.desc ~= "") and g.desc or "",
+      image = function(ix, iy, iw, ih)
+        if self.img then fit_image(self.img, ix, iy, iw, ih, false)
+        else G.text(T.f.small, g.image and L("Carregando capa...") or L("Sem capa"), ix, iy + ih / 2 - 8, T.c.faint, "center", iw) end
+      end })
+  else
+  local ch = 150
+  TV.draw_detail({ x = x, y = y + ch + 8, w = w, h = h - ch - 8, icon = "games", color = T.c.accent2, name = g.name,
+    pills = Lib.is_fav(g) and { { L("FAVORITO"), T.c.yellow } } or {}, rows = rows,
+    text = (g.desc and g.desc ~= "") and g.desc or "" })
+  G.rect(x, y, w, ch, T.c.bg0, 12, 0.85)
+  G.frame(x, y, w, ch, TV.pal().frame, 12, 2)
+  if self.img then
+    fit_image(self.img, x + 6, y + 6, w - 12, ch - 12, false)
+  else
+    Icons.draw("testes_de_controles", x + w / 2 - 24, y + ch / 2 - 30, T.c.faint, 2)
+    G.text(T.f.small, g.image and L("Carregando capa...") or L("Sem capa no gamelist.xml"), x, y + ch - 24, T.c.faint, "center", w)
+  end
+  end
+  local hs = { { "a", L("Jogar") } }
+  if #sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador") } end
+  hs[#hs + 1] = { "select", Lib.is_fav(g) and L("Desfavoritar") or L("Favoritar") }
+  hs[#hs + 1] = { "y", L("Info") }
+  if self.p.system then hs[#hs + 1] = { "r2", I18N.tr(SORT_LABEL[sort_mode()]) } end
+  hs[#hs + 1] = { "b", L("Voltar") }
+  G.hints(hs)
+end
+
+-- Neon Grid: jogo escolhido em destaque + grade de capas (so a capa do
+-- escolhido e carregada; as outras aparecem como blocos com o nome)
+function S:draw_grid()
+  local list = self.list
+  local it = list[self.sel]
+  local g, sys = it.g, it.sys
+  local function cover(i, x, y, w, h)
+    local o = list[i]
+    if i == self.sel and self.img then
+      G.rect(x, y, w, h, T.c.bg2, 4)
+      fit_image(self.img, x + 2, y + 2, w - 4, h - 4, false)
+      return
+    end
+    G.rect(x, y, w, h, T.c.bg2, 4)
+    G.rect(x, y + h - 4, w, 4, T.c.accent, 0, 0.6)
+    local isz = math.min(w, h) * 0.36
+    Icons.draw("games", x + (w - isz) / 2, y + h * 0.16, T.c.faint, isz / 24)
+    if h > 100 then
+      local lines = G.wrap(T.f.small, o.g.name, w - 8)
+      local ly = y + h - 12 - math.min(3, #lines) * 14
+      for k = 1, math.min(3, #lines) do TV.ctext(T.f.small, lines[k], x + 4, ly + (k - 1) * 14, w - 8, T.c.dim) end
+    end
+  end
+  local emu, core = Lib.choice(sys, g)
+  local pills = { { sys.fullname, T.c.accent2 } }
+  if emu then pills[#pills + 1] = { emu .. (core and (" / " .. core) or ""), T.c.line } end
+  if g.size then pills[#pills + 1] = { U.format_bytes(g.size), T.c.line } end
+  local tags = {}
+  if Lib.is_fav(g) then tags[#tags + 1] = { L("FAVORITO"), T.c.yellow } end
+  local desc = (g.desc and g.desc ~= "") and g.desc or ((g.genre and g.genre ~= "") and g.genre or (g.rel or g.file))
+  CG.draw(self, { top = 46, n = #list, sel = self.sel, draw_cover = cover, name = g.name, pills = pills, tags = tags, desc = desc })
+  local hs = { { "a", L("Jogar") } }
+  if #sys.emulators > 0 then hs[#hs + 1] = { "x", L("Emulador") } end
+  hs[#hs + 1] = { "select", Lib.is_fav(g) and L("Desfavoritar") or L("Favoritar") }
+  hs[#hs + 1] = { "y", L("Info") }
+  if self.p.system then hs[#hs + 1] = { "r2", I18N.tr(SORT_LABEL[sort_mode()]) } end
   hs[#hs + 1] = { "b", L("Voltar") }
   G.hints(hs)
 end
@@ -222,6 +324,18 @@ function S:action(act)
   if act == "b" then App.pop(); return end
   if n == 0 then return end
   local it = self.list[self.sel]
+  if act == "r2" and self.p.system then
+    -- ordem: A-Z <-> adicionados recentemente
+    local cur = sort_mode()
+    local nxt = cur == "name" and "recent" or "name"
+    Lib.set_sort_mode(nxt)
+    self.sel, self.top = 1, 0
+    self:rebuild()
+    App.toast(L("Ordem: ") .. (nxt == "name" and I18N.tr(L("A-Z")) or I18N.tr(L("Adicionados recentemente"))), "info")
+    return
+  end
+  local gn = (TV.mode() == "bars" and TV.bars_nav(self.sel, n, act)) or (CG.active() and TV.grid_nav(self.sel, n, act))
+  if gn then self.sel = gn; return end
   if act == "up" then self.sel = (self.sel - 2) % n + 1
   elseif act == "down" then self.sel = self.sel % n + 1
   elseif act == "l1" or act == "left" then self.sel = math.max(1, self.sel - VIS)

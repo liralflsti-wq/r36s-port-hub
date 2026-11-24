@@ -222,6 +222,7 @@ function S:install()
             for _, x in ipairs(r) do
               if x.action == "new" then nn = nn + 1 elseif x.action == "replace" then nu = nu + 1 else ns = ns + 1 end
             end
+            pcall(function() require("core.achievements").unlock("bios_install") end)   -- conquista "BIOS em dia"
             App.show_dialog({ title = L("Instalação concluída"), kind = "ok",
               body = string.format(I18N.tr(L("%d instaladas, %d substituídas, %d já idênticas. Cada arquivo foi conferido pelo MD5 depois de copiado.")), nn, nu, ns)
                 .. (j.result.backup and ("\n" .. I18N.tr(L("Backup das BIOS anteriores: ")) .. "backups/bios/" .. j.result.backup) or "")

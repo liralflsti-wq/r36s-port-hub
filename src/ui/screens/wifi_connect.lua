@@ -89,6 +89,7 @@ function S:update()
   if res.created_uuid then self.created_uuid = res.created_uuid end
   Net.invalidate()
   if res.ok then
+    pcall(function() require("core.achievements").unlock("wifi_connect") end)   -- conquista "Conectado"
     self.state = { msg = L("Conectado.") .. (res.ip and ("  IP " .. res.ip) or ""), color = "green", ok = true }
     self.created_uuid = nil                          -- o perfil fica salvo pelo sistema
     App.toast(L("Conectado a ") .. self.net.ssid .. (res.ip and ("  •  IP " .. res.ip) or ""), "ok")

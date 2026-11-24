@@ -206,32 +206,45 @@ end
 --- Janela de apoio (Pix)
 function S:draw_pix()
   G.rect(0, 0, T.W, T.H, T.c.black, 0, 0.75)
-  local w, h = 600, 330
+  local w = 600
+  local qrw = 236
+  local tw = w - 44 - qrw - 20
+  -- mede o texto antes (a altura muda com o tamanho da fonte escolhido)
+  local lh_body = math.ceil(T.f.body:getHeight() * 1.05)
+  local lh_small = math.ceil(T.f.small:getHeight() * 1.05)
+  local body = G.wrap(T.f.body, PIX_TEXT, tw)
+  local how = G.wrap(T.f.small, PIX_HOW, tw)
+  local thanks_h = T.f.bodyb:getHeight()
+  local text_h = #body * lh_body + 10 + 24 + #how * lh_small + 10 + thanks_h
+  local content_h = math.max(qrw, text_h)
+  local h = math.min(T.H - 20, math.max(330, 56 + content_h + 44))
   local x, y = (T.W - w) / 2, (T.H - h) / 2 - 6
   G.panel(x, y, w, h, { bg = T.c.bg1, border = T.c.yellow, lw = 2, r = 10 })
   G.rect(x, y, w, 6, T.c.yellow, 3)
   G.text(T.f.pix16, L("APOIE O PROJETO"), x + 22, y + 22, T.c.yellow)
   local size = 0
   if self.pix_qr then
-    size = draw_qr_matrix(self.pix_qr, x + 22, y + 54, 236)
+    size = draw_qr_matrix(self.pix_qr, x + 22, y + 54, qrw)
   else
     G.text(T.f.body, L("Não foi possível gerar o QR Code."), x + 22, y + 120, T.c.red, "left", 230)
   end
-  local tx = x + 22 + math.max(size, 236) + 20
-  local tw = x + w - 22 - tx
+  local tx = x + 22 + math.max(size, qrw) + 20
   local ty = y + 56
-  for _, l in ipairs(G.wrap(T.f.body, PIX_TEXT, tw)) do
+  for _, l in ipairs(body) do
     G.text(T.f.body, l, tx, ty, T.c.text)
-    ty = ty + 18
+    ty = ty + lh_body
   end
   ty = ty + 10
   G.tag("LIVEPIX", tx, ty, T.c.accent2, T.c.bg0, T.f.pix8)
   ty = ty + 24
-  for _, l in ipairs(G.wrap(T.f.small, PIX_HOW, tw)) do
+  for _, l in ipairs(how) do
     G.text(T.f.small, l, tx, ty, T.c.dim)
-    ty = ty + 15
+    ty = ty + lh_small
   end
-  G.text(T.f.bodyb, L("Obrigado pelo apoio!"), tx, y + h - 64, T.c.accent)
+  -- "Obrigado" sempre abaixo do texto (nunca por cima), acima da barra de botoes
+  local thy = math.max(ty + 10, y + h - 44 - thanks_h - 6)
+  thy = math.min(thy, y + h - 36 - thanks_h)
+  G.text(T.f.bodyb, L("Obrigado pelo apoio!"), tx, thy, T.c.accent)
   if self.pix_qr then
     G.button_icon("a", x + 22, y + h - 30)
     G.text(T.f.small, L("Ampliar QR Code"), x + 44, y + h - 29, T.c.dim)
@@ -347,6 +360,8 @@ function S:action(act)
   if self.show_pix then
     if act == "a" and self.pix_qr then
       self.pix_big = not self.pix_big
+      -- conquista "Apoiador do projeto": ampliou o QR Code do Pix
+      if self.pix_big then require("core.achievements").unlock("supporter") end
     elseif act == "b" then
       if self.pix_big then self.pix_big = false else self.show_pix = false end
     end
@@ -359,6 +374,24 @@ function S:action(act)
       if self.qr_big then self.qr_big = false else self.show_qr = false end
     end
     return
+  end
+  -- easter egg: o codigo classico (cima cima baixo baixo esquerda direita
+  -- esquerda direita B A) nesta tela chama o mascote Lyro. Com a sequencia em
+  -- andamento, B e A nao saem da tela nem abrem o canal.
+  local SEQ = { "up", "up", "down", "down", "left", "right", "left", "right", "b", "a" }
+  self.egg = self.egg or 0
+  if act == SEQ[self.egg + 1] then
+    self.egg = self.egg + 1
+    if self.egg == #SEQ then
+      self.egg = 0
+      if not require("core.achievements").unlock("mascot_lyro") then
+        App.toast(require("lib.i18n").tr(L("O Lyro manda um oi de novo!")), "ok")
+      end
+      return
+    end
+    if (act == "b" or act == "a") and self.egg >= 9 then return end
+  else
+    self.egg = (act == "up") and 1 or 0
   end
   if act == "b" then App.pop()
   elseif act == "a" then self:open_channel()

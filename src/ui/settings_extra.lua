@@ -77,7 +77,7 @@ end
 --- brilho, FTP, favoritos e historicos ficam como estao)
 local RESET_KEYS = { "start_screen", "exit_mode", "anim", "eco", "notif", "notif_info", "notif_alert",
   "notif_downloads", "ftp_notif_done", "ftp_notif_fail", "music", "music_vol", "sfx", "sfx_vol", "notif_sound",
-  "font_size", "list_sort", "fav_sort", "cat_auto", "upd_notify", "notif_pos", "rec_fps", "stream_fps" }
+  "font_size", "list_sort", "fav_sort", "lib_sort", "cat_auto", "upd_notify", "notif_pos", "rec_fps", "stream_fps" }
 
 local function reset_prefs()
   -- copia do arquivo atual antes de mexer (recuperacao manual, se precisar)
@@ -108,7 +108,7 @@ function X.prefs_category()
     rows = {
       -- idioma: A abre a tela de escolha (bandeiras), a mesma da primeira abertura
       { kind = "action", label = L("Idioma"),
-        desc = L("Idioma de todo o aplicativo: Português (Brasil), English e Русский. A abre a tela de escolha; a mudança vale na hora, sem reiniciar."),
+        desc = L("Idioma de todo o aplicativo: Português (Brasil) ou English. A abre a tela de escolha; a mudança vale na hora, sem reiniciar."),
         value = function()
           for _, l in ipairs(I18N.LANGS) do if l.id == I18N.lang then return l.label end end
           return "?"

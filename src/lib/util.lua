@@ -68,10 +68,9 @@ function U.free_space(path)
   return tonumber(avail) * 1024, tonumber(total) * 1024
 end
 
--- unidades exibidas por idioma (o russo usa Б/КБ/МБ/ГБ e с/мин/ч)
+-- unidades exibidas (iguais em portugues e ingles)
 local UNITS = {
   default = { B = "B", KB = "KB", MB = "MB", GB = "GB", s = "s", min = "min", h = "h" },
-  ru = { B = "Б", KB = "КБ", MB = "МБ", GB = "ГБ", s = "с", min = "мин", h = "ч" },
 }
 local function units()
   local ok, I = pcall(require, "lib.i18n")

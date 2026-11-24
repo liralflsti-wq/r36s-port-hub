@@ -988,4 +988,228 @@ A hora é a do sistema do console (fuso configurado no dArkOS), lida a cada quad
 - **Aparelho detectado** em Informações do Console: nome e placa pela base de placas do Analisador de Console (Device Tree / `Hardware` do `/proc/cpuinfo`), ou o nome lido do sistema quando a placa não está na base. Linha **Tela** com a resolução real, avisando quando não é 640x480.
 - **RAM do R36S corrigida**: o R36S tem 1 GB físico (2 chips DDR3L), mas o Linux mostra cerca de 975 MB porque o kernel e a GPU reservam uma parte. O Analisador agora usa a faixa visível de 920 a 1024 MB (`reference.ram_visible_mb`) e mostra "X MB visíveis no sistema (1 GB físico)". Placas de clone aparecem com 896, 640, 512 ou 384 MB.
 - **Backup dos saves** (`core/savebackup.lua`): procura `conf/`, `savedata/`, `saves/`, `save/`, `userdata/` e arquivos `.sav/.srm/.save` dentro das pastas do port e guarda um `.tar.gz` em `backups/saves/<id>/` (5 por port). Em Configurações > Backup e restauração > **Saves dos ports**: A faz backup, X restaura o mais recente. Ao remover um port com saves, o hub oferece **BACKUP DOS SAVES E REMOVER**.
-- **Teste de controles ao vivo** (`ui/screens/padtest.lua`): ao abrir "Testar analógicos e botões" (Configurações ou Ports Utilitários), aparece na hora o desenho do controle. Cada botão acende ao ser apertado e fica verde depois de testado; os dois analógicos mostram posição, valores, alcance máximo e o contorno do alcance; o painel "Dados brutos" mostra os eixos e os botões numerados do SDL. Todos os botões são testáveis: **segure SELECT + START** para voltar e **segure L1 + R1** para o teste completo (R36S Analog Tester, com relatório), que continua em "Teste completo com relatório".
+- **Teste de controles ao vivo** (`ui/screens/padtest.lua`): ao abrir "Testar analógicos e botões" (Configurações ou Ports Utilitários), aparece na hora o desenho do controle. Cada botão acende ao ser apertado e fica verde depois de testado; os dois analógicos mostram posição, valores, alcance máximo e o contorno do alcance; o painel "Dados brutos" mostra os eixos e os botões numerados do SDL. **Aperte FN** para voltar (desde a 0.5.4; antes era segurar SELECT + START, que no R36S fecha o app e por isso fechava o hub) e **segure L1 + R1** para o teste completo (R36S Analog Tester, com relatório), que continua em "Teste completo com relatório".
+
+## 0.5.5 BETA — Atualizar a lista do EmulationStation ao sair
+
+### Atualizar a lista do EmulationStation ao sair
+
+- Se nesta sessão algum port foi **instalado** (modo port) ou **desinstalado**, ao sair do hub aparece "**Atualizar a lista de jogos?**": **ATUALIZAR E SAIR** (fecha o hub e reinicia o EmulationStation, o mesmo que "Reiniciar lista"), **SÓ SAIR** (a lista atualiza na próxima vez que o ES abrir) ou **VOLTAR**. Não aparece ao iniciar um jogo, ao desligar/reiniciar o console, no R36 Hub OS nem se nada mudou.
+- Reiniciar a lista com o hub aberto não é possível: o ES só lê a lista ao abrir, o hub roda dentro dele e os dois não dividem a tela.
+
+### Visual próprio por tema (Configurações, Categorias e Biblioteca) — `ui/themeviews.lua`
+
+- **Tema Padrão:** cartões (visual original das telas).
+- **Neon Grid Edition:** painel de console nas três telas — item escolhido em destaque no alto (ícone, nome, estado/quantidade, descrição) e grade de blocos com brilho verde embaixo (`ui/covergrid.lua`). Na Biblioteca, os consoles viram blocos (com os ícones do usuário, se houver) e a lista de jogos de um console vira grade de capas.
+- **Pastel Pop Edition:** vitrine (`ui/coverview.lua`) em Configurações e Categorias — coluna de bolhas à esquerda, nome grande e painel branco com "Sobre esta área", "Estado atual" e "Nesta área" (opções da área) ou "Ports nesta categoria" (nomes reais do catálogo). A Biblioteca continua com as prateleiras.
+- Nomes longos não são mais cortados no meio da palavra: a fonte diminui antes (`G.fit_lines` ignora caminhos e links).
+
+### Tema novo: Sky Warriors Edition (`themes/skywarriors`, `ui/skymenu.lua`)
+
+- Clima de menu de jogo de luta de anime, com **arte original do hub** (sem personagens, logos, símbolos ou nomes de séries): céu azul em degradê com sol suave, nuvens de cúmulo, ilhas e mar com brilhos no horizonte e ornamentos dourados de nuvem em espiral nos cantos (`background = "sky"`, desenhado em código em `ui/gfx.lua`).
+- **Tela inicial** (`layout = "sky"`): logo num selo dourado, opções em **barras inclinadas azul-turquesa** com medalhão de ícone; a escolhida fica **laranja/amarela com aura de energia** pulsando; setas laranja de rolagem; painel com moldura dourada à direita com o resumo real, catálogo, espaço livre e descrição.
+- **Configurações, Categorias, Biblioteca (consoles e jogos)** usam o mesmo visual de barras + painel de detalhes (`style.list = "bars"`, `TV.draw_bars` / `TV.draw_detail` em `ui/themeviews.lua`). Na lista de jogos, a capa do gamelist aparece no alto do painel. Texto branco com contorno escuro para ler sobre o céu.
+- **Logo nas cores do tema** (`logo_header/menu/about/splash.png`): o "R36S" em dourado/amarelo, escudo com moldura dourada e fundo azul royal, "PORT HUB" em turquesa claro. Gerada a partir da logo padrão por `tools/make_theme_logos.py`.
+- **Efeitos animados** (`ui/skyfx.lua`, arte original): nuvens andando devagar pelo céu (desenhadas uma vez em imagem pequena, leve no R36S); rastro de luz cruzando o céu a cada 11 s; faíscas subindo da opção escolhida nas barras; brilho de "carregar poder" ao apertar **A** (clarão, anéis e raios saindo da opção, por cima de tudo, então aparece mesmo quando a tela muda); **abertura com impacto** (energia juntando, clarão branco, ondas de choque, raios e a logo tremendo; a abertura dura no mínimo 1,3 s só neste tema). Com "Animações da interface" desligado (ou modo econômico), as nuvens ficam paradas e os outros efeitos não aparecem.
+- Ordem na tela de Temas: Pastel Pop, Neon Grid, Sky Warriors, Padrão.
+
+### Tema novo: Moonlight Blade Edition (`themes/moonblade`)
+
+- Clima de anime de espadachim, com **arte original do hub** (sem personagens, armas, técnicas, logos ou nomes de séries): noite azul-escura quase preta com estrelas, **lua grande** com halo, névoa vermelha no horizonte, silhuetas de telhados e **traços de pincel de nanquim** com respingos vermelhos (`background = "blade"`).
+- **Interface própria "tinta e papel"** (diferente do Sky Warriors):
+  - **Tela inicial** (`layout = "blade"`, `ui/blademenu.lua`): **roda de selos** em volta de um **círculo de pincel (ensō)** que gira devagar; a opção escolhida fica no lado direito da roda (maior, com brilho vermelho e fagulhas) e aparece grande no centro do círculo. A roda gira pelo caminho mais curto. À direita, um **pergaminho pendurado** (rolos de madeira em cima e embaixo, faixa vermelha com o nome em pé, carimbo vermelho com a inicial, traço de pincel) com o resumo real, o catálogo, o espaço livre e a descrição.
+  - **Listas** (Configurações, Categorias, Biblioteca e jogos; `style.list = "blades"`, `ui/inkview.lua`): **fileira de talismãs de papel** pendurados numa corda, com o ícone numa faixa de tinta e o nome escrito na vertical; o escolhido fica no centro, maior, com moldura e brilho vermelhos; números em selos vermelhos. Embaixo, um **pergaminho aberto** com carimbo, nome, pílulas, informações e descrição (na lista de jogos, a capa fica à direita do pergaminho). Esquerda/direita andam um, L1/R1 seis.
+- **Logo** em preto, branco e vermelho (`tools/make_theme_logos.py --moonblade`).
+- **Efeitos** (`ui/skyfx.lua`): brasas vermelhas subindo e pétalas caindo no fundo; fagulhas saindo da lâmina escolhida; **corte de energia** diagonal (branco com brilho vermelho e fagulhas) ao apertar A; **abertura com golpe de espada**: o corte atravessa a tela preta e as duas metades se separam revelando a logo. Sem efeitos com "Animações da interface" desligado.
+
+### Ícones próprios por tema (`ui/icons.lua`)
+- Um tema pode trazer a pasta `icons/` com PNGs pelo nome do símbolo (`games.png`, `settings.png`...). Quando existe, o hub usa esse ícone (sem tingir) no lugar do símbolo padrão; o que faltar continua com o padrão. Nenhum tema usa ainda.
+- Os temas Kaiju, Ninja, Showa Kaiju e Golden Cosmos foram testados e removidos a pedido; quem estava com um deles salvo volta ao Padrão.
+
+### Trilha própria por tema (`core/music.lua`, `core/themes.lua`)
+- Um tema pode trazer `music/main.ogg` (aviso e tela inicial), `music/nav.ogg` (lojas, listas, configurações) e `music/download.ogg` (durante downloads/instalações). Ao trocar de tema a música troca na hora; a faixa que o tema não tiver continua sendo a do hub.
+- Sky Warriors ganhou trilha própria (músicas enviadas pelo autor, convertidas de Opus para OGG Vorbis 44,1 kHz, volume igualado ao das faixas do hub): **main** = "Beyond Super", **nav** = "Limit Breaker", **download** = "Legendary Energy".
+- Para ocupar menos espaço, cada música virou um trecho que se repete sem emenda: o corte cai exatamente numa batida (ritmo detectado), o fim e o começo do trecho foram escolhidos por serem parecidos e a emenda tem um cruzamento de 0,35 s. main = 48 s (112 batidas a 140 bpm), nav = 67 s (160 batidas a 144 bpm), download = 58 s (128 batidas a 129 bpm). As três juntas passaram de 8,3 MB para 2,2 MB.
+
+### Conquistas ("funções descobertas") e nome do usuário
+- Em Configurações a categoria se chama **Meu perfil** (ícone novo `set_profile`): "Nome do perfil" (A renomeia), "Conquistas" (abre o álbum, mostra X de N) e, embaixo, a lista das conquistas.
+- **Temporadas** (`Achievements.SEASONS`): cada conquista tem `season` (padrão 1). Temporada 1 = "Primeira Jornada" (0.5.5); o álbum mostra a temporada no título.
+- `core/achievements.lua`: lista das conquistas (`DEFS`: id, nome, descrição, dica, carta em `assets/achievements/<id>.png`, cor, grito), estado salvo em `achievements.json` (data em que liberou) e o nome do usuário nas preferências (`user_name`). `Achievements.unlock(id)` libera só na primeira vez.
+- Primeira abertura (ou enquanto não houver nome): depois do aviso inicial o hub pergunta "Como você quer ser chamado?" no teclado da tela (até 20 caracteres, com espaço). Cancelar = pergunta de novo na próxima abertura.
+- Comemoração (`ui/achv_popup.lua`, em qualquer tema, uma vez por conquista): a imagem da carta pula no canto com raios girando, o grito da conquista (ex.: "INSTALADO!") e a faixa "CONQUISTA DESBLOQUEADA" com o nome. Some sozinha em ~3,5 s e não bloqueia os botões.
+- Configurações > **Conquistas** (logo depois de Preferências): nome do usuário (A troca), progresso (X de N), "Ver cartas" e a lista das conquistas (bloqueadas aparecem como "???" com um enigma: dicas em forma de charada, sem dizer onde fica a função).
+- Tela de cartas (`ui/screens/achievements.lua`, `ui/achv_card.lua`): nome do jogador e barra de progresso no alto, coleção de cartas (bloqueadas com cadeado), detalhes da escolhida (data em que liberou e descrição), A mostra a carta grande, X troca o nome.
+- Conquista 1 — **Primeira instalação**: libera ao terminar a primeira instalação de um port (janela "Port instalado!" ou instalação em segundo plano); a carta é a imagem do personagem fazendo joia enviada pelo autor (recortada, com contorno de adesivo). Substitui o "joia" que antes aparecia em toda instalação no tema Padrão.
+- **Raridades** (`Achievements.RARITY`, moldura em `ui/achv_card.lua`): Comum (prata), Incomum (verde, fio de luz), Épica (roxa, brilho pulsando e gemas nos cantos), Lendária (dourada em degradê, reflexo correndo e faíscas) e Única (borda arco-íris girando, brilho holográfico na arte e estrelas orbitando). A faixa da raridade aparece na carta, nos detalhes, na lista das Configurações e na comemoração. Cartas bloqueadas não mostram a raridade.
+- As imagens nunca são cortadas: na carta aparecem inteiras sobre o fundo de raios; as que têm fundo (`fill = true`) ganham borda branca de adesivo, as recortadas ficam com o contorno próprio.
+- **A numa carta liberada** abre a imagem inteira em tela cheia (`ui/achv_view.lua`), com a entrada e os efeitos da raridade: Comum aparece suave; Incomum sobe com pulinho, brilho verde e faíscas subindo; Épica explode do centro com ondas roxas, aura pulsando e orbes girando; Lendária com clarão dourado, raios de luz girando, reflexo passando na imagem e faíscas na moldura; Única com raios arco-íris, moldura arco-íris girando, brilho holográfico, chuva de confete e estrelas orbitando. Embaixo: raridade, nome e data.
+- Conquistas atuais (imagens enviadas pelo autor, reduzidas para 420 px de altura; textos, balões, onomatopeias e numeração de página das imagens foram tirados no recorte das margens da página ou apagados com preenchimento automático (OpenCV inpaint), sem cortar a arte):
+  - **Primeira instalação** (Comum, "INSTALADO!"): termina a primeira instalação de um port.
+  - **Detetive** (Comum, "ACHEI!"): primeira pesquisa que encontra algum port (`ui/screens/search.lua`).
+  - **Multitarefa** (Incomum, "TERMINOU!"): um download em segundo plano termina (`ui/overlay.lua`).
+  - **Arrombador** (Épica, "ABRIU!"): instala um arquivo digitando a senha no teclado da tela (`ui/overlay.lua`).
+  - **Explorador** (Comum, "UAAAU!"): abre a Central de Conteúdo (`ui/screens/store.lua`).
+  - **Hora de jogar** (Comum, "BORA JOGAR!"): abre um jogo pela Biblioteca (`main.lua`, `App.launch_game`).
+  - **Até logo** (Comum, "VOLTA LOGO!"): sai do hub pelo menu Sair (`ui/screens/menu.lua`).
+  - **Poliglota** (Incomum, "BONJOUR!"): troca o idioma (a primeira escolha não conta; `App.set_language`).
+  - **Dedos de aço** (Incomum, "GIROU TUDO!"): testa todos os botões no teste de controles (`ui/screens/padtest.lua`).
+  - **Fã número 1** (Lendária, "FÃ Nº 1!"): hub aberto em 7 dias diferentes (`Achievements.track_day`, preferência `achv_days`).
+  - **Carta de amor** (Comum, "FAVORITO!"): marca o primeiro port como favorito (`core/favorites.lua`).
+  - **Guardiã** (Épica, "PROTEGIDO!"): termina um backup (`ui/settings_defs.lua`).
+  - **Conectado** (Incomum, "CONECTADO!"): conecta no Wi-Fi pela tela do hub (`ui/screens/wifi_connect.lua`).
+  - **Ressurreição** (Lendária, "ERGA-SE!"): restaura um backup (`ui/settings_defs.lua`); a imagem mantém o balão "ERGA-SE." a pedido do autor.
+  - **Arrancou pela raiz** (Comum, "ARRANCADO!"): desinstala um port (`core/uninstall.lua`).
+  - **Arrependido** (Comum, "NÃÃÃO!"): cancela um download (`ui/overlay.lua`).
+  - **Velocista** (Incomum, "VOANDO!"): termina o teste de velocidade (`ui/screens/netdiag.lua`).
+  - **No osso** (Incomum, "SOCORRO!"): hub aberto com a bateria em 10% ou menos, fora do carregador (`core/battery.lua`).
+  - **Contrabandista** (Épica, "DE ONDE VEIO?!"): instala um port de arquivo local (`ui/overlay.lua`).
+  - **Mecânico** (Épica, "CONSERTADO!"): termina a manutenção do cartão SD (`ui/screens/sdmaint_run.lua`).
+  - **BIOS em dia** (Épica, "GANHOU VIDA!"): instala uma BIOS (`ui/screens/bios_pkg.lua`); imagem deitada, mostrada inteira.
+  - **Colecionador** (Épica, "COLEÇÃO!"): 10 ports registrados como instalados pelo hub (`ui/overlay.lua`).
+  - **Atualizado** (Lendária, "ATUALIZADO!"): primeira abertura depois de atualizar o hub (`main.lua`, notas da atualização).
+  - **Repaginado** (Incomum, "QUE ESTILO!"): troca o tema na tela de Temas (`core/themes.lua`, só quando o tema muda de verdade e é salvo).
+  - **Deu ruim** (Épica, "DEU RUIM!"): primeiro erro gravado no registro de erros (`core/errlog.lua`, `M.problem`).
+  - **Mestre do FTP** (Lendária, "TRANSFERIDO!"): primeiro arquivo enviado ou recebido pelo servidor FTP (`core/ftp.lua`).
+  - **Apoiador do projeto** (Única, "VALEU!!"): amplia o QR Code do Pix em Sobre o Projeto (`ui/screens/about.lua`).
+  - **Lenda do R36S PORT HUB** (Única, "LENDA!"): conquista final, libera sozinha quando todas as outras estão liberadas (`Achievements.check_final`, marcada com `final = true`; conferida a cada conquista nova e ao abrir a tela de cartas).
+- Conquistas liberadas quando o hub está fechando (Hora de jogar, Até logo) ficam guardadas (`unlock_later`, preferência `achv_pending`) e a comemoração aparece na próxima abertura, depois do aviso.
+- **Som de conquista** (`core/sfx.lua`, `S.achievement`): gerado em código (sem arquivo), no estilo dos consoles atuais — "whoosh" de entrada, sinos de cristal (síntese FM) subindo em arpejo e eco. Muda com a raridade: Comum 2 notas; Incomum 3; Épica arpejo + acorde grave; Lendária arpejo maior + brilho cintilante; Única arpejo longo, acorde cheio, brilho e "pling" final. Segue a opção "Som das notificações" e o volume dos efeitos. Gerado na primeira vez de cada raridade e guardado na memória.
+- Comemorações em fila: se várias conquistas liberam juntas (ex.: a última conquista + a Lenda), uma aparece depois da outra.
+- Ícones novos de linha: `set_trophy`/`trophy` e `lock` (`tools/make_icons.py`).
+- Autoteste: `achvreset` (zera as conquistas), `achv [id]` (libera e mostra uma janela de exemplo) e `achvdemo` (cartas de exemplo das 5 raridades, só na memória).
+
+### Meu perfil, temporadas e o Mascote (exclusivo de quem completa o álbum)
+- **Mascote** (`core/mascot.lua`, desenho `ui/mascot_view.lua`, tela `ui/screens/mascot.lua`): arte original feita em código. Libera quando a conquista final (Lenda) da Temporada 1 é liberada; antes disso, Meu perfil > Mascote mostra uma silhueta e "??? Algo especial espera quem completar o álbum".
+- Espécies: Slime, Robô, Gatinho, Fantasminha, **Caveira das sombras** (crânio com olhos acesos envolto em labaredas de sombra roxas; carta Ressurreição) e **Dragãozinho** (asas batendo, chifres, barriga clara, baforada de fogo quando feliz; carta Colecionador). Todas com volume pintado em camadas (contorno, degradê de luz, luz de recorte e brilho especular) para parecerem 3D sem pesar no console. Cada carta libera um item: espécie (Slime = Lenda, Robô = Mestre do FTP, Gatinho = Carta de amor, Fantasminha = Deu ruim), cores (cartas comuns + Arco-íris da Lenda), acessórios (incomuns + Coroa do Apoiador), auras (épicas) e efeitos (lendárias + Moedas do Apoiador).
+- Vive no canto inferior direito, em cima da barra de dicas, em todas as telas, só na inicial ou escondido (R1 na tela do mascote). Some na abertura, no teclado, no teste de controles e durante a comemoração de conquista.
+- Dia a dia: cumprimenta pelo nome do perfil (bom dia/tarde/noite; "Senti sua falta" depois de 3 dias), dorme de 1h às 6h, pula e comemora em instalações e conquistas, fica preocupado com bateria baixa (15%), assusta com erros, fica triste ao cancelar download. Pisca, respira e olha em volta.
+- Tela do mascote: A carinho (corações), SELECT dança, Y dica do hub, X renomeia (padrão "Bit"), R1 onde aparece; cima/baixo escolhe a categoria e esquerda/direita o item (itens bloqueados mostram a carta que libera).
+- Nível e experiência: abrir o hub +5, port instalado +10, conquista +20, carinho +2 (até 5 por dia).
+- **Conquistas assinadas**: `achievements.json` guarda a lista + uma assinatura (hash com o identificador do aparelho: /etc/machine-id ou serial do /proc/cpuinfo). Arquivo copiado de outro console é ignorado (guardado como `achievements_invalid.json`); arquivos antigos sem assinatura são aceitos e assinados.
+- Autoteste: `achvall` (libera todas) e `mascotset slot=id`.
+
+### Outras correções da 0.5.5
+
+- **Teste de controles:** sair agora é **segurar B por 5 segundos** (barra de progresso no painel). FN e um toque em B contam como teste (17 botões).
+- **Tema Wii Blue Edition removido.** Quem estava com ele volta ao Tema Padrão automaticamente (`M.ALIASES`).
+- **Apoie o projeto:** a janela mede o texto antes de desenhar; com fonte grande ela cresce e "Obrigado pelo apoio!" fica sempre abaixo do texto.
+- **Biblioteca > console:** **R2** alterna a ordem dos jogos entre **A-Z** e **Adicionados** (data do arquivo no cartão, mais novos primeiro). Vale nos três temas (no Pastel, nas prateleiras) e fica salva (`lib_sort`, volta ao padrão em "Restaurar preferências").
+
+## 0.5.4 BETA — Senha digitada no console, arquivos TAR, ordem A-Z/Recentes e FN no teste de controles
+
+### Senha digitada no console
+
+- **Senha digitada no console**: se nenhuma senha salva funcionar num arquivo local (Gerenciador de arquivos ou "prontos para instalar"), em vez do erro abre o teclado na tela ("Senha do arquivo"). OK tenta de novo só com a senha digitada; senha errada reabre o teclado com "Senha incorreta"; CANCELAR mantém o arquivo. Quando funciona, o hub pergunta se quer **salvar no `senhas.txt`** (SALVAR / NÃO SALVAR) para usar sozinho nos próximos arquivos. Se outra janela estiver aberta (ex.: "Instalar todos"), aparece um aviso para instalar de novo e digitar a senha. A senha digitada não vai para o histórico de downloads nem para logs.
+- Arquivos cuja lista nem abre sem a senha certa (7z com nomes criptografados) também aparecem em "prontos para instalar"; a lista se atualiza sozinha quando uma instalação termina com a tela aberta.
+
+### Arquivos TAR
+
+- O hub agora instala e extrai **.tar**, **.tar.gz/.tgz**, **.tar.xz/.txz** e **.tar.bz2/.tbz2** com o `tar` do sistema: no Gerenciador de arquivos (tag TAR, TAR.GZ...), em "Prontos para instalar" e nos downloads. O formato é reconhecido pela assinatura do arquivo; caminhos perigosos (`/`, `../`) são recusados e o espaço livre é conferido antes de extrair. TAR não tem senha nem partes.
+
+### Ordem de visualização na Central de Conteúdo
+
+- Botão **X** na Central de Conteúdo (listas de ports e categorias) alterna a ordem: **Padrão** (ordem do catálogo) → **A-Z** (nome) → **Recentes** (recém adicionados, pelo campo `added` do catálogo, mais novos primeiro; sem data vai para o fim). A barra de botões mostra a ordem atual e um aviso confirma a troca.
+- A escolha fica salva e é a mesma de Configurações > Catálogo > **Ordenação das listas**, que ganhou a opção "Recém adicionados" (Tamanho e Instalados primeiro continuam lá). Favoritos mantêm a ordem própria; em Meus Ports > Instalados o X continua sendo Desinstalar.
+
+### Teste de controles: FN para voltar
+
+- Na tela "Teste de controles", **FN** volta para o hub (um toque; se já estava apertado ao abrir, precisa soltar antes). SELECT + START não é mais usado ali: no R36S essa combinação é do sistema e fecha o app. O FN saiu da contagem de botões testados.
+
+## 0.5.3 BETA — Senhas e arquivos em partes, origem do port e capa do pacote
+
+### Teste de controles ao vivo
+
+- A/B/X/Y desenhados no padrão do R36S (estilo Nintendo): **X em cima, A à direita, B embaixo, Y à esquerda**.
+- O direcional não acende mais ao mexer o analógico: com controle conectado, o teste usa só o que o controle informa (antes também contava as "setas" que o hub cria a partir do analógico esquerdo para navegar nos menus, e as teclas do gptokeyb).
+
+### Arquivos com senha e em partes (`core/archives.lua`)
+
+- **Senhas automáticas**: ao instalar ou extrair um `.zip`, `.rar` ou `.7z` com senha, o hub tenta sem senha e depois as senhas dos grupos de ports (**R36SPORTSBR**, **R36XBR**, embutidas) e as do usuário em `<pasta do hub>/senhas.txt` (uma por linha; `#` = comentário). Para o 7-Zip testa a senha num arquivo pequeno do pacote; para nomes criptografados, na listagem. Sem senha certa: aviso explicando onde colocar a senha. As senhas não vão para logs nem para o "Reportar problema". ZIP com senha usa o 7-Zip do hub (sem ele, `unzip -P`).
+- **Arquivos em partes**: `jogo.part1.rar` (ou `part01`), `jogo.7z.001`, `jogo.zip.001` e ZIP dividido (`jogo.zip` + `jogo.z01`...). Escolher qualquer parte instala a partir da primeira, como no PC; o Gerenciador de arquivos mostra "RAR • N PARTES" (tamanho somado) na primeira e "PARTE n" nas outras. Ao excluir depois da instalação, todas as partes saem juntas.
+- Configurações > Downloads > **Senhas de arquivos compactados** mostra quantas senhas há e onde fica o `senhas.txt`.
+
+### Origem e capa dos ports instalados de arquivo local
+
+- **Origem**: a senha dos grupos é o nome do grupo; o hub guarda de onde veio o port (`local_sources.json`) e mostra "Origem: grupo do Telegram R36XBR" + link ao terminar a instalação e nos detalhes do port local ("Instalado no console • Telegram R36XBR").
+- **Capa do pacote**: se o pacote traz uma imagem (nome com cover, capa, boxart, box, poster, folder, portada ou screenshot; PNG/JPG até 4 MB, até 2 níveis dentro da pasta do port), o hub a coloca no `gamelist.xml` (com "Baixado do grupo X." na descrição), seguindo as mesmas regras das capas do catálogo (nunca troca imagem já existente). O EmulationStation e o hub (que agora também lê o `<image>` do `gamelist.xml` para ports locais) mostram a mesma capa.
+
+
+### Atalho "prontos para instalar" (`core/pendports.lua`, `ui/screens/pendports.lua`)
+
+- Arquivos `.zip`, `.rar` e `.7z` (inclusive em partes, contados como um) soltos na pasta de ports, como os baixados do Telegram, são detectados. Só entram os que têm um script `.sh` na raiz ou numa pasta logo abaixo; o update e o pacote completo do próprio hub (`update_manifest.json`, pasta `r36sporthub`) e o PortMaster ficam de fora (a lista é lida com as senhas salvas, sem extrair nada; resultado em cache por nome, tamanho e data).
+- **Meus Ports** mostra no topo "N arquivo(s) prontos para instalar" (selo INSTALAR). Na tela: **A** instala um, **Y** instala todos (Central de Downloads, um de cada vez). Senhas, partes, origem do grupo e capa do pacote são tratadas pelo instalador; depois de cada instalação o arquivo compactado (e todas as partes) é excluído.
+- A tela inicial avisa uma vez por sessão: "N port(s) na pasta ports prontos para instalar".
+
+### Créditos do port (`porthub.txt`)
+
+- Quem faz o port pode pôr um `porthub.txt` ao lado do `.sh` (ou dentro da pasta do jogo) com `desenvolvedor=`, `grupo=`, `link=`, `versao=`, `data=`, `descricao=`, `agradecimentos=` (todas opcionais; aceita também `Chave: valor`, sem diferença de maiúsculas ou acentos; `#` = comentário).
+- Ao instalar, o hub lê o arquivo, move-o para dentro da pasta do jogo (para não ficar solto na pasta ports) e mostra desenvolvedor, versão, data e agradecimentos na mensagem de instalação e nos detalhes do port (Meus Ports). No EmulationStation, preenche `<developer>` e usa a descrição.
+- O `grupo=` vale como origem quando o arquivo não tinha senha. Sem `porthub.txt`, o hub usa o `porter` do `port.json` do PortMaster, quando existir.
+
+## 0.5.5: tradução russa removida
+
+O hub agora tem só português (Brasil) e inglês.
+
+| Arquivo | Mudança |
+|---|---|
+| `src/i18n/ru.lua` | Removido (cópia em `archive/ru_0.5.5.lua`) |
+| `src/lib/i18n.lua` | Russo saiu da lista de idiomas. Novo `I18N.migrate`: quem estava em russo passa para o inglês |
+| `src/main.lua` | Na abertura, a preferência "ru" salva no console vira "en" |
+| `src/ui/screens/language.lua` | Tela de idioma só com Português e English (bandeira russa removida) |
+| `src/ui/screens/battery.lua`, `src/lib/util.lua` | Unidades e tempo em cirílico removidos |
+| `src/core/catalog.lua` | Lê só `description_en`/`short_en` do catálogo (campos `_ru` são ignorados) |
+| `src/ui/settings_extra.lua`, `src/core/achievements.lua`, `src/i18n/en.lua` | Textos que citavam o russo atualizados |
+| `README.md` | "Dois idiomas" |
+
+As fontes Inter com cirílico continuam (88 KB) para mostrar nomes de ports que tenham letras cirílicas.
+
+## 0.5.5: perfil, álbum em pasta de cartas, aniversário e tempo de jogo
+
+- **Meu perfil**: saiu a lista de cartas (bloqueadas/desbloqueadas). Entraram **Foto de perfil**, **Aniversário** e **Tempo de jogo**.
+- **Álbum de cartas** (`ui/screens/achievements.lua`): visual de pasta de cartas colecionáveis, com duas páginas de 4 bolsos (8 cartas por vez), argolas e plástico. L1/R1 viram a página; passar da borda com o direcional também vira. Sem ano nem datas: a tela de álbuns (com ano e lançamento) só aparece quando houver mais de uma temporada.
+- **Foto de perfil** (`core/profile.lua`, `ui/screens/avatar_pick.lua`): lista os avatares de `assets/avatars` e da pasta `conf/love/r36sporthub/avatares` (imagens do usuário, PNG/JPG). Aparece em Meu perfil e no rodapé do álbum.
+- **Aniversário** (`ui/screens/birthday.lua`): dia e mês. No dia, o Nexo dá parabéns e libera a carta **Feliz aniversário** (única, opcional: não conta para a carta final "Lenda").
+- **Tempo de jogo** (`core/playtime.lua`): jogos da Biblioteca e ports abertos pelo hub. O launcher grava início e fim em `conf/.play_time`; na volta o hub soma em `playtime.json`. Sessões abaixo de 10 s ou acima de 24 h são ignoradas. Aparece nos detalhes do jogo/port, em Meu perfil (com ranking) e nas falas do Nexo.
+- **Nexo**: ao voltar de um jogo comenta a partida (e tira onda quando joga muito ou repete o favorito); troca a fala na hora ao mudar de tela ou aba (antes esperava 4 s); falas importantes ficam 4 s antes de serem trocadas; fica escondido no álbum para não cobrir as cartas.
+- Arquivos: `src/main.lua`, `port/R36S PORT HUB.sh`, `src/core/achievements.lua`, `src/core/assistant/init.lua`, `src/core/assistant/brain.lua`, `src/ui/settings_defs.lua`, `src/ui/screens/settings_cat.lua`, `src/ui/screens/library_games.lua`, `src/ui/screens/details.lua`, `src/ui/assistant.lua`, `src/ui/gfx.lua`, `src/i18n/en.lua`, `src/dev/autotest.lua`, `src/assets/achievements/birthday.jpg` e os novos acima.
+
+### Foto de perfil com avatares online (DiceBear)
+
+- `ui/screens/avatar_pick.lua`: abas (L1/R1) "Meus" + Pixel, Robôs, Personagens e Carinhas. As miniaturas vêm pela internet (cache das capas); A em "Aplicar foto" baixa só aquele avatar para `avatares_online/` (fica no cartão e funciona sem Wi-Fi).
+- `core/profile.lua`: `P.ONLINE`, `P.online_list(estilo)`, `P.apply_online(item, cb)`. API: `https://api.dicebear.com/9.x/<estilo>/png?seed=<nome>&size=128` (PNG até 256 px). `PORTHUB_AVATAR_API` troca o endereço nos testes.
+- Licenças dos estilos em `port/r36sporthub/licenses/AVATARES-DiceBear.txt` (Pixel Art, Pixel Art Neutral e Lorelei: CC0 1.0; Bottts: livre para uso pessoal e comercial).
+- Não usamos a galeria do xperience-app.com: são avatares de personagens de marcas (Star Wars, Muppets, Bluey...), sem permissão de uso.
+
+### Conquistas de tempo de jogo
+
+- Três cartas novas com as artes enviadas: **Tempo de jogo** (1 h somada, Incomum), **Tempo de jogo extenso** (10 h, Épica) e **Tempo de jogo lendário** (50 h, Lendária, opcional: não conta para a carta final "Lenda").
+- Liberadas em `core/playtime.lua` (`PT.check_achievements`) sempre que uma sessão de jogo é somada. Imagens em `src/assets/achievements/playtime_1h.jpg`, `playtime_10h.jpg` e `playtime_50h.jpg`.
+
+### Easter egg: Lyro, o mascote
+
+- Mascote do projeto: **Lyro** (raposinha azul com a bandana de invasor pixelado). Carta `mascot_lyro` (Única, opcional, não conta para a "Lenda"), imagem `src/assets/achievements/mascot_lyro.jpg`.
+- Como liberar: na tela **Sobre o Projeto**, digitar ↑ ↑ ↓ ↓ ← → ← → B A. Com a sequência em andamento, o B e o A são "engolidos" (não saem da tela nem abrem o canal). Repetir depois só mostra "O Lyro manda um oi de novo!".
+- No álbum aparece como bloqueada com a dica: "Um código antigo, digitado na página de quem criou tudo, chama um amigo peludo."
+- Código em `src/ui/screens/about.lua` (`S:action`).
+
+### Visualizador de conquistas em carrossel (substitui a pasta de cartas)
+
+- Componentes analisados: `ui/screens/achievements.lua` (tela), `ui/achv_card.lua` (desenho da carta), `ui/achv_view.lua` (carta em tela cheia), `core/achievements.lua` (dados; não mudou).
+- `ui/screens/achievements.lua` reescrita: carta escolhida no centro (140x210, proporção 2:3, inteira), duas de cada lado menores e escurecidas, setas laterais, deslize animado (desliga no modo econômico). Barra de progresso geral no topo com "X de Y liberadas (Z%)" e a foto/nome do perfil.
+- Painel separado abaixo: nome, descrição (ou o enigma), raridade, data de liberação e número "NNN / TOTAL". O texto desce de fonte até caber, nunca é cortado.
+- Controles: ←/→ (ou ↑/↓) troca a carta, L1/R1 pula 5, A abre a carta em tela cheia (como antes), X troca o nome, B volta.
+- `ui/achv_card.lua`: nova opção `bare` (sem nome/etiqueta) usada só nas cartas pequenas do carrossel; as outras telas não mudam.
+- Usa as cores do tema atual (testado no Padrão e no Neon Grid). A versão em pasta de cartas ficou em `archive/achievements_pasta_0.5.5.lua`.
+
+### Repositório do código continua público
+
+- O repositório `liralflsti-wq/r36s-port-hub` não vai mais ser fechado: fica público. A licença própria (desde a 0.5.3) continua valendo: ver o código é livre; copiar, modificar, redistribuir ou reaproveitar precisa de autorização.
+- Textos ajustados: `src/config.lua` (comentário), `GUIA_GITHUB_CATALOGOS.txt`, `publicar.sh` (comentários) e `README.md`. Nenhum link mudou: catálogo, atualizações e Releases continuam no repositório `r36s-port-hub-catalogo`.
+
+### Ajustes pedidos depois do teste no console (0.5.5)
+
+- **Detalhes do port instalado** (`ui/screens/details.lua`): botões na ordem **Iniciar, Desinstalar, Reinstalar/Atualizar, Voltar** (no Neon Grid: Iniciar, Desinstalar, Reinstalar, Favoritar). Abaixo dos botões, no lugar do destino, a linha **Tempo de jogo** do port (tempo, sessões e última vez).
+- **Tela de tempo de jogo** (`ui/screens/playtime.lua`, nova): resumo (total, jogos, sessões, favorito) e ranking com medalhas e barras; A abre o port no catálogo. Meu perfil > Tempo de jogo abre ela.
+- **Teste de controles**: segurar B por **3 s** para voltar (antes 5 s).
+- **Fonte do texto** (Aparência e personalização): 6 opções — Chakra Petch (padrão), Atkinson Hyperlegible, Barlow, Titillium Web, Kanit e Ubuntu. A fonte nova é reduzida automaticamente se for mais larga que a Chakra Petch, para caber nas telas. Pixeladas não mudam. Preferência `font_family`. Licenças OFL/UFL em `port/r36sporthub/licenses/`.
+- **Primeiro acesso**: idioma → nome do perfil → aniversário (B pula) → Aviso importante. O assistente fica quieto até o aviso.

@@ -103,6 +103,8 @@ end
 --- problema mostrado ao usuario (sem travar): vai para o arquivo do dia
 local last_key, last_t = nil, 0
 function M.problem(title, body)
+  -- conquista "Deu ruim": o primeiro erro registrado
+  if rawget(_G, "App") and App.t then pcall(function() require("core.achievements").unlock("first_error") end) end
   pcall(function()
     local key = tostring(title) .. "|" .. tostring(body)
     -- a mesma mensagem repetida em seguida nao enche o arquivo

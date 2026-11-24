@@ -1,0 +1,29 @@
+{
+ "version": "0.4.6",
+ "version_label": "0.4.6 BETA",
+ "date": "2026-11-03T13:46:44",
+ "files": {
+  "R36S PORT HUB.sh": "24aa081f278621f639ba3747e5b37e19632e21168a59e5ede1517f433fcf822a",
+  "r36sporthub/bin/7zzs": "2f9b4ffcdc83eedb737a95bbdb04ab7f4805f8ad92aaef32ccc6b2bf32883209",
+  "r36sporthub/bin/es_theme_apply.sh": "d214110b0246b3201b430838a150d8beac578f588ea455021bf8cbf0741e879c",
+  "r36sporthub/bin/fetch.sh": "9fd0404c10b595f2db6a4fa3175789d20d450e2b7f0390928d396251517a2480",
+  "r36sporthub/cover.png": "c03ae8b5570913bfe183297d44573a45ef7a7bd14c5a909bee5e9a3518c788ec",
+  "r36sporthub/fanart.png": "963122d7eb6b5c79a6962c0aca3a18aba75ad2ff6785774521dba99eb2f6a51f",
+  "r36sporthub/game.love": "4cbd21244d9047913eefa93f00c84b85381f19f508d5aa7f06042d75c02fa085",
+  "r36sporthub/gameinfo.xml": "6321645e724d9a4e6078aaf0c787c6073d3ca9ea7df3e8a4dfcf50019edeebd3",
+  "r36sporthub/licenses/7-Zip-License.txt": "1790374e5352329cedb46ee3808930a88e9ca2f08b82b10fcf5cf605d2c301b1",
+  "r36sporthub/licenses/LICENSE.Inter.txt": "781ffde332be9bdb6ccc527e6ccd6d6a586f3960c2d598b5580b8c7d1ae53d66",
+  "r36sporthub/licenses/LICENSE.love2d.txt": "781f3b7254c9a5b721b88c2ff2f61bdb0de5868117f9eb74a394f28ae04caab9",
+  "r36sporthub/licenses/LICENSE.luaqrcode.md": "589ed758767cd7bad07510a9bcae16a1b482c022845db1b8dca2838ff33af378",
+  "r36sporthub/licenses/OFL-ChakraPetch.txt": "13831d02389d917d22fcfa6c79f98f8acbf61d230add0e73a4d4dc5f3bfb9e56",
+  "r36sporthub/licenses/OFL-PressStart2P.txt": "705960c3281a5765ecc0b59bd4ed7ca59eed165748076bc2fc3e8fdbfeb944b0",
+  "r36sporthub/logo.png": "2fc1f9974f7028097f9b46f57699337c9ed23dbc5cf8b3e71d6d0d3136f60ed0",
+  "r36sporthub/tools/R36S_Analog_Tester.sh": "aa000f1484f6f2251043bed68e40f2d6a530e5efdea87d1e9f0b4a88538e4082",
+  "r36sporthub/tools/converter_gravacao.html": "b153f0c284c4ee5c38045fa83a698d5c155590a6cfc27832dc1deb14745c9f2e",
+  "r36sporthub/tools/r36s_analog_tester/LEIA-ME.txt": "0626794e1ccc410584389f29dcb593433957f2e28a9f874591b5a9e6323494af",
+  "r36sporthub/tools/r36s_analog_tester/fonte_menu.bin": "1a2112ebf7ab85d10c624bb079b5d0344a4385616019a695f18c823dc08d4694",
+  "r36sporthub/tools/r36s_analog_tester/logo_menu.bin": "94310f8f6d075732145c53192af56d27e563d092ee22fb784e2029f673f04428",
+  "r36sporthub/tools/r36s_analog_tester/r36s_analog_tester.py": "6f222630ab44891494f26f8b109baafbaa40052d5967b26b5a4a39796309d5fc",
+  "r36sporthub/tools/r36s_analog_tester/ui_imagens.bin": "989581ead0cab9a2b020a2486746fc96890dff93bf538ce401392c59bac3337a"
+ }
+}

@@ -1,10 +1,10 @@
 {
-  "version": "0.5.4",
-  "version_label": "0.5.4 BETA",
-  "date": "2026-11-16",
+  "version": "0.5.5",
+  "version_label": "0.5.5 BETA",
+  "date": "2026-11-24",
   "url": "https://github.com/liralflsti-wq/r36s-port-hub-catalogo/releases/latest/download/R36S-PORT-HUB-update.zip",
-  "size": 11361209,
-  "sha256": "048650c771c463b58f44e2e4860c2bd14e4c42d13516c4cd3d9d225588861a8a",
+  "size": 16446827,
+  "sha256": "068df706743c697e5f89d1022c8417558550704b4e59c5c51e7bed0c017ef9c8",
   "min_version": "0.4",
-  "notes": "Senha nos arquivos compactados, arquivos TAR e em partes, ports na fila, ordem A-Z/Recentes e FN no teste de controles.\n* Arquivos com senha: o hub tenta abrir sem senha, depois com as senhas dos grupos de ports e com as suas (arquivo senhas.txt), e também deixa digitar a senha no console. As senhas não vão para o log nem para o Reportar problema.\n* Suporte a arquivos TAR (.tar, .tar.gz, .tar.xz e outros) no Gerenciador de arquivos.\n* Arquivos em partes (part1.rar, .7z.001, .zip com .z01...): instalar qualquer parte usa a primeira, como no PC; ao excluir, todas as partes saem juntas.\n* Ports na fila: compactados copiados para a pasta de ports (ex.: baixados do Telegram) aparecem em Meus Ports com o atalho Instalar.\n* Ordem A-Z ou Recentes nas listas de ports.\n* Botão FN no teste de controles."
+  "notes": "Perfil completo, conquistas em carrossel, tempo de jogo, fontes e novo primeiro acesso\n* Primeiro acesso: idioma, nome do perfil, aniversário e depois o aviso importante.\n* Meu perfil: foto de perfil (avatares online, só baixa o que você aplicar), aniversário e tempo de jogo com tela própria de ranking.\n* Conquistas em carrossel: carta no centro e painel com nome, descrição, raridade, data e número.\n* Detalhes do port instalado: Iniciar, Desinstalar, Reinstalar e Voltar, com o tempo de jogo do port.\n* Aparência: 6 fontes de texto para escolher.\n* Teste de controles: segure B por 3 s para voltar.\n* Cartas novas: Feliz aniversário, tempo de jogo (1 h, 10 h e 50 h) e uma carta secreta...\n* Nexo troca a fala na hora e comenta suas partidas. Idiomas: Português (Brasil) e English."
 }

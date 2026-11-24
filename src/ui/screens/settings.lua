@@ -9,6 +9,10 @@ local Icons = require("ui.icons")
 local Defs = require("ui.settings_defs")
 local U = require("lib.util")
 local lg = love.graphics
+local TV = require("ui.themeviews")
+local CG = require("ui.covergrid")
+local CV = require("ui.coverview")
+local I18N = require("lib.i18n")
 
 local S = {}
 
@@ -35,8 +39,81 @@ local function total_rows() return math.ceil(#Defs.LIST / COLS) end
 
 local function color(name) return T.c[name] or T.c.accent end
 
+function S:update(dt)
+  if TV.mode() == "showcase" then CV.update(self, self.sel, dt) end
+end
+
+local function cat_status(cat)
+  local ok, st = pcall(cat.status)
+  return ok and st or ""
+end
+
+--- Neon Grid: destaque da area escolhida + grade de blocos
+function S:draw_grid()
+  local cat = Defs.LIST[self.sel]
+  CG.draw(self, {
+    top = 46, n = #Defs.LIST, sel = self.sel,
+    draw_cover = function(i, x, y, w, h)
+      local c = Defs.LIST[i]
+      TV.icon_cover(c.icon, color(c.color), (h > 100) and c.name or nil)(i, x, y, w, h, i == self.sel)
+    end,
+    name = cat.name, pills = { { cat_status(cat), color(cat.color) } }, desc = I18N.tr(cat.desc),
+  })
+end
+
+--- nomes das opcoes da area (so as listas fixas; as montadas na hora ficam de fora)
+function S:option_list(cat)
+  self.opt_cache = self.opt_cache or {}
+  local key = cat.id .. ":" .. tostring(I18N.lang or "")
+  if self.opt_cache[key] then return self.opt_cache[key] end
+  local names = {}
+  if type(cat.rows) == "table" then
+    for _, r in ipairs(cat.rows) do
+      local lb = type(r.label) == "string" and r.label or nil
+      if lb and r.kind ~= "header" and r.kind ~= "info" then names[#names + 1] = I18N.tr(lb) end
+    end
+  end
+  local txt = #names > 0 and table.concat(names, "  •  ") or I18N.tr(L("Aperte A para ver as opções."))
+  self.opt_cache[key] = txt
+  return txt
+end
+
+--- Sky Warriors: barras inclinadas + painel de detalhes
+function S:draw_bars()
+  local cat = Defs.LIST[self.sel]
+  TV.draw_bars(self, { top = 46, n = #Defs.LIST, sel = self.sel,
+    item = function(i) local c = Defs.LIST[i]; return { icon = c.icon, color = color(c.color), label = c.name } end })
+  TV.draw_detail({ icon = cat.icon, color = color(cat.color), name = cat.name,
+    pills = { { cat_status(cat), color(cat.color) } },
+    rows = {}, text = I18N.tr(cat.desc) .. "\n\n" .. self:option_list(cat) })
+end
+
+--- Pastel Pop: vitrine (coluna de bolhas, nome grande, painel de informacoes)
+function S:draw_showcase()
+  local cat = Defs.LIST[self.sel]
+  CV.draw(self, {
+    top = 48, n = #Defs.LIST, sel = self.sel,
+    draw_cover = function(i, x, y, w, h, on)
+      local c = Defs.LIST[i]
+      TV.icon_cover(c.icon, color(c.color), c.name)(i, x, y, w, h, on)
+    end,
+    name = cat.name, pills = { { cat_status(cat), color(cat.color) } },
+    sections = { { title = L("Sobre esta área"), text = I18N.tr(cat.desc) },
+      { title = L("Estado atual"), rows = { { L("Agora"), cat_status(cat), color(cat.color) } } },
+      { title = L("Nesta área"), text = self:option_list(cat) } },
+  })
+end
+
 function S:draw()
   G.header(L("Configurações"))
+  local mode = TV.mode()
+  if mode ~= "cards" then
+    if mode == "grid" then self:draw_grid() elseif mode == "bars" then self:draw_bars() else self:draw_showcase() end
+    G.hints({ { "dpad", L("Navegar") }, { "a", L("Abrir") }, { "b", L("Voltar") } })
+    local cnt = string.format("%d/%d", self.sel, #Defs.LIST)
+    G.text(T.f.small, cnt, T.W - 14 - T.f.small:getWidth(cnt), T.H - 25, T.c.faint)
+    return
+  end
   local first, last = self.top * COLS + 1, math.min(#Defs.LIST, (self.top + ROWS) * COLS)
   for i = first, last do
     local cat = Defs.LIST[i]
@@ -99,6 +176,11 @@ end
 
 function S:action(act)
   local n = #Defs.LIST
+  local mode = TV.mode()
+  if mode ~= "cards" then
+    local nx = (mode == "grid" and TV.grid_nav or (mode == "bars" and TV.bars_nav or TV.showcase_nav))(self.sel, n, act)
+    if nx then self.sel = nx; self:follow(); return end
+  end
   local tr = total_rows()
   local col, row = (self.sel - 1) % COLS, math.floor((self.sel - 1) / COLS)
   if act == "left" then col = (col - 1) % COLS

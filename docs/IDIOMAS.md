@@ -1,6 +1,6 @@
-# Idiomas (pt-BR, English, Русский)
+# Idiomas (pt-BR, English)
 
-O R36S PORT HUB funciona em três idiomas: **Português (Brasil)**, **English** e **Русский**.
+O R36S PORT HUB funciona em dois idiomas: **Português (Brasil)** e **English**. O russo foi removido na 0.5.5: quem estava em russo passa automaticamente para o inglês.
 
 ## Inicialização
 
@@ -33,7 +33,7 @@ Fica no arquivo `settings.txt`, na pasta de dados do app (`conf/love/r36sporthub
 
 ```
 disclaimer_ok=1
-language=ru
+language=en
 music=1
 ```
 
@@ -47,7 +47,6 @@ music=1
 |---|---|
 | `src/lib/i18n.lua` | Idioma atual, lista de idiomas, `L()` e `tr()`, além do índice reverso |
 | `src/i18n/en.lua` | Dicionário inglês: `["texto em português"] = "tradução"` |
-| `src/i18n/ru.lua` | Dicionário russo, no mesmo formato |
 | `src/core/prefs.lua` | Leitura e gravação de `settings.txt` |
 
 - **A chave é o próprio texto em português.**
@@ -66,7 +65,6 @@ music=1
   - os comandos do protocolo FTP.
 - **Threads** (instalação, FTP, temas, atualização, verificações) recebem o idioma em `job.lang`. As mensagens delas saem no idioma de quem pediu a tarefa.
 - **Unidades**:
-  - em russo, `Б/КБ/МБ/ГБ` e `с/мин/ч`;
   - nos demais idiomas, `B/KB/MB/GB` e `s/min/h`.
 
 ## Fontes
@@ -81,11 +79,11 @@ music=1
 
 Os catálogos podem trazer textos em outros idiomas. Sem eles, aparece o texto original.
 
-- **Ports**: `description_en`, `description_ru`, `short_en`, `short_ru`.
-- **Temas do EmulationStation**: `description_en`, `description_ru`. Os 41 temas do catálogo já têm.
+- **Ports**: `description_en` e `short_en` (campos `_ru` antigos são ignorados).
+- **Temas do EmulationStation**: `description_en`. Os 41 temas do catálogo já têm.
 
 ## Adicionar ou corrigir uma tradução
 
 1. Encontre o texto em português no código, dentro de `L("...")`.
-2. Em `src/i18n/en.lua` e `src/i18n/ru.lua`, adicione ou corrija a linha `["texto em português"] = "tradução"`.
+2. Em `src/i18n/en.lua`, adicione ou corrija a linha `["texto em português"] = "tradução"`.
 3. Mantenha `%s`, `%d` e `%%`, espaços no começo e no fim e `\n` como no original. Partes de frase são juntadas pelo código.

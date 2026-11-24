@@ -34,10 +34,6 @@ local function flag(id, x, y, w, h)
     lg.setColor(0.24, 0.23, 0.43, 1); lg.rectangle("fill", x, y, w * 0.42, h * 4 / 7)
     lg.setColor(1, 1, 1, 1)
     for r = 0, 2 do for c = 0, 3 do lg.rectangle("fill", x + 2 + c * 3.5, y + 2 + r * 3.6, 1.2, 1.2) end end
-  elseif id == "ru" then
-    lg.setColor(1, 1, 1, 1); lg.rectangle("fill", x, y, w, h / 3)
-    lg.setColor(0.0, 0.22, 0.65, 1); lg.rectangle("fill", x, y + h / 3, w, h / 3 + 0.5)
-    lg.setColor(0.84, 0.17, 0.12, 1); lg.rectangle("fill", x, y + 2 * h / 3, w, h / 3 + 0.5)
   end
   G.frame(x, y, w, h, T.c.line, 0)
 end

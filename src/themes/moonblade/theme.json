@@ -1,0 +1,55 @@
+{
+  "id": "moonblade",
+  "name": "Moonlight Blade Edition",
+  "description": "Clima de anime de espadachim: noite escura com lua grande, telhados ao longe, traços de pincel de nanquim e cores preto, branco e vermelho. As opções viram lâminas de espada, um corte de energia cruza a tela ao apertar A e brasas vermelhas sobem no ar.",
+  "version": "1.0",
+  "author": "R36S PORT HUB",
+  "preview": "preview.png",
+  "colors": {
+    "bg0": "#06060c",
+    "bg1": "#14131c",
+    "bg2": "#221f2c",
+    "bg3": "#0c0b12",
+    "line": "#3a3445",
+    "text": "#ffffff",
+    "dim": "#d6d2dc",
+    "faint": "#8a8494",
+    "accent": "#e3172b",
+    "accent2": "#ff5a5a",
+    "yellow": "#ffd23f",
+    "green": "#4be38a",
+    "red": "#ff4d6a",
+    "orange": "#ff8a3d",
+    "black": "#000000",
+    "shadow": "#00000099"
+  },
+  "buttons": {
+    "a": "#e3172b",
+    "b": "#9a95a5",
+    "x": "#ffffff",
+    "y": "#ff8a3d",
+    "l1": "#9a95a5",
+    "r1": "#9a95a5",
+    "start": "#9a95a5",
+    "select": "#9a95a5",
+    "dpad": "#9a95a5"
+  },
+  "style": {
+    "background": "blade",
+    "layout": "blade",
+    "list": "blades",
+    "round": 0.4,
+    "glow": "#e3172b",
+    "scanlines": false,
+    "focus": "#ff2a3d",
+    "effect": "glow",
+    "card": {
+      "fill": "#14131c",
+      "line": "#3a3445",
+      "text": "#ffffff",
+      "dim": "#d6d2dc",
+      "faint": "#8a8494",
+      "icon": "#ffffff"
+    }
+  }
+}

@@ -5,6 +5,9 @@
 --    nav      -> "Tema de navegação - Retro Arcade" (loja, categorias, detalhes)
 --    download -> "Tema de download - Download Power" (durante a instalação)
 --  As faixas sao tocadas em streaming (pouca memoria) com transicao suave.
+--  Um tema pode trazer a propria trilha em themes/<tema>/music/ (main.ogg,
+--  nav.ogg, download.ogg): ao trocar de tema a musica troca junto; a faixa que
+--  o tema nao tiver continua sendo a do hub.
 -- =============================================================================
 local U = require("lib.util")
 
@@ -52,13 +55,33 @@ function M.init()
   if not M.available then U.log("audio indisponivel; musica desligada") end
 end
 
+-- pasta de musica do tema atual (nil = trilha do hub)
+local BAD = {}      -- arquivos de tema que falharam (usa a do hub)
+local function theme_dir()
+  local ok, T = pcall(require, "ui.theme")
+  return ok and T.style and T.style.music_dir or nil
+end
+M.dir = false
+
+--- arquivo da faixa: o do tema, se existir, senao o do hub
+local function file_for(name)
+  local d = theme_dir()
+  if d then
+    local f = d .. "/" .. name .. ".ogg"
+    if not BAD[f] and love.filesystem.getInfo(f) then return f end
+  end
+  return FILES[name]
+end
+
 local function source(name)
   local s = M.sources[name]
   if s then return s end
-  if not M.available or not FILES[name] then return nil end
-  local ok, src = pcall(love.audio.newSource, FILES[name], "stream")
+  local file = file_for(name)
+  if not M.available or not file then return nil end
+  local ok, src = pcall(love.audio.newSource, file, "stream")
   if not ok or not src then
-    U.log("falha ao abrir musica:", name, tostring(src))
+    U.log("falha ao abrir musica:", name, file, tostring(src))
+    if file ~= FILES[name] then BAD[file] = true; return source(name) end
     FILES[name] = nil
     return nil
   end
@@ -88,8 +111,23 @@ function M.play(name)
   end
 end
 
+--- troca de tema: para a trilha antiga e toca a do tema novo (ou a do hub)
+local function check_theme()
+  local d = theme_dir() or false
+  if d == M.dir then return end
+  local first = M.dir == false and not next(M.sources)
+  M.dir = d
+  if first then return end
+  for _, s in pairs(M.sources) do pcall(s.stop, s) end
+  M.sources, M.levels = {}, {}
+  local cur = M.current
+  M.current = nil
+  M.play(cur)
+end
+
 function M.update(dt)
   if not M.available then return end
+  check_theme()
   local step = dt / FADE
   for name, s in pairs(M.sources) do
     local target = (M.enabled and name == M.current) and 1 or 0

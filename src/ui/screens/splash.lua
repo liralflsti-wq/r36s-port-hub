@@ -20,7 +20,8 @@ function S:enter(p)
   self.on_done = p.on_done
 end
 
-function S:update()
+function S:update(dt)
+  self.t = (self.t or 0) + (dt or 0)
   if self.done then return end
   -- desenha o quadro atual antes de rodar a proxima etapa
   if self.drawn then
@@ -31,6 +32,9 @@ function S:update()
       local ok, e = pcall(st[2])
       if not ok then print("[porthub] etapa de inicializacao falhou: " .. tostring(st[1]) .. ": " .. tostring(e)) end
     else
+      -- Sky Warriors: deixa o impacto da abertura terminar (no maximo 1,3 s)
+      local FX = require("ui.skyfx")
+      if FX.on() and App.animations() and (self.t or 0) < FX.SPLASH_MIN then return end
       self.done = true
       if self.on_done then self.on_done() end
       return
@@ -43,9 +47,18 @@ function S:draw()
   -- logo centralizada
   local img_w, img_h = 252, 170
   local lx = (T.W - img_w) / 2
-  G.logo(lx, 70, "splash")
-  G.text(T.f.pix16, "R36S PORT HUB", 0, 258, T.c.text, "center", T.W)
-  G.text(T.f.body, SLOGAN, 0, 284, T.c.accent2, "center", T.W)
+  local FX = require("ui.skyfx")
+  local sx, sy = FX.splash_shake(self.t or 0)
+  G.logo(lx + sx, 70 + sy, "splash")
+  if FX.on() then
+    -- sobre o ceu: texto com contorno escuro para ler bem
+    local TV = require("ui.themeviews")
+    TV.outline_text(T.f.pix16, "R36S PORT HUB", (T.W - T.f.pix16:getWidth("R36S PORT HUB")) / 2, 258, T.c.text)
+    TV.outline_text(T.f.body, SLOGAN, (T.W - T.f.body:getWidth(SLOGAN)) / 2, 284, T.c.yellow)
+  else
+    G.text(T.f.pix16, "R36S PORT HUB", 0, 258, T.c.text, "center", T.W)
+    G.text(T.f.body, SLOGAN, 0, 284, T.c.accent2, "center", T.W)
+  end
   local tag = C.VERSION
   local tw = T.f.pix8:getWidth(tag) + 12
   G.tag(tag, (T.W - tw) / 2, 308, T.c.accent, T.c.bg0, T.f.pix8)
@@ -54,6 +67,7 @@ function S:draw()
   local frac = math.min(1, math.max(0, self.i) / n)
   G.progress(170, 372, T.W - 340, 10, frac, T.c.accent)
   G.text(T.f.small, self.msg or "", 0, 392, T.c.dim, "center", T.W)
+  FX.splash_fx(self.t or 0, T.W / 2, 155)
 end
 
 function S:action() end   -- nada a fazer durante o carregamento

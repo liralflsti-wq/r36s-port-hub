@@ -135,10 +135,33 @@ end
 --- botoes do layout classico: principal, INICIAR (port instalado com script) e VOLTAR
 function S:classic_buttons()
   local label, enabled = self:primary()
+  local p = self.port
+  local installed = App.status(p) ~= "none"
+  -- instalado: Iniciar, Desinstalar, Reinstalar (ou Atualizar) e Voltar
+  if installed and App.port_script(p) then
+    local list = { { id = "start", label = L("INICIAR"), enabled = true } }
+    if not p.builtin then list[#list + 1] = { id = "remove", label = L("DESINSTALAR"), enabled = true, danger = true } end
+    if not p.is_local then list[#list + 1] = { id = "primary", label = label, enabled = enabled } end
+    list[#list + 1] = { id = "back", label = L("VOLTAR"), enabled = true }
+    return list
+  end
   local list = { { id = "primary", label = label, enabled = enabled } }
-  if App.port_script(self.port) then list[#list + 1] = { id = "start", label = L("INICIAR"), enabled = true } end
-  list[#list + 1] = { id = "back", label = "VOLTAR", enabled = true }
+  if App.port_script(p) then list[#list + 1] = { id = "start", label = L("INICIAR"), enabled = true } end
+  list[#list + 1] = { id = "back", label = L("VOLTAR"), enabled = true }
   return list
+end
+
+--- "Tempo de jogo: 1h 05min · 3 sessões · última vez 22/11" (so instalado)
+function S:playtime_line()
+  local p = self.port
+  if App.status(p) == "none" and not p.is_local then return nil end
+  local PT = require("core.playtime")
+  local g = PT.get("port:" .. tostring(p.id))
+  if not g or (g.secs or 0) <= 0 then return I18N.tr(L("Tempo de jogo: ainda não jogado pelo hub")) end
+  local s = I18N.tr(L("Tempo de jogo: ")) .. PT.format(g.secs)
+  s = s .. "  ·  " .. ((g.sessions or 0) == 1 and I18N.tr(L("1 sessão")) or string.format(I18N.tr(L("%d sessões")), g.sessions or 0))
+  if g.last then s = s .. "  ·  " .. I18N.tr(L("última vez: ")) .. os.date("%d/%m", g.last) end
+  return s
 end
 
 function S:primary()
@@ -245,7 +268,7 @@ function S:draw()
 
   -- botoes
   local buttons = self:classic_buttons()
-  local widths = #buttons == 3 and { 150, 128, 88 } or { 230, 146 }
+  local widths = (#buttons == 4 and { 88, 112, 98, 58 }) or (#buttons == 3 and { 150, 128, 88 }) or { 230, 146 }
   -- texto: fonte grande quando todos cabem; senao a pixelada menor em todos
   local f = T.f.pix16
   for i, b in ipairs(buttons) do
@@ -255,7 +278,7 @@ function S:draw()
   for i, b in ipairs(buttons) do
     local w = widths[i]
     local on = i == self.btn
-    local c = (not b.enabled) and T.c.faint or (b.id == "back" and T.c.accent2 or T.c.accent)
+    local c = (not b.enabled) and T.c.faint or (b.id == "back" and T.c.accent2 or (b.danger and T.c.red or T.c.accent))
     local ty = by + math.floor((40 - f:getHeight()) / 2)
     if on then
       G.rect(bx - 3, by - 3, w + 6, 46, c, 9, App.pulse(0.3, 0.15, 5))
@@ -271,7 +294,14 @@ function S:draw()
   local info = p.is_local and (L("Instalado em ") .. C.PORTS_DIR .. L(" (fora do catálogo)"))
     or (p.download_url:match("^https?://") and (L("Destino: ") .. C.PORTS_DIR)
     or L("O link de download deste port ainda não foi cadastrado."))
-  G.text_fit(T.f.small, info, DX, by + 48, DW, T.c.faint)
+  -- instalado: no lugar do destino, o tempo de jogo deste port
+  local ptl = self:playtime_line()
+  if ptl then
+    Icons.draw("set_clock", DX - 2, by + 45, T.c.accent, 0.75)
+    G.text_fit(T.f.small, ptl, DX + 18, by + 48, DW - 18, T.c.text)
+  else
+    G.text_fit(T.f.small, info, DX, by + 48, DW, T.c.faint)
+  end
 
   if Favorites.is(p) then
     Icons.draw("generic", 20 + 200 - 30, 62, T.c.yellow, 1)
@@ -292,9 +322,16 @@ function S:neon_buttons()
   local label, enabled = self:primary()
   local installed = App.status(p) ~= "none"
   local list = {}
-  list[#list + 1] = { id = "primary", label = label, enabled = enabled }
-  list[#list + 1] = { id = "start", label = L("INICIAR"), enabled = App.port_script(p) ~= nil }
-  list[#list + 1] = { id = "remove", label = L("REMOVER"), enabled = installed and not p.builtin, danger = true }
+  if installed then
+    -- instalado: Iniciar, Desinstalar, Reinstalar/Atualizar (e Favoritar)
+    list[#list + 1] = { id = "start", label = L("INICIAR"), enabled = App.port_script(p) ~= nil }
+    list[#list + 1] = { id = "remove", label = L("DESINSTALAR"), enabled = not p.builtin, danger = true }
+    list[#list + 1] = { id = "primary", label = label, enabled = enabled }
+  else
+    list[#list + 1] = { id = "primary", label = label, enabled = enabled }
+    list[#list + 1] = { id = "start", label = L("INICIAR"), enabled = App.port_script(p) ~= nil }
+    list[#list + 1] = { id = "remove", label = L("REMOVER"), enabled = false, danger = true }
+  end
   list[#list + 1] = { id = "fav", label = Favorites.is(p) and L("DESFAVORITAR") or L("FAVORITAR"), enabled = not p.builtin }
   return list
 end
@@ -336,6 +373,8 @@ function S:draw_neon()
   elseif st == "installed" then stt = L("Instalado") .. (Manifest.installed_version(p) and (" (v" .. Manifest.installed_version(p) .. ")") or "")
   elseif st == "update" then stt = L("Atualização disponível")
   else stt = L("Não instalado") end
+  local ptg = require("core.playtime").get("port:" .. tostring(p.id))
+  if ptg then stt = require("lib.i18n").tr(stt) .. "  ·  " .. require("core.playtime").format(ptg.secs) end
   local none = L("não informado")
   local cells = {
     { L("PLATAFORMA"), (p.platform or "") ~= "" and p.platform or none },
@@ -453,6 +492,7 @@ function S:action(act)
     local cur = cb[self.btn]
     if cur and cur.id == "back" then App.pop(); return end
     if cur and cur.id == "start" then App.launch_port(self.port); return end
+    if cur and cur.id == "remove" then App.ask_uninstall(self.port); return end
     local _, enabled = self:primary()
     if not enabled and Downloads.pending(self.port.id) then
       App.toast(self.port.name .. L(" já está na Central de Downloads."), "info")

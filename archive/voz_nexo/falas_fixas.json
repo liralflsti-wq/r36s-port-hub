@@ -1,0 +1,506 @@
+[
+ {
+  "id": "dae10dbf86",
+  "text": "Wi-Fi desconectado."
+ },
+ {
+  "id": "13d15f4835",
+  "text": "Estou por aqui se precisar. É só apertar L2."
+ },
+ {
+  "id": "547d6a69c7",
+  "text": "Tudo em ordem. Quer uma dica? Aperte L2."
+ },
+ {
+  "id": "5553645d9b",
+  "text": "Aqui ficam os ports que você instalou."
+ },
+ {
+  "id": "124ab35579",
+  "text": "Nenhum favorito ainda. SELECT marca um port!"
+ },
+ {
+  "id": "edc6752fb4",
+  "text": "L1 e R1 trocam a categoria; Y atualiza o catálogo."
+ },
+ {
+  "id": "bac055ab47",
+  "text": "Estou acompanhando o download. Pode navegar à vontade."
+ },
+ {
+  "id": "d8d2bf9dbc",
+  "text": "START abre esta tela de qualquer lugar."
+ },
+ {
+  "id": "3f48ab80a2",
+  "text": "Downloads continuam em segundo plano enquanto você usa o hub."
+ },
+ {
+  "id": "a7f1f60132",
+  "text": "Escolha um sistema para ver os jogos dele."
+ },
+ {
+  "id": "0235cb7a59",
+  "text": "A abre o jogo; o hub fecha e volta quando você sair dele."
+ },
+ {
+  "id": "ea05a5924d",
+  "text": "SELECT marca o jogo como favorito."
+ },
+ {
+  "id": "0b5644c0a3",
+  "text": "Escolha uma categoria e eu mostro só o que interessa."
+ },
+ {
+  "id": "9c517fcf2e",
+  "text": "As categorias ajudam a achar ports parecidos com os que você gosta."
+ },
+ {
+  "id": "61c8c42447",
+  "text": "Digite parte do nome: eu procuro em todo o catálogo."
+ },
+ {
+  "id": "d6ebd9fb85",
+  "text": "Este projeto é feito pela comunidade. Obrigado por usar!"
+ },
+ {
+  "id": "d82db399ca",
+  "text": "START aqui abre o apoio via Pix."
+ },
+ {
+  "id": "e6e01df51b",
+  "text": "Escolha uma aba. Eu explico cada uma quando você entrar."
+ },
+ {
+  "id": "23fb5a49bd",
+  "text": "Dica: faça um backup antes de mudar muita coisa."
+ },
+ {
+  "id": "656798860f",
+  "text": "Mudar de tema muda a cara do hub inteiro, inclusive a música em alguns."
+ },
+ {
+  "id": "6a752b00be",
+  "text": "Teste os temas à vontade: a escolha fica salva."
+ },
+ {
+  "id": "23628e116a",
+  "text": "Aqui ficam os temas do EmulationStation, separados dos temas do hub."
+ },
+ {
+  "id": "855a53f195",
+  "text": "Sem Wi-Fi, o catálogo e as atualizações não chegam."
+ },
+ {
+  "id": "ddfe7395f0",
+  "text": "Escolha a rede e digite a senha com calma. Eu aviso se der erro."
+ },
+ {
+  "id": "b69cb40449",
+  "text": "Vou te ajudar a entender a conexão: veja a velocidade e se o catálogo responde."
+ },
+ {
+  "id": "83198442bc",
+  "text": "Pelo FTP você manda arquivos do PC direto para o console."
+ },
+ {
+  "id": "2cb0cba82b",
+  "text": "Aqui aparecem as transferências do FTP em tempo real."
+ },
+ {
+  "id": "b0f8a29677",
+  "text": "Siga o passo a passo: em poucos minutos o PC fala com o console."
+ },
+ {
+  "id": "8bdc251a9b",
+  "text": "Alguns emuladores só funcionam com o BIOS certo. Aqui você confere e instala."
+ },
+ {
+  "id": "2fed68e34f",
+  "text": "Manutenção do SD libera espaço e evita erros. Vale rodar de vez em quando."
+ },
+ {
+  "id": "0334be52e8",
+  "text": "Vou mostrar o que mais ocupa espaço no cartão."
+ },
+ {
+  "id": "f6e4329a19",
+  "text": "A verificação procura erros no cartão. Não desligue o console durante o teste."
+ },
+ {
+  "id": "c4aafbc7a6",
+  "text": "Confiro se os arquivos do hub estão inteiros e sem corrupção."
+ },
+ {
+  "id": "53c8be026d",
+  "text": "Você está na versão mais recente que eu conheço."
+ },
+ {
+  "id": "e81fe6a80b",
+  "text": "Atualizações ficam guardadas: dá para voltar se algo der errado."
+ },
+ {
+  "id": "347e7885d4",
+  "text": "Aqui fica o histórico de todas as atualizações do hub."
+ },
+ {
+  "id": "4504f19a74",
+  "text": "Cópias de segurança das versões anteriores, para voltar se precisar."
+ },
+ {
+  "id": "0d406b4faa",
+  "text": "Brilho alto e Wi-Fi ligado são o que mais gastam bateria."
+ },
+ {
+  "id": "1f8b00f84e",
+  "text": "Aperte todos os botões: eu mostro se algum falhar."
+ },
+ {
+  "id": "b502dc5b50",
+  "text": "Esses são arquivos de port que estão no cartão esperando instalação."
+ },
+ {
+  "id": "014f2881ab",
+  "text": "Suas gravações de tela ficam aqui."
+ },
+ {
+  "id": "72ade4700b",
+  "text": "Grave a tela do console para mostrar no seu canal."
+ },
+ {
+  "id": "280b8ddadb",
+  "text": "Álbum completo! Você é lenda."
+ },
+ {
+  "id": "d88020da8b",
+  "text": "Cada temporada traz um álbum novo de cartas."
+ },
+ {
+  "id": "f271077a80",
+  "text": "Aqui você vê se o sistema do console é compatível com o hub."
+ },
+ {
+  "id": "716c5f9f20",
+  "text": "Data e hora certas evitam erro de certificado nos downloads."
+ },
+ {
+  "id": "36f851c4ee",
+  "text": "Esta é a identificação do seu console."
+ },
+ {
+  "id": "01e82c50c4",
+  "text": "Aqui você cuida do PortMaster: instalar, verificar e consertar."
+ },
+ {
+  "id": "cb88b37117",
+  "text": "As novidades do projeto ficam aqui."
+ },
+ {
+  "id": "cb3c0a16ae",
+  "text": "Essas são as novidades da versão. Leia com calma!"
+ },
+ {
+  "id": "9e204a9070",
+  "text": "Ajustes avançados do console. Mude com cuidado."
+ },
+ {
+  "id": "d3e91d5808",
+  "text": "Navegue pelos arquivos do cartão com cuidado."
+ },
+ {
+  "id": "b832cc7c4f",
+  "text": "Aqui ficam as informações do seu console."
+ },
+ {
+  "id": "b9496fc309",
+  "text": "Aparência: tema, tamanho do texto e brilho. Tudo muda na hora."
+ },
+ {
+  "id": "876d479042",
+  "text": "Áudio: música de fundo e sons da interface."
+ },
+ {
+  "id": "dadf19cd0f",
+  "text": "Rede: Wi-Fi, FTP e o teste de conexão."
+ },
+ {
+  "id": "f721f86688",
+  "text": "O modo econômico reduz animações e gasta menos bateria."
+ },
+ {
+  "id": "7db70e5d91",
+  "text": "Controles: teste os botões e ajuste o analógico."
+ },
+ {
+  "id": "cc933137db",
+  "text": "Se um botão falhar, o teste de controles mostra qual."
+ },
+ {
+  "id": "38d57401d8",
+  "text": "Downloads: catálogo, pasta dos ports e o histórico."
+ },
+ {
+  "id": "3daf2a0998",
+  "text": "Você ainda não tem backup. Recomendo fazer um agora."
+ },
+ {
+  "id": "2f766f88db",
+  "text": "O backup guarda configurações, favoritos e histórico. Os ports não entram."
+ },
+ {
+  "id": "5de1b5ef22",
+  "text": "Notificações: escolha o que aparece e se toca som."
+ },
+ {
+  "id": "ced31f006c",
+  "text": "Avisos de erro sempre valem a pena deixar ligados."
+ },
+ {
+  "id": "7ac94de1be",
+  "text": "Console: informações, manutenção do SD e atualizações."
+ },
+ {
+  "id": "69aa3f9b27",
+  "text": "Aqui você troca o seu nome e o meu também."
+ },
+ {
+  "id": "00b1fb5427",
+  "text": "Preferências: idioma, avisos na tela e som de notificação."
+ },
+ {
+  "id": "4e370246a4",
+  "text": "Catálogo: de onde vêm os ports e quando ele se atualiza."
+ },
+ {
+  "id": "999dbbe0a3",
+  "text": "Meus ports: atualizar, verificar e remover o que já está no cartão."
+ },
+ {
+  "id": "ab172520ba",
+  "text": "Ferramentas: utilitários extras para cuidar do console."
+ },
+ {
+  "id": "a52f73d493",
+  "text": "Diagnóstico: nenhum problema registrado hoje."
+ },
+ {
+  "id": "85ef315323",
+  "text": "Estou de olho. Se precisar, aperte L2."
+ },
+ {
+  "id": "0e6fee27c3",
+  "text": "Pronto para começar o dia?"
+ },
+ {
+  "id": "e34054e067",
+  "text": "Café na mão e console carregado?"
+ },
+ {
+  "id": "fade1c934f",
+  "text": "Vamos ver o que tem de novo hoje."
+ },
+ {
+  "id": "4548b1fc28",
+  "text": "Como está a tarde?"
+ },
+ {
+  "id": "a446b8d7f3",
+  "text": "Hora de uma partida rápida?"
+ },
+ {
+  "id": "8d114c4643",
+  "text": "Tudo certo por aí?"
+ },
+ {
+  "id": "149af28e7f",
+  "text": "Uma partida antes de dormir?"
+ },
+ {
+  "id": "4cd7eb63d2",
+  "text": "Que bom te ver por aqui à noite."
+ },
+ {
+  "id": "29059937d7",
+  "text": "Vamos deixar tudo em ordem para amanhã?"
+ },
+ {
+  "id": "f97ba70f3d",
+  "text": "Já é tarde. Não esqueça de descansar."
+ },
+ {
+  "id": "e5938f639e",
+  "text": "Jogando de madrugada? Cuide da bateria."
+ },
+ {
+  "id": "9ac53b07cf",
+  "text": "Bom fim de semana!"
+ },
+ {
+  "id": "5ea9d03330",
+  "text": "Fim de semana é perfeito para testar ports novos."
+ },
+ {
+  "id": "83a26da5c3",
+  "text": "Começo de semana: vamos organizar a biblioteca?"
+ },
+ {
+  "id": "e874b7dbf0",
+  "text": "Sexta-feira! Que tal separar uns jogos para o fim de semana?"
+ },
+ {
+  "id": "004e1c3eb3",
+  "text": "Faz tempo! Senti falta de você por aqui."
+ },
+ {
+  "id": "9df5a94853",
+  "text": "Que bom te ver de volta!"
+ },
+ {
+  "id": "9c678dc88b",
+  "text": "Se repetir, me pergunte \"Deu algum erro?\" para ver os detalhes."
+ },
+ {
+  "id": "63e891538c",
+  "text": "Parece problema de internet: confira o Wi-Fi em Configurações e tente de novo."
+ },
+ {
+  "id": "af126383f6",
+  "text": "Falta espaço no cartão SD: apague ports que não usa ou rode a Manutenção do SD."
+ },
+ {
+  "id": "e2ec17cc8c",
+  "text": "O arquivo veio corrompido: baixe de novo. Se repetir, o servidor pode estar com problema."
+ },
+ {
+  "id": "9ea745bbb6",
+  "text": "Esse arquivo pede senha: confira a senha do grupo e tente de novo."
+ },
+ {
+  "id": "f4d6eadf39",
+  "text": "Sem permissão para gravar: o cartão pode estar com erro. Rode a Verificação do SD."
+ },
+ {
+  "id": "1ffb258c27",
+  "text": "Falha ao descompactar: o arquivo pode ter vindo incompleto. Baixe de novo."
+ },
+ {
+  "id": "816ef0316a",
+  "text": "O arquivo não está mais nesse endereço: atualize o catálogo e tente de novo."
+ },
+ {
+  "id": "3ca63b01f7",
+  "text": "Coloque o console para carregar."
+ },
+ {
+  "id": "2c97830068",
+  "text": "Reinicie a lista do EmulationStation para ver os ports novos (menu Sair)."
+ },
+ {
+  "id": "b3eee77ed2",
+  "text": "Sem Wi-Fi: o catálogo e as atualizações não chegam."
+ },
+ {
+  "id": "d7834f3d76",
+  "text": "Você ainda não disse seu nome. Defina em Meu perfil."
+ },
+ {
+  "id": "0af90bd14d",
+  "text": "Tudo em dia por aqui."
+ },
+ {
+  "id": "4e1cec3497",
+  "text": "Aperte L2 para ver."
+ },
+ {
+  "id": "645d763604",
+  "text": "Seus ports estão atualizados."
+ },
+ {
+  "id": "305ae887d5",
+  "text": "Nenhum erro hoje."
+ },
+ {
+  "id": "36b6ac2c1a",
+  "text": "Nenhuma pendência."
+ },
+ {
+  "id": "09f98b7718",
+  "text": "Nenhum erro hoje. Tudo funcionando!"
+ },
+ {
+  "id": "8ff0d2462a",
+  "text": "Nada pendente. Tudo em dia!"
+ },
+ {
+  "id": "2d3e846efc",
+  "text": "Ainda não registrei nenhuma atividade hoje."
+ },
+ {
+  "id": "0fb69acb78",
+  "text": "START abre os downloads de qualquer tela."
+ },
+ {
+  "id": "f1bbd2610a",
+  "text": "SELECT marca um port como favorito."
+ },
+ {
+  "id": "b56880b192",
+  "text": "L2 me chama de qualquer tela."
+ },
+ {
+  "id": "63cb76140b",
+  "text": "Segure B por 5 segundos para sair do teste de controles."
+ },
+ {
+  "id": "5da569d99f",
+  "text": "Faça backup das suas configurações de vez em quando."
+ },
+ {
+  "id": "7143e5860a",
+  "text": "Depois de instalar ports, reinicie a lista do EmulationStation no menu Sair."
+ },
+ {
+  "id": "9a5d1e1d2f",
+  "text": "No álbum, A abre a carta inteira."
+ },
+ {
+  "id": "806829056e",
+  "text": "Ports marcados como NOVO entraram no catálogo nos últimos dias."
+ },
+ {
+  "id": "2ab93d7744",
+  "text": "Se um download falhar, ele fica em Downloads para tentar de novo."
+ },
+ {
+  "id": "b401279e77",
+  "text": "A Manutenção do SD encontra arquivos que sobraram e libera espaço."
+ },
+ {
+  "id": "a01c53ebde",
+  "text": "Você pode instalar ports de arquivos que já estão no cartão, sem baixar de novo."
+ },
+ {
+  "id": "32a62929b5",
+  "text": "O teste de controles mostra se algum botão ou analógico está com defeito."
+ },
+ {
+  "id": "e8f3972f6d",
+  "text": "Em Meu perfil você troca o seu nome e o meu também."
+ },
+ {
+  "id": "ccb021e2a6",
+  "text": "Com pouca bateria, evite instalar ports grandes: uma queda de energia pode corromper o arquivo."
+ },
+ {
+  "id": "7ff53e7325",
+  "text": "Favoritos aparecem na Biblioteca para você achar rápido."
+ },
+ {
+  "id": "937dce3d70",
+  "text": "O hub avisa sozinho quando sai versão nova. É só aceitar a atualização."
+ },
+ {
+  "id": "ed78b0313e",
+  "text": "Se o EmulationStation não mostrar um port novo, reinicie a lista pelo menu Sair."
+ }
+]

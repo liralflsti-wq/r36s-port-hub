@@ -425,6 +425,24 @@ function O.on_install_finished(app, j)
   app.update_free_space()
   app.on_catalog_changed()
   local jo0 = j.opts or {}
+  -- conquista "Contrabandista": port instalado de um arquivo local
+  if j.result == "done" and jo0.local_file and (jo0.mode or "port") == "port" then
+    require("core.achievements").unlock("local_install")
+  end
+  -- conquista "Arrependido": cancelou um download
+  if j.result == "cancelled" then
+    require("core.achievements").unlock("cancel_download")
+    pcall(function() require("core.assistant").event("cancel", (j.port and j.port.name) or (j.download_entry and j.download_entry.name)) end)
+  end
+  if j.result == "done" and (jo0.mode or "port") == "port" then
+    pcall(function() require("core.assistant").event("install", (j.port and j.port.name) or (j.download_entry and j.download_entry.name)) end)
+  end
+  -- conquista "Colecionador": 10 ports instalados pelo hub
+  if j.result == "done" then
+    local n = 0
+    for _ in pairs(require("core.manifest").data or {}) do n = n + 1 end
+    if n >= 10 then require("core.achievements").unlock("collector") end
+  end
   -- arquivo local com senha: pede a senha no teclado em vez de so mostrar o erro
   if j.result == "error" and j.error_code == "encrypted" and jo0.local_file then
     Installer.clear()
@@ -432,6 +450,8 @@ function O.on_install_finished(app, j)
     return
   end
   -- senha digitada funcionou: pergunta se quer salvar no senhas.txt
+  -- conquista "Arrombador": instalou um arquivo digitando a senha no teclado
+  if j.result == "done" and jo0.password then require("core.achievements").unlock("password_install") end
   if j.result == "done" and jo0.password and not jo0.pw_asked then
     jo0.pw_asked = true
     local A = require("core.archives")
@@ -475,6 +495,9 @@ function O.on_install_finished(app, j)
       return
     end
     if j.result == "done" then
+      if (jo0.mode or "port") == "port" then require("core.achievements").unlock("first_install") end
+      -- conquista "Multitarefa": terminou um download em segundo plano
+      require("core.achievements").unlock("background_download")
       app.toast(p.name .. (require("config").OS_MODE and L(" instalado. Ele já está em Meus Ports.")
         or L(" instalado. Reinicie a lista de Ports para ver o jogo.")), "ok")
     elseif j.result == "error" then
@@ -516,6 +539,8 @@ function O.on_install_finished(app, j)
     if p.requires_files then
       body = body .. L("\n\nAtenção: este port precisa dos arquivos do jogo original. Consulte as instruções do port.")
     end
+    -- conquista "Primeira instalacao" (so na primeira vez): o adesivo fazendo joia
+    if (jo.mode or "port") == "port" then require("core.achievements").unlock("first_install") end
     app.show_dialog({
       title = L("Port instalado!"),
       kind = "ok",

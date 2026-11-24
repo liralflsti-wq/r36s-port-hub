@@ -109,7 +109,13 @@ function G.fit_lines(font, s, w, maxh, plain)
     lh = plain and ff:getHeight() or ff:getHeight() * ff:getLineHeight()
     local _, ls = ff:getWrap(s, w)
     lines = ls
-    if #ls * lh <= maxh + 0.5 then return f, lines, lh, false end
+    -- palavra mais larga que a caixa seria cortada no meio: tenta a fonte menor
+    local word_ok = true
+    for wd in s:gmatch("%S+") do
+      -- so palavras comuns (caminhos e links longos podem quebrar)
+      if #wd <= 24 and not wd:find("[/\\_%.]") and ff:getWidth(wd) > w then word_ok = false; break end
+    end
+    if word_ok and #ls * lh <= maxh + 0.5 then return f, lines, lh, false end
   end
   local maxl = math.max(1, math.floor((maxh + 0.5) / lh))
   local out = {}
@@ -218,7 +224,7 @@ function G.button_icon(btn, x, y, override)
     lg.circle("fill", x + 8, y + 8, 1.2)
     return 16
   end
-  local label = ({ l1 = "L1", r1 = "R1", l2 = "L2", r2 = "R2", start = "START", select = "SELECT" })[btn] or btn
+  local label = ({ l1 = "L1", r1 = "R1", l1r1 = "L1/R1", l2 = "L2", r2 = "R2", start = "START", select = "SELECT" })[btn] or btn
   local f = T.f.pix8
   local w = f:getWidth(label) + 10
   G.rect(x, y + 1, w, 14, c, 7)
@@ -227,7 +233,7 @@ function G.button_icon(btn, x, y, override)
 end
 
 --- largura que as dicas ocupam com a fonte `font`
-local HINT_LABEL = { l1 = "L1", r1 = "R1", l2 = "L2", r2 = "R2", start = "START", select = "SELECT" }
+local HINT_LABEL = { l1 = "L1", r1 = "R1", l1r1 = "L1/R1", l2 = "L2", r2 = "R2", start = "START", select = "SELECT" }
 function G.hints_width(list, font)
   local tw = 14
   for _, h in ipairs(list) do
@@ -442,6 +448,148 @@ local function background_xdash(cv)
   end
 end
 
+--- Fundo Sky Warriors (arte original do hub): ceu azul em degrade, sol suave,
+--- nuvens fofas, horizonte com mar e ilhas e ornamentos dourados de nuvem em
+--- espiral nos cantos. Tudo desenhado em codigo.
+local function sky_swirl(cx, cy, r, dir, c)
+  -- espiral de nuvem estilizada (linha dupla dourada)
+  lg.setLineWidth(3)
+  for pass = 1, 2 do
+    if pass == 1 then lg.setColor(0.45, 0.25, 0.05, 0.55) else lg.setColor(c[1], c[2], c[3], 1) end
+    local pts = {}
+    for i = 0, 40 do
+      local t = i / 40 * math.pi * 2.6
+      local rr = r * (1 - i / 48)
+      pts[#pts + 1] = cx + math.cos(t) * rr * dir
+      pts[#pts + 1] = cy + math.sin(t) * rr + (pass == 1 and 1.5 or 0)
+    end
+    lg.line(pts)
+  end
+  lg.setLineWidth(1)
+end
+
+local function background_sky(cv)
+  -- ceu: azul forte no alto ate azul claro no horizonte
+  local top, hor = { 0.13, 0.42, 0.82 }, { 0.62, 0.84, 0.98 }
+  local HY = 330
+  for i = 0, HY, 3 do
+    local k = (i / HY) ^ 1.3
+    lg.setColor(top[1] + (hor[1] - top[1]) * k, top[2] + (hor[2] - top[2]) * k, top[3] + (hor[3] - top[3]) * k, 1)
+    lg.rectangle("fill", 0, i, T.W, 3)
+  end
+  -- sol suave (alto, direita)
+  for i = 20, 1, -1 do
+    lg.setColor(1, 0.97, 0.8, 0.025)
+    lg.circle("fill", 540, 70, i * 6)
+  end
+  -- nuvens: desenhadas por cima, andando (ui/skyfx.lua)
+  -- ilhas ao longe
+  lg.setColor(0.32, 0.62, 0.55, 1)
+  lg.ellipse("fill", 150, HY + 2, 90, 14)
+  lg.ellipse("fill", 520, HY + 2, 130, 18)
+  lg.setColor(0.42, 0.74, 0.45, 1)
+  lg.ellipse("fill", 520, HY + 6, 110, 10)
+  -- mar
+  for i = HY, T.H, 3 do
+    local k = (i - HY) / (T.H - HY)
+    lg.setColor(0.10 + 0.0 * k, 0.48 - 0.22 * k, 0.78 - 0.30 * k, 1)
+    lg.rectangle("fill", 0, i, T.W, 3)
+  end
+  -- brilhos na agua
+  for j = 0, 26 do
+    local x = (j * 97) % T.W
+    local y = HY + 10 + (j * 37) % (T.H - HY - 20)
+    lg.setColor(1, 1, 1, 0.18)
+    lg.rectangle("fill", x, y, 10 + (j % 4) * 6, 2)
+  end
+  -- ornamentos dourados de nuvem nos cantos (arte original)
+  local gold = { 1.0, 0.80, 0.25 }
+  sky_swirl(34, 30, 20, 1, gold)
+  sky_swirl(70, 22, 13, -1, gold)
+  sky_swirl(T.W - 34, T.H - 52, 20, -1, gold)
+  sky_swirl(T.W - 70, T.H - 44, 13, 1, gold)
+  -- leve escurecimento embaixo (rodape legivel)
+  for i = 0, 30 do
+    lg.setColor(0.02, 0.10, 0.25, 0.012 * i)
+    lg.rectangle("fill", 0, T.H - 60 + i * 2, T.W, 2)
+  end
+end
+
+--- Fundo Moonlight Blade (arte original do hub): noite azul-escura quase
+--- preta, lua grande com halo, nevoa vermelha no horizonte, telhados ao longe
+--- e tracos de pincel de nanquim nas bordas. Tudo desenhado em codigo.
+local function ink_stroke(x0, y0, x1, y1, w0, c, a, seed)
+  -- traco de pincel: largo no comeco, afinando, com bordas irregulares
+  local n = 40
+  local dx, dy = x1 - x0, y1 - y0
+  local len = math.sqrt(dx * dx + dy * dy)
+  local nx, ny = -dy / len, dx / len
+  for i = 0, n - 1 do
+    local t = i / n
+    local w = w0 * (1 - t) ^ 0.7 * (0.85 + 0.15 * math.sin(i * 1.7 + seed))
+    local px, py = x0 + dx * t, y0 + dy * t
+    lg.setColor(c[1], c[2], c[3], a * (0.75 + 0.25 * math.sin(i * 2.3 + seed)))
+    lg.circle("fill", px + nx * math.sin(i * 0.9 + seed) * 2, py + ny * math.sin(i * 0.9 + seed) * 2, w / 2)
+  end
+end
+
+local function background_blade(cv)
+  local top, mid = { 0.03, 0.04, 0.09 }, { 0.10, 0.07, 0.14 }
+  for i = 0, T.H, 3 do
+    local k = (i / T.H) ^ 1.1
+    lg.setColor(top[1] + (mid[1] - top[1]) * k, top[2] + (mid[2] - top[2]) * k, top[3] + (mid[3] - top[3]) * k, 1)
+    lg.rectangle("fill", 0, i, T.W, 3)
+  end
+  -- estrelas
+  for j = 0, 60 do
+    local x, y = (j * 211) % T.W, (j * 97) % 260
+    lg.setColor(1, 1, 1, 0.15 + (j % 5) * 0.08)
+    lg.rectangle("fill", x, y, j % 7 == 0 and 2 or 1, j % 7 == 0 and 2 or 1)
+  end
+  -- lua grande com halo (alto, direita)
+  local mx, my, mr = 500, 120, 74
+  for i = 24, 1, -1 do
+    lg.setColor(0.95, 0.92, 0.85, 0.018)
+    lg.circle("fill", mx, my, mr + i * 5)
+  end
+  lg.setColor(0.97, 0.95, 0.90, 1)
+  lg.circle("fill", mx, my, mr)
+  -- crateras suaves
+  lg.setColor(0.86, 0.84, 0.80, 0.55)
+  lg.circle("fill", mx - 22, my - 14, 14)
+  lg.circle("fill", mx + 18, my + 20, 10)
+  lg.circle("fill", mx + 30, my - 26, 7)
+  lg.circle("fill", mx - 8, my + 34, 6)
+  -- nevoa vermelha no horizonte
+  for i = 0, 50 do
+    lg.setColor(0.65, 0.05, 0.10, 0.010 * (i / 50) * 2)
+    lg.rectangle("fill", 0, 250 + i * 3, T.W, 3)
+  end
+  -- telhados ao longe (silhuetas)
+  lg.setColor(0.02, 0.02, 0.05, 1)
+  local roofs = { { 20, 360, 120 }, { 150, 375, 90 }, { 260, 350, 140 }, { 420, 370, 110 }, { 540, 355, 130 } }
+  for _, r in ipairs(roofs) do
+    local x, y, w = r[1], r[2], r[3]
+    lg.polygon("fill", x - 10, y, x + w + 10, y, x + w - 10, y - 16, x + 10, y - 16)
+    lg.rectangle("fill", x, y, w, T.H - y)
+    lg.polygon("fill", x + w * 0.3, y - 16, x + w * 0.7, y - 16, x + w * 0.6, y - 28, x + w * 0.4, y - 28)
+  end
+  lg.rectangle("fill", 0, 400, T.W, T.H - 400)
+  -- tracos de nanquim (cantos) e respingos vermelhos
+  local ink = { 0.0, 0.0, 0.0 }
+  ink_stroke(-20, 60, 230, 18, 46, ink, 0.85, 1.3)
+  ink_stroke(T.W + 20, 440, 380, 470, 54, ink, 0.9, 2.1)
+  local red = { 0.80, 0.06, 0.12 }
+  ink_stroke(-10, 78, 140, 52, 10, red, 0.85, 3.7)
+  ink_stroke(T.W + 10, 428, 470, 448, 12, red, 0.85, 0.4)
+  for j = 0, 9 do
+    lg.setColor(0.80, 0.06, 0.12, 0.7)
+    lg.circle("fill", 150 + j * 9 + (j % 3) * 4, 30 + (j * 7) % 18, 1 + (j % 3))
+  end
+end
+
+
+
 local function background_wii(cv)
   local top, bot = T.c.bg1, T.c.bg0
   for i = 0, T.H - 1, 4 do
@@ -523,6 +671,18 @@ function G.build_background()
     G.bg = cv
     return
   end
+  if T.style.background == "blade" then
+    background_blade(cv)
+    lg.setCanvas()
+    G.bg = cv
+    return
+  end
+  if T.style.background == "sky" then
+    background_sky(cv)
+    lg.setCanvas()
+    G.bg = cv
+    return
+  end
   if T.style.background == "xdash" then
     background_xdash(cv)
     lg.setCanvas()
@@ -571,6 +731,9 @@ end
 function G.background()
   lg.setColor(1, 1, 1, 1)
   lg.draw(G.bg, 0, 0)
+  -- Sky Warriors: nuvens andando e rastro de luz (ui/skyfx.lua)
+  local bgs = T.style.background
+  if bgs == "sky" or bgs == "blade" then require("ui.skyfx").draw_back() end
 end
 
 --- Logo do hub (texto pixelado com sombra colorida)
