@@ -11,16 +11,23 @@ XDG_DATA_HOME_ORIG="$XDG_DATA_HOME"
 PH_LD_SET=${LD_LIBRARY_PATH+1}; PH_LD_ORIG="$LD_LIBRARY_PATH"
 PH_SDL_SET=${SDL_GAMECONTROLLERCONFIG+1}; PH_SDL_ORIG="$SDL_GAMECONTROLLERCONFIG"
 
-if [ -d "/opt/system/Tools/PortMaster/" ]; then
-  controlfolder="/opt/system/Tools/PortMaster"
-elif [ -d "/opt/tools/PortMaster/" ]; then
-  controlfolder="/opt/tools/PortMaster"
-elif [ -d "$XDG_DATA_HOME/PortMaster/" ]; then
-  controlfolder="$XDG_DATA_HOME/PortMaster"
-else
-  controlfolder="/roms/ports/PortMaster"
-fi
-
+# Diagnostico antes de tocar nos cartoes.
+BOOT_LOG=$(mktemp "${TMPDIR:-/tmp}/porthub-startup.XXXXXX") || exit 1
+boot_note() { printf '[launcher] %s\n' "$*" >> "$BOOT_LOG"; }
+friendly_error() {
+  boot_note "$1"
+  printf '\nR36S PORT HUB: %s\nLog: %s\n' "$1" "$BOOT_LOG" >&2
+  if [ -w /dev/tty1 ]; then
+    printf '\033c\n\n  R36S PORT HUB\n\n  %s\n  Log: %s\n' "$1" "$BOOT_LOG" > /dev/tty1
+    sleep 6
+  fi
+}
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" 2>/dev/null && pwd -P)
+boot_note "Data: $(date); kernel: $(uname -sm); launcher: $SCRIPT_DIR"
+for PM in /opt/system/Tools/PortMaster /opt/tools/PortMaster "$XDG_DATA_HOME/PortMaster" "$SCRIPT_DIR/PortMaster" /roms/ports/PortMaster /roms2/ports/PortMaster /storage/roms/ports/PortMaster; do
+  if [ -f "$PM/control.txt" ]; then controlfolder="$PM"; break; fi
+done
+controlfolder=${controlfolder:-/roms/ports/PortMaster}
 HAS_PM=0
 if [ -f "$controlfolder/control.txt" ]; then
   source "$controlfolder/control.txt"
@@ -28,19 +35,55 @@ if [ -f "$controlfolder/control.txt" ]; then
   get_controls
   HAS_PM=1
 fi
-
-# "directory" vem do control.txt (roms ou roms2). Sem PortMaster, assume roms.
-directory=${directory:-roms}
-
-GAMEDIR="/$directory/ports/r36sporthub"
+PM_ROOT=""
+case "${directory:-}" in
+  /*) PM_ROOT="${directory%/}/ports" ;;
+  ?*) PM_ROOT="/${directory%/}/ports" ;;
+esac
+# A instalacao ao lado do launcher tem prioridade. Nao misturar backups
+# ou configuracoes de duas instalacoes distintas.
+PORTSD=""
+for ROOT in "$SCRIPT_DIR" "$PM_ROOT" /roms/ports /roms2/ports /storage/roms/ports /userdata/roms/ports; do
+  [ -n "$ROOT" ] || continue
+  boot_note "Candidato: $ROOT"
+  if [ -d "$ROOT/r36sporthub" ]; then
+    PORTSD=$(cd -- "$ROOT" && pwd -P) || continue
+    break
+  fi
+done
+if [ -z "$PORTSD" ]; then
+  friendly_error "Instalacao nao encontrada. Copie a pasta r36sporthub para ports."
+  exit 1
+fi
+GAMEDIR="$PORTSD/r36sporthub"
 CONFDIR="$GAMEDIR/conf"
-
-mkdir -p "$CONFDIR" "$GAMEDIR/tmp"
-cd "$GAMEDIR" || exit 1
-
-> "$GAMEDIR/log.txt" && exec > >(tee "$GAMEDIR/log.txt") 2>&1
+GAME_FILE="$GAMEDIR/game.love"
+boot_note "Selecionado: $GAMEDIR; PortMaster: $controlfolder; CFW: ${CFW_NAME:-desconhecido}"
+if ! mkdir -p "$CONFDIR" "$GAMEDIR/tmp" || ! cd "$GAMEDIR"; then
+  friendly_error "Nao foi possivel acessar a instalacao. Verifique o cartao."
+  exit 1
+fi
+if ! cat "$BOOT_LOG" > "$GAMEDIR/log.txt"; then
+  friendly_error "Nao foi possivel gravar o log. Verifique o cartao."
+  exit 1
+fi
+exec > >(tee -a "$GAMEDIR/log.txt") 2>&1
 echo "[launcher] R36S PORT HUB BETA - $(date)"
-echo "[launcher] GAMEDIR=$GAMEDIR  PortMaster=$HAS_PM ($controlfolder)"
+echo "[launcher] GAMEDIR=$GAMEDIR PortMaster=$HAS_PM ($controlfolder)"
+
+validate_game() {
+  [ -f "$GAME_FILE" ] && [ -r "$GAME_FILE" ] && [ -s "$GAME_FILE" ] || return 1
+  # ZIP completo e main.lua na raiz. Sem extrator, nao afirmar integridade.
+  if command -v unzip >/dev/null 2>&1; then
+    unzip -tq "$GAME_FILE" >/dev/null 2>&1 || return 2
+    unzip -p "$GAME_FILE" main.lua >/dev/null 2>&1 || return 2
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -c 'import sys,zipfile; z=zipfile.ZipFile(sys.argv[1]); sys.exit(0 if "main.lua" in z.namelist() and z.testzip() is None else 1)' "$GAME_FILE" || return 2
+  else
+    echo "[launcher] AVISO: sem unzip/python3; integridade ZIP nao verificada."
+  fi
+  return 0
+}
 
 # Dados do app (cache do catalogo, capas, registro de instalados)
 export XDG_DATA_HOME="$CONFDIR"
@@ -49,7 +92,7 @@ export XDG_DATA_HOME="$CONFDIR"
 export PORTHUB_XDG_ORIG="$XDG_DATA_HOME_ORIG"
 [ -d "$controlfolder" ] && export PORTHUB_PM_DIR="$controlfolder"
 export PORTHUB_DIR="$GAMEDIR"
-export PORTHUB_PORTS_DIR="/$directory/ports"
+export PORTHUB_PORTS_DIR="$PORTSD"
 
 rm -f "$CONFDIR/.restart_es"
 rm -f "$CONFDIR/.run_tool"
@@ -67,7 +110,6 @@ rm -f "$CONFDIR/.restart_app"
 #   state=booting  -> se o app fechar sem confirmar que abriu, restaura o backup
 # So arquivos do hub ("R36S PORT HUB.sh" e r36sporthub/...) sao tocados.
 # -----------------------------------------------------------------------------
-PORTSD="/$directory/ports"
 UPD_J="$GAMEDIR/backups/.journal"
 upd_get() { sed -n "s/^$1=//p" "$UPD_J" 2>/dev/null | head -n 1; }
 upd_restore() {
@@ -142,6 +184,17 @@ while true; do
     sync
   fi
 
+  validate_game
+  VALID_RC=$?
+  if [ "$VALID_RC" != "0" ]; then
+    echo "[launcher] game.love invalido: $GAME_FILE (codigo $VALID_RC)"
+    if [ "$(upd_get state)" = "booting" ] && [ "$UPD_RETRY" = "0" ]; then
+      if upd_recover "game.love ausente ou invalido"; then UPD_RETRY=1; continue; fi
+    fi
+    friendly_error "game.love ausente, ilegivel ou corrompido. Reinstale o pacote completo."
+    exit 1
+  fi
+
   if [ "$HAS_PM" = "1" ] && [ -f "$controlfolder/runtimes/love_11.5/love.txt" ]; then
     export LD_LIBRARY_PATH="$GAMEDIR/libs.${DEVICE_ARCH}:$LD_LIBRARY_PATH"
     export SDL_GAMECONTROLLERCONFIG="$sdl_controllerconfig"
@@ -149,12 +202,12 @@ while true; do
 
     $GPTOKEYB "$LOVE_GPTK" &
     pm_platform_helper "$LOVE_BINARY"
-    $LOVE_RUN "$GAMEDIR/game.love"
+    $LOVE_RUN "$GAME_FILE"
     LOVE_RC=$?
     [ "$HAS_PM" = "1" ] && pm_finish
   elif command -v love >/dev/null 2>&1; then
     echo "[launcher] Runtime love_11.5 do PortMaster nao encontrado; usando 'love' do sistema."
-    love "$GAMEDIR/game.love"
+    love "$GAME_FILE"
     LOVE_RC=$?
   else
     echo "[launcher] ERRO: runtime LOVE 11.5 nao encontrado."
@@ -227,7 +280,7 @@ while true; do
     rm -f "$CONFDIR/.run_port"
     PORT_SH=${PORT_REQ%%|*}
     PORT_ID=$(printf '%s' "${PORT_REQ#*|}" | tr -cd 'A-Za-z0-9_-')
-    PORTS_ROOT="/$directory/ports"
+    PORTS_ROOT="$PORTSD"
     case "$PORT_SH" in
       ""|*/*|*..*) PORT_SH="" ;;
       *.sh|*.SH) ;;
@@ -283,7 +336,7 @@ if [ -f "$CONFDIR/.restart_es" ] && [ ! -f "$CONFDIR/.power" ]; then
     rm -f "$CONFDIR/.es_theme"
     # so um tema que existe numa pasta de temas do EmulationStation
     THEME_OK=""
-    for TD in /etc/emulationstation/themes "${HOME:-/home/ark}/.emulationstation/themes" "/$directory/themes"; do
+    for TD in /etc/emulationstation/themes "${HOME:-/home/ark}/.emulationstation/themes" "$(dirname "$PORTSD")/themes"; do
       [ -n "$THEME_REQ" ] && [ -d "$TD/$THEME_REQ" ] && THEME_OK=1
     done
     [ -n "$THEME_OK" ] || THEME_REQ=""
