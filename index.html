@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Abra e acompanhe chamados do R36S PORT HUB.">
+<title>Suporte | R36S PORT HUB</title>
+<link rel="stylesheet" href="./style.css">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script defer src="./config.js"></script>
+<script defer src="./app.js"></script>
+</head>
+<body>
+<header class="top"><div class="wrap bar"><a class="brand" href="./"><span class="pixel" aria-hidden="true">+</span> R36S PORT HUB</a><nav aria-label="Conta"><a href="https://github.com/liralflsti-wq/r36s-port-hub">Projeto no GitHub</a><button id="logout" class="secondary" hidden>Sair</button></nav></div></header>
+<main class="wrap">
+<section class="hero"><div><p class="eyebrow">R36S PORT HUB / SUPORTE</p><h1>Central de<br><span>suporte</span></h1><p>Encontrou um problema no seu console? Abra um chamado e acompanhe a correção.</p></div><div class="console" aria-hidden="true"><div class="screen">R36S<br><b>SUPORTE</b></div><div class="controls"><b>✚</b><span>● ●</span></div></div></section>
+<p id="message" class="message" role="status" aria-live="polite" hidden></p>
+<section class="panel" id="auth">
+<h2>Acesse sua conta</h2><p>Entre para enviar fotos ou logs e acompanhar seus chamados.</p>
+<button id="google" class="secondary" type="button">Continuar com Google</button>
+<form id="login"><label>E-mail<input name="email" type="email" autocomplete="email" required></label><label>Senha<input name="password" type="password" autocomplete="current-password" minlength="8" required></label><div class="actions"><button value="login">Entrar</button><button class="secondary" value="signup">Criar conta</button><button type="button" class="secondary" id="recover">Redefinir senha</button></div></form>
+<form id="reset" hidden><label>Nova senha<input name="password" type="password" autocomplete="new-password" minlength="8" required></label><button>Salvar senha</button></form>
+</section>
+<div id="workspace" hidden><p id="account"></p><div class="workspace">
+<section class="panel"><h2>Abrir chamado</h2>
+<form id="report">
+<label>Título<input name="title" required maxlength="120" placeholder="Ex. O Hub fecha ao abrir a Loja"></label>
+<div class="pair"><label>Modelo do console<input name="console_model" required maxlength="100" placeholder="Ex. R36S ou Powkiddy X55"></label>
+<label>Sistema operacional<input name="os" required maxlength="100" placeholder="Ex. dArkOSre e versão"></label></div>
+<label>Versão do PORT HUB <small>(opcional)</small><input name="hub_version" maxlength="50" placeholder="Ex. 0.5.5 BETA"></label>
+<label>O que aconteceu?<textarea name="description" required maxlength="4000" rows="5" placeholder="Inclua os passos, o resultado esperado e a mensagem de erro."></textarea></label>
+<label>Foto ou arquivo de log <small>(opcional)</small><input name="attachment" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.log"></label><small>PNG, JPG, WebP, TXT ou LOG até 4 MB. Remova senhas e dados pessoais.</small>
+<button>Enviar chamado</button></form></section>
+<section class="panel"><div class="section-head"><h2 id="list-title">Meus chamados</h2><button id="refresh" class="secondary">Atualizar</button></div><label>Filtrar por status<select id="filter"><option value="">Todos</option><option value="open">Recebido</option><option value="working">Em correção</option><option value="resolved">Resolvido</option></select></label><div id="tickets"></div><div class="actions"><button id="prev" class="secondary" hidden>Anterior</button><button id="next" class="secondary" hidden>Próxima</button></div></section>
+</div></div>
+</main>
+<footer class="wrap">R36S PORT HUB · Suporte da comunidade</footer>
+</body></html>
