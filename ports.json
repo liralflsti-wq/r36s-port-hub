@@ -1133,6 +1133,40 @@
       "requires_files": false,
       "featured": false,
       "added": "2026-11-26"
+    },
+    {
+      "id": "resident-evil-4",
+      "name": "Resident Evil 4",
+      "short": "Survival horror de ação em terceira pessoa.",
+      "description": "Port para R36S.\n\nSurvival horror de ação em terceira pessoa.\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "terror",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 1205809303,
+      "size_label": "1149.9 MB",
+      "download_url": "https://pub-55dedbef51aa457291c153c0451fd995.r2.dev/Ports/Resident%20Evil%204.rar",
+      "cover": "https://pub-55dedbef51aa457291c153c0451fd995.r2.dev/Ports/resident-evil-4-cover.png",
+      "author": "Créditos aos autores originais",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-27"
+    },
+    {
+      "id": "crash-twinsanity",
+      "name": "Crash Twinsanity",
+      "short": "Plataforma 3D com o marsupial Crash.",
+      "description": "Port para R36S.\n\nPlataforma 3D com o marsupial Crash.\n\nAviso: o R36S PORT HUB não é o desenvolvedor deste jogo nem deste port e não hospeda nenhum arquivo. Apenas organizamos links de download já disponíveis publicamente. Todos os direitos pertencem aos seus criadores e editoras.",
+      "category": "plataforma",
+      "section": "games",
+      "version": "1.0",
+      "size_bytes": 1075015468,
+      "size_label": "1025.2 MB",
+      "download_url": "https://pub-55dedbef51aa457291c153c0451fd995.r2.dev/Ports/Crash%20Twinsanity.rar",
+      "cover": "https://pub-55dedbef51aa457291c153c0451fd995.r2.dev/Ports/crash-twinsanity-cover.png",
+      "author": "Créditos aos autores originais",
+      "requires_files": false,
+      "featured": false,
+      "added": "2026-11-27"
     }
   ]
 }
