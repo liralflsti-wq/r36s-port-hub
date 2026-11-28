@@ -1,7 +1,7 @@
 {
   "catalog_version": 1,
   "title": "R36S PORT HUB - ports (R36S)",
-  "updated": "2026-11-26",
+  "updated": "2026-11-27",
   "categories": [
     {
       "id": "acao",
@@ -53,9 +53,9 @@
       "category": "corrida",
       "section": "games",
       "version": "1.0",
-      "size_bytes": 487130723,
-      "size_label": "464.6 MB",
-      "download_url": "https://pub-55dedbef51aa457291c153c0451fd995.r2.dev/Ports/Need%20For%20Speed%20Underground.rar",
+      "size_bytes": 606304965,
+      "size_label": "578.2 MB",
+      "download_url": "https://pub-55dedbef51aa457291c153c0451fd995.r2.dev/Ports/Need%20For%20Speed%20Underground.zip",
       "cover": "https://pub-55dedbef51aa457291c153c0451fd995.r2.dev/Ports/need-for-speed-underground-cover.png",
       "author": "Créditos aos autores originais",
       "requires_files": false,
